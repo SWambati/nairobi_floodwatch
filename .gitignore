@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Models
+models/*.pkl
+models/*.joblib
+
+# Data
+data/raw/
+data/processed/
+data/interim/
+*.tif
+*.tiff
+*.parquet
+*.grib
+*.grib2
+*.nc
+
+# Database
+*.db
+*.sqlite
