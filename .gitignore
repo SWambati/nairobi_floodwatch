@@ -43,3 +43,14 @@ data/interim/
 # Database
 *.db
 *.sqlite
+
+# Colab / Drive links
+data/project_data
+outputs/project_outputs
+
+# Generated project data
+outputs/processed/
+outputs/features/
+outputs/models/
+outputs/reports/
+outputs/logs/
