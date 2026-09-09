@@ -12,12 +12,30 @@ def main():
 
     print("\nProcessing Summary")
     print("-" * 50)
-
-    print("Groundsource positive candidates: ", f"{len(groundsource_labels):,}")
-    print("Master event anchors: ", f"{len(master_event_anchors):,}")
-    print("Corroborated Groundsource candidates: ", f"{(groundsource_labels['verification_status'] == 'corroborated').sum():,}")
-    print("Groundsource-only candidates: ", f"{(groundsource_labels['verification_status'] == 'candidate').sum():,}")
-    print("Groundsource event groups: ", f"{groundsource_labels['event_group_id'].nunique():,}")
+    print(
+    "Corroborated Groundsource candidates: "
+    f"{(
+        groundsource_labels[
+            'verification_status'
+        ] == 'corroborated'
+    ).sum():,}"
+    )
+    print(
+    "Near-match Groundsource candidates: "
+    f"{(
+        groundsource_labels[
+            'verification_status'
+        ] == 'near_match'
+    ).sum():,}"
+    )
+    print(
+    "Groundsource-only candidates: "
+    f"{(
+        groundsource_labels[
+            'verification_status'
+        ] == 'candidate'
+    ).sum():,}"
+    )
 
     save_flood_label_outputs(
         groundsource_labels,
