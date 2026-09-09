@@ -136,11 +136,14 @@ def validate_flood_labels(
     flood observations only.
     """
 
-    invalid_labels = set(
-        dataframe[label_column]
-        .dropna()
-        .unique()
-    ) - {1}
+    invalid_labels = (
+        set(
+            dataframe[label_column]
+            .dropna()
+            .unique()
+        )
+        - {1}
+    )
 
     if invalid_labels:
         raise ValueError(
@@ -154,6 +157,7 @@ def validate_coordinates(
 ) -> None:
     """
     Validate Groundsource centroid coordinates.
+
     Exact Nairobi boundary verification was already
     performed during acquisition.
     """
@@ -311,7 +315,7 @@ def preprocess_groundsource(
 
     # temporal_leakage_group already represents
     # observations that must remain together during
-    # train/test splitting.
+    # future train/test splitting.
     dataframe["event_group_id"] = (
         dataframe["temporal_leakage_group"]
     )
@@ -321,30 +325,35 @@ def preprocess_groundsource(
     # --------------------------------------------------------
 
     verification_map = {
-    "MASTER_INTERVAL_MATCH": "corroborated",
-    "MASTER_WITHIN_1_DAY": "corroborated",
-    "MASTER_WITHIN_3_DAYS": "near_match",
-    "NO_STAGE2_MATCH": "candidate",
+        "MASTER_INTERVAL_MATCH": "corroborated",
+        "MASTER_WITHIN_1_DAY": "corroborated",
+        "MASTER_WITHIN_3_DAYS": "near_match",
+        "NO_STAGE2_MATCH": "candidate",
     }
+
     dataframe["verification_status"] = (
-    dataframe["stage2_match_status"]
-    .map(verification_map)
-    )
-    if dataframe["verification_status"].isna().any():
-        unknown_statuses = (
-        dataframe.loc[
-            dataframe["verification_status"].isna(),
-            "stage2_match_status",
-        ]
-        .dropna()
-        .unique()
-        .tolist()
+        dataframe["stage2_match_status"]
+        .map(verification_map)
     )
 
-    raise ValueError(
-        "Groundsource contains unexpected "
-        f"Stage-2 match statuses: {unknown_statuses}"
-    )
+    if dataframe["verification_status"].isna().any():
+        unknown_statuses = (
+            dataframe.loc[
+                dataframe[
+                    "verification_status"
+                ].isna(),
+                "stage2_match_status",
+            ]
+            .dropna()
+            .unique()
+            .tolist()
+        )
+
+        raise ValueError(
+            "Groundsource contains unexpected "
+            f"Stage-2 match statuses: "
+            f"{unknown_statuses}"
+        )
 
     # Every retained Groundsource record has coordinates,
     # making it suitable for later weather/spatial joins.
@@ -378,13 +387,14 @@ def preprocess_groundsource(
         "record_role",
     ]
 
-    result = dataframe[
-        output_columns
-    ].rename(
-        columns={
-            "centroid_latitude": "latitude",
-            "centroid_longitude": "longitude",
-        }
+    result = (
+        dataframe[output_columns]
+        .rename(
+            columns={
+                "centroid_latitude": "latitude",
+                "centroid_longitude": "longitude",
+            }
+        )
     )
 
     return result.reset_index(drop=True)
@@ -453,7 +463,9 @@ def preprocess_master_catalogue(
 
     dataframe["label_record_id"] = (
         "MASTER-"
-        + dataframe["Master_Event_ID"].astype(str)
+        + dataframe[
+            "Master_Event_ID"
+        ].astype(str)
     )
 
     dataframe["source_name"] = (
@@ -598,7 +610,11 @@ def process_flood_labels() -> tuple[
         master_processed,
     )
 
+
+# ============================================================
 # OUTPUT WRITER
+# ============================================================
+
 def save_flood_label_outputs(
     groundsource_labels: pd.DataFrame,
     master_event_anchors: pd.DataFrame,
