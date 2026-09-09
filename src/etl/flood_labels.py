@@ -320,15 +320,30 @@ def preprocess_groundsource(
     # Verification status
     # --------------------------------------------------------
 
+    verification_map = {
+    "MASTER_INTERVAL_MATCH": "corroborated",
+    "MASTER_WITHIN_1_DAY": "corroborated",
+    "MASTER_WITHIN_3_DAYS": "near_match",
+    "NO_STAGE2_MATCH": "candidate",
+    }
     dataframe["verification_status"] = (
-        dataframe["stage2_match_status"]
-        .eq("MASTER_WITHIN_1_DAY")
-        .map(
-            {
-                True: "corroborated",
-                False: "candidate",
-            }
-        )
+    dataframe["stage2_match_status"]
+    .map(verification_map)
+    )
+    if dataframe["verification_status"].isna().any():
+        unknown_statuses = (
+        dataframe.loc[
+            dataframe["verification_status"].isna(),
+            "stage2_match_status",
+        ]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    raise ValueError(
+        "Groundsource contains unexpected "
+        f"Stage-2 match statuses: {unknown_statuses}"
     )
 
     # Every retained Groundsource record has coordinates,
