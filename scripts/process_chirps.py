@@ -14,9 +14,9 @@ def main():
 
     print("=" * 60)
 
-
+    # --------------------------------------------------------
     # Validate acquired CHIRPS archive
-
+    # --------------------------------------------------------
 
     print(
         "Validating CHIRPS archive..."
@@ -49,9 +49,9 @@ def main():
         f"{inventory['last_date'].max()}"
     )
 
-
+    # --------------------------------------------------------
     # Build real Nairobi extraction requests
-
+    # --------------------------------------------------------
 
     print(
         "\nLoading Groundsource "
@@ -67,9 +67,9 @@ def main():
         f"{len(requests):,}"
     )
 
-
+    # --------------------------------------------------------
     # Extract rainfall
-     
+    # --------------------------------------------------------
 
     print(
         "\nExtracting CHIRPS rainfall..."
@@ -116,9 +116,9 @@ def main():
             f"{rainfall['rainfall_mm'].median():.2f} mm"
         )
 
-
+    # --------------------------------------------------------
     # Persist outputs
-
+    # --------------------------------------------------------
 
     save_chirps_outputs(
         inventory,
