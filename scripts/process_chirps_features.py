@@ -50,16 +50,16 @@ def main():
     for method, count in(sampling_counts.items()):
         print(f"  {method}: {count:,}")
 
-        fallback = daily_rainfall[daily_rainfall["chirps_sampling_method"]== "nearest_valid"]
+    fallback = daily_rainfall[daily_rainfall["chirps_sampling_method"]== "nearest_valid"]
 
-        if not fallback.empty:
-            print("\nFallback distance "
-                  "(CHIRPS pixels):")
+    if not fallback.empty:
+        print("\nFallback distance "
+              "(CHIRPS pixels):")
 
-            fallback_counts = (fallback["chirps_fallback_distance_pixels"].value_counts().sort_index())
+        fallback_counts = (fallback["chirps_fallback_distance_pixels"].value_counts().sort_index())
 
-            for distance, count in fallback_counts.items():
-                print(f"  {distance} pixels: {count:,}")
+        for distance, count in fallback_counts.items():
+            print(f"  {distance} pixels: {count:,}")
 
     #feature summary
 

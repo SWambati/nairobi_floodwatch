@@ -124,7 +124,7 @@ def calculate_rainfall_features(daily_rainfall: pd.DataFrame) -> pd.DataFrame:
 
         fallback_days_7d = len(fallback_rows)
 
-        if fallback_rows.empty: 
+        if fallback_rows.empty:
             maximum_fallback_distance = 0
         else:
             maximum_fallback_distance = int(fallback_rows["chirps_fallback_distance_pixels"].max())
@@ -143,24 +143,25 @@ def calculate_rainfall_features(daily_rainfall: pd.DataFrame) -> pd.DataFrame:
                 "chirps_fallback_days_7d": fallback_days_7d,
                 "chirps_max_fallback_distance_pixels": maximum_fallback_distance,
             })
-        features = pd.DataFrame(feature_records)
 
-        #row-count consistency
-        expected_feature_rows = (dataframe["label_record_id"].nunique())
+    features = pd.DataFrame(feature_records)
 
-        if len(features) != expected_feature_rows:
-            raise ValueError("Rainfall feature row count mismatch " f"(expected {expected_feature_rows}, got {len(features)})")
+    #row-count consistency
+    expected_feature_rows = (dataframe["label_record_id"].nunique())
 
-        #logical consistency
+    if len(features) != expected_feature_rows:
+        raise ValueError("Rainfall feature row count mismatch " f"(expected {expected_feature_rows}, got {len(features)})")
 
-        invalid_1_to_3 = (features["rain_1d"] > features["rain_3d"])
-        invalid_3_to_7 = (features["rain_3d"] > features["rain_7d"])
+    #logical consistency
 
-        if (invalid_1_to_3.any() or invalid_3_to_7.any()):
-            raise ValueError("Rainfall accumulation consistency check failed. Expected rain_1d <= rain_3d <= rain_7d")
+    invalid_1_to_3 = (features["rain_1d"] > features["rain_3d"])
+    invalid_3_to_7 = (features["rain_3d"] > features["rain_7d"])
 
-        if features["label_record_id"].duplicated().any():
-            raise ValueError("Duplicated rainfall feature rows were generated")
+    if (invalid_1_to_3.any() or invalid_3_to_7.any()):
+        raise ValueError("Rainfall accumulation consistency check failed. Expected rain_1d <= rain_3d <= rain_7d")
+
+    if features["label_record_id"].duplicated().any():
+        raise ValueError("Duplicated rainfall feature rows were generated")
 
     return features.reset_index(drop=True)
 
