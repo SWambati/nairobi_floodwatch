@@ -93,7 +93,7 @@ def calculate_rainfall_features(daily_rainfall: pd.DataFrame) -> pd.DataFrame:
 
     #missing rainfall values not allowed in feature stage
 
-    missing_rainfall = dataframe["rainfall_mm"].isna()
+    missing_rainfall = (dataframe["rainfall_mm"].isna())
 
     if missing_rainfall.any():
         raise ValueError("Cannot construct CHIRPS rainfall "f"features:{missing_rainfall.sum()} daily observations are missing")
@@ -137,13 +137,19 @@ def calculate_rainfall_features(daily_rainfall: pd.DataFrame) -> pd.DataFrame:
                 "latitude": first["latitude"],
                 "longitude": first["longitude"],
                 "verification_status": first["verification_status"],
-                "rain_1d": rain_1d,
-                "rain_3d": rain_3d,
-                "rain_7d": rain_7d,
+                "rain_1d": float(rain_1d),
+                "rain_3d": float(rain_3d),
+                "rain_7d": float(rain_7d),
                 "chirps_fallback_days_7d": fallback_days_7d,
                 "chirps_max_fallback_distance_pixels": maximum_fallback_distance,
             })
         features = pd.DataFrame(feature_records)
+
+        #row-count consistency
+        expected_feature_rows = (dataframe["label_record_id"].nunique())
+
+        if len(features) != expected_feature_rows:
+            raise ValueError("Rainfall feature row count mismatch " f"(expected {expected_feature_rows}, got {len(features)})")
 
         #logical consistency
 
@@ -156,7 +162,7 @@ def calculate_rainfall_features(daily_rainfall: pd.DataFrame) -> pd.DataFrame:
         if features["label_record_id"].duplicated().any():
             raise ValueError("Duplicated rainfall feature rows were generated")
 
-        return features.reset_index(drop=True)
+    return features.reset_index(drop=True)
 
 #pipeline
 def process_chirps_features() -> tuple[pd.DataFrame, pd.DataFrame]:
