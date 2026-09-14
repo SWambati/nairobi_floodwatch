@@ -7,7 +7,7 @@ from src.etl.chirps import (EXPECTED_END_DATE, EXPECTED_START_DATE, extract_dail
 RAINFALL_WINDOWS = (1, 3, 7, )
 MAX_LOOKBACK_DAYS = max(RAINFALL_WINDOWS)
 CHIRPS_PROCESSED_DIR = (PROCESSED_DIR/"weather"/"chirps")
-CHIRPS_FEATURES_DIR = (FEATURES_DIR/"weather"/"chirps")
+CHIRPS_FEATURE_DIR = (FEATURES_DIR/"weather"/"chirps")
 
 #preceeding request generation
 
