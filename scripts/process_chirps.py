@@ -14,9 +14,9 @@ def main():
 
     print("=" * 60)
 
-    # --------------------------------------------------------
-    # Validate acquired CHIRPS archive
-    # --------------------------------------------------------
+    
+    # ARCHIVE VALIDATION
+    
 
     print(
         "Validating CHIRPS archive..."
@@ -49,9 +49,9 @@ def main():
         f"{inventory['last_date'].max()}"
     )
 
-    # --------------------------------------------------------
-    # Build real Nairobi extraction requests
-    # --------------------------------------------------------
+    
+    # REAL NAIROBI EXTRACTION REQUESTS
+    
 
     print(
         "\nLoading Groundsource "
@@ -67,9 +67,9 @@ def main():
         f"{len(requests):,}"
     )
 
-    # --------------------------------------------------------
-    # Extract rainfall
-    # --------------------------------------------------------
+    
+    # RAINFALL EXTRACTION
+    
 
     print(
         "\nExtracting CHIRPS rainfall..."
@@ -103,27 +103,141 @@ def main():
         f"{missing_count:,}"
     )
 
+    
+    # SAMPLING METHOD SUMMARY
+    
+
+    print(
+        "\nSampling methods:"
+    )
+
+    sampling_counts = (
+        rainfall[
+            "chirps_sampling_method"
+        ]
+        .value_counts(
+            dropna=False
+        )
+    )
+
+    for method, count in (
+        sampling_counts.items()
+    ):
+        print(
+            f"  {method}: "
+            f"{count:,}"
+        )
+
+    fallback = rainfall[
+        rainfall[
+            "chirps_sampling_method"
+        ] == "nearest_valid"
+    ]
+
+    if not fallback.empty:
+        print(
+            "\nFallback distance "
+            "(CHIRPS pixels):"
+        )
+
+        fallback_counts = (
+            fallback[
+                "chirps_fallback_distance_pixels"
+            ]
+            .value_counts()
+            .sort_index()
+        )
+
+        for distance, count in (
+            fallback_counts.items()
+        ):
+            print(
+                f"  {distance} pixel(s): "
+                f"{count:,}"
+            )
+
+    
+    # RAINFALL SUMMARY
+    
+
     if valid_count > 0:
         print(
-            "Rainfall range: "
+            "\nRainfall statistics:"
+        )
+
+        print(
+            "  Range: "
             f"{rainfall['rainfall_mm'].min():.2f} "
             "to "
             f"{rainfall['rainfall_mm'].max():.2f} mm"
         )
 
         print(
-            "Median rainfall: "
+            "  Median: "
             f"{rainfall['rainfall_mm'].median():.2f} mm"
         )
 
-    # --------------------------------------------------------
-    # Persist outputs
-    # --------------------------------------------------------
+        print(
+            "  Mean: "
+            f"{rainfall['rainfall_mm'].mean():.2f} mm"
+        )
+
+    
+    # SAVE OUTPUTS
+    
 
     save_chirps_outputs(
         inventory,
         rainfall,
     )
+
+    
+    # FINAL VALIDATION
+    
+
+    if missing_count > 0:
+        missing_records = rainfall[
+            rainfall[
+                "rainfall_mm"
+            ].isna()
+        ]
+
+        print(
+            "\nWARNING:"
+        )
+
+        print(
+            f"{missing_count:,} rainfall "
+            "observations remain missing even "
+            "after nearest-valid-cell fallback."
+        )
+
+        print(
+            "Review these records before using "
+            "the output for feature engineering."
+        )
+
+        print(
+            "\nMissing coordinates:"
+        )
+
+        print(
+            missing_records[
+                [
+                    "label_record_id",
+                    "date",
+                    "latitude",
+                    "longitude",
+                ]
+            ].to_string(
+                index=False
+            )
+        )
+
+        raise RuntimeError(
+            "CHIRPS rainfall extraction completed "
+            "with unresolved missing observations."
+        )
 
     print(
         "\nCHIRPS rainfall extraction: OK"

@@ -13,10 +13,7 @@ from config.paths import (
     PROCESSED_DIR,
 )
 
-
-# ============================================================
 # CONFIGURATION
-# ============================================================
 
 CHIRPS_FILE_PATTERN = (
     "chirps_v3_sat_nairobi_*.tif"
@@ -42,10 +39,10 @@ EXPECTED_END_DATE = date(
 
 WGS84 = CRS.from_epsg(4326)
 
+# Search up to three CHIRPS grid cells away when an exact-boundary crop has left the requested cell as NoData.
+MAX_FALLBACK_RADIUS = 3
 
-# ============================================================
 # FILE DISCOVERY
-# ============================================================
 
 def discover_chirps_files() -> dict[int, Path]:
     """
@@ -100,10 +97,7 @@ def discover_chirps_files() -> dict[int, Path]:
         )
     )
 
-
-# ============================================================
 # BAND-DATE HANDLING
-# ============================================================
 
 def _parse_band_date(
     description: str | None,
@@ -112,10 +106,6 @@ def _parse_band_date(
     Parse a date from an Earth Engine-style CHIRPS
     band description.
 
-    Supported examples:
-        2004_01_01
-        2004-01-01
-        precipitation_2004_01_01
     """
 
     if not description:
@@ -145,6 +135,7 @@ def get_band_dates(
     band in one annual CHIRPS GeoTIFF.
 
     Band descriptions are used where available.
+
     If descriptions are unavailable, dates are derived
     sequentially from January 1 because the acquisition
     was exported as one continuous daily band per day.
@@ -195,10 +186,8 @@ def get_band_dates(
 
     return dates
 
+# ARCHIVE INVENTORY
 
-# ============================================================
-# ARCHIVE INVENTORY / VALIDATION
-# ============================================================
 
 def build_chirps_inventory() -> pd.DataFrame:
     """
@@ -265,12 +254,10 @@ def build_chirps_inventory() -> pd.DataFrame:
                 }
             )
 
-    return pd.DataFrame(
-        records
-    ).sort_values(
-        "year"
-    ).reset_index(
-        drop=True
+    return (
+        pd.DataFrame(records)
+        .sort_values("year")
+        .reset_index(drop=True)
     )
 
 
@@ -326,6 +313,12 @@ def validate_chirps_archive() -> pd.DataFrame:
             file_path
         ) as dataset:
 
+            if dataset.crs is None:
+                raise ValueError(
+                    "CHIRPS raster does not define "
+                    f"a CRS: {file_path.name}"
+                )
+
             band_dates = get_band_dates(
                 dataset,
                 year,
@@ -379,9 +372,7 @@ def validate_chirps_archive() -> pd.DataFrame:
     return build_chirps_inventory()
 
 
-# ============================================================
 # REQUEST VALIDATION
-# ============================================================
 
 def validate_location_date_requests(
     dataframe: pd.DataFrame,
@@ -390,8 +381,8 @@ def validate_location_date_requests(
     longitude_column: str,
 ) -> None:
     """
-    Validate the coordinate/date requests supplied to
-    the CHIRPS extraction module.
+    Validate coordinate/date requests supplied to the
+    CHIRPS extraction module.
     """
 
     required_columns = {
@@ -409,6 +400,14 @@ def validate_location_date_requests(
         raise ValueError(
             "CHIRPS extraction request is missing "
             f"columns: {sorted(missing_columns)}"
+        )
+
+    if dataframe[
+        date_column
+    ].isna().any():
+        raise ValueError(
+            "CHIRPS extraction request contains "
+            "missing dates."
         )
 
     if dataframe[
@@ -442,9 +441,178 @@ def validate_location_date_requests(
         )
 
 
-# ============================================================
-# RAINFALL EXTRACTION
-# ============================================================
+# SINGLE-PIXEL SAMPLING
+
+def sample_chirps_value(
+    dataset: rasterio.io.DatasetReader,
+    band_number: int,
+    x: float,
+    y: float,
+    max_search_radius: int = MAX_FALLBACK_RADIUS,
+) -> tuple[float, str, int]:
+    """
+    Sample one CHIRPS rainfall value.
+
+    The requested raster cell is sampled first.
+
+    If that cell is masked/NoData, the function searches
+    outward for the nearest valid CHIRPS cell from the
+    SAME date/band.
+
+    This fallback is intended to handle edge effects
+    introduced when coarse CHIRPS pixels were masked to
+    the exact Nairobi County boundary.
+
+    Returns:
+        rainfall_mm
+        sampling_method
+        fallback_distance_pixels
+    """
+
+    row, col = dataset.index(
+        x,
+        y,
+    )
+
+    
+    # Direct sample
+    
+    if (
+        0 <= row < dataset.height
+        and 0 <= col < dataset.width
+    ):
+        direct = dataset.read(
+            band_number,
+            window=(
+                (row, row + 1),
+                (col, col + 1),
+            ),
+            masked=True,
+        )
+
+        value = direct[0, 0]
+
+        if not np.ma.is_masked(value):
+            return (
+                float(value),
+                "direct",
+                0,
+            )
+
+    # Nearest-valid-cell fallback
+    
+
+    for radius in range(
+        1,
+        max_search_radius + 1,
+    ):
+
+        row_min = max(
+            row - radius,
+            0,
+        )
+
+        row_max = min(
+            row + radius,
+            dataset.height - 1,
+        )
+
+        col_min = max(
+            col - radius,
+            0,
+        )
+
+        col_max = min(
+            col + radius,
+            dataset.width - 1,
+        )
+
+        candidates = []
+
+        for candidate_row in range(
+            row_min,
+            row_max + 1,
+        ):
+            for candidate_col in range(
+                col_min,
+                col_max + 1,
+            ):
+
+                # Search only the current outer ring.
+                if max(
+                    abs(candidate_row - row),
+                    abs(candidate_col - col),
+                ) != radius:
+                    continue
+
+                sample = dataset.read(
+                    band_number,
+                    window=(
+                        (
+                            candidate_row,
+                            candidate_row + 1,
+                        ),
+                        (
+                            candidate_col,
+                            candidate_col + 1,
+                        ),
+                    ),
+                    masked=True,
+                )
+
+                value = sample[
+                    0,
+                    0,
+                ]
+
+                if np.ma.is_masked(value):
+                    continue
+
+                euclidean_distance = (
+                    (
+                        candidate_row - row
+                    ) ** 2
+                    +
+                    (
+                        candidate_col - col
+                    ) ** 2
+                ) ** 0.5
+
+                candidates.append(
+                    (
+                        euclidean_distance,
+                        float(value),
+                    )
+                )
+
+        if candidates:
+            candidates.sort(
+                key=lambda item: item[0]
+            )
+
+            nearest_value = (
+                candidates[0][1]
+            )
+
+            return (
+                nearest_value,
+                "nearest_valid",
+                radius,
+            )
+
+    
+    # No valid fallback found
+    
+
+    return (
+        np.nan,
+        "missing",
+        max_search_radius,
+    )
+
+
+# DAILY RAINFALL EXTRACTION
+
 
 def extract_daily_rainfall(
     requests: pd.DataFrame,
@@ -507,17 +675,41 @@ def extract_daily_rainfall(
             f"{sorted(unavailable_years)}"
         )
 
+    
+    # Output columns
+    
+
     dataframe["rainfall_mm"] = np.nan
+
     dataframe["chirps_year"] = (
         dataframe["_year"]
     )
-    dataframe["chirps_band"] = (
-        pd.Series(
-            pd.NA,
-            index=dataframe.index,
-            dtype="Int64",
-        )
+
+    dataframe["chirps_band"] = pd.Series(
+        pd.NA,
+        index=dataframe.index,
+        dtype="Int64",
     )
+
+    dataframe[
+        "chirps_sampling_method"
+    ] = pd.Series(
+        None,
+        index=dataframe.index,
+        dtype="object",
+    )
+
+    dataframe[
+        "chirps_fallback_distance_pixels"
+    ] = pd.Series(
+        pd.NA,
+        index=dataframe.index,
+        dtype="Int64",
+    )
+
+    
+    # Process each annual raster only once
+    
 
     for year, year_rows in dataframe.groupby(
         "_year"
@@ -573,6 +765,10 @@ def extract_daily_rainfall(
                     f"{sorted(missing_dates)[:10]}"
                 )
 
+            
+            # Process one date/band at a time
+        
+
             for (
                 requested_date,
                 date_rows,
@@ -625,25 +821,33 @@ def extract_daily_rainfall(
                 )
 
                 sampled_values = []
+                sampling_methods = []
+                fallback_distances = []
 
-                for sample in dataset.sample(
-                    coordinates,
-                    indexes=band_number,
-                    masked=True,
-                ):
+                for x, y in coordinates:
 
-                    value = sample[0]
+                    (
+                        value,
+                        method,
+                        distance_pixels,
+                    ) = sample_chirps_value(
+                        dataset=dataset,
+                        band_number=band_number,
+                        x=x,
+                        y=y,
+                    )
 
-                    if np.ma.is_masked(
+                    sampled_values.append(
                         value
-                    ):
-                        sampled_values.append(
-                            np.nan
-                        )
-                    else:
-                        sampled_values.append(
-                            float(value)
-                        )
+                    )
+
+                    sampling_methods.append(
+                        method
+                    )
+
+                    fallback_distances.append(
+                        distance_pixels
+                    )
 
                 dataframe.loc[
                     date_rows.index,
@@ -652,17 +856,58 @@ def extract_daily_rainfall(
 
                 dataframe.loc[
                     date_rows.index,
+                    "chirps_sampling_method",
+                ] = sampling_methods
+
+                dataframe.loc[
+                    date_rows.index,
+                    "chirps_fallback_distance_pixels",
+                ] = fallback_distances
+
+                dataframe.loc[
+                    date_rows.index,
                     "chirps_band",
                 ] = band_number
 
-    negative_rainfall = dataframe[
-        "rainfall_mm"
-    ].dropna() < 0
+    
+    # Final quality checks
+    
+
+    negative_rainfall = (
+        dataframe[
+            "rainfall_mm"
+        ]
+        .dropna()
+        < 0
+    )
 
     if negative_rainfall.any():
         raise ValueError(
             "Negative CHIRPS rainfall values "
             "were detected after extraction."
+        )
+
+    valid_methods = {
+        "direct",
+        "nearest_valid",
+        "missing",
+    }
+
+    unexpected_methods = (
+        set(
+            dataframe[
+                "chirps_sampling_method"
+            ]
+            .dropna()
+            .unique()
+        )
+        - valid_methods
+    )
+
+    if unexpected_methods:
+        raise ValueError(
+            "Unexpected CHIRPS sampling methods: "
+            f"{sorted(unexpected_methods)}"
         )
 
     return (
@@ -678,18 +923,19 @@ def extract_daily_rainfall(
     )
 
 
-# ============================================================
-# GROUNDsource EVENT-DATE REQUESTS
-# ============================================================
+
+# GROUNDSOURCE EVENT-DATE REQUESTS
+
 
 def load_groundsource_event_requests() -> pd.DataFrame:
     """
     Build a location/date extraction request from the
-    Task 7 Groundsource positive-candidate output.
+    Groundsource positive-candidate output.
 
     This is used as a real-data validation of the CHIRPS
-    extraction engine. It does NOT construct the final
-    modelling dataset.
+    extraction engine.
+
+    It does NOT construct the final modelling dataset.
     """
 
     flood_label_file = (
@@ -720,9 +966,7 @@ def load_groundsource_event_requests() -> pd.DataFrame:
 
     missing = (
         required_columns
-        - set(
-            dataframe.columns
-        )
+        - set(dataframe.columns)
     )
 
     if missing:
@@ -751,9 +995,9 @@ def load_groundsource_event_requests() -> pd.DataFrame:
     return requests
 
 
-# ============================================================
+
 # OUTPUT WRITER
-# ============================================================
+
 
 def save_chirps_outputs(
     inventory: pd.DataFrame,
