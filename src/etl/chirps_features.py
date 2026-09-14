@@ -174,7 +174,7 @@ def process_chirps_features() -> tuple[pd.DataFrame, pd.DataFrame]:
     return (daily_rainfall, rainfall_features)
 
 #output writer
-def save_chirps_feature_output(daily_rainfall:pd.DataFrame, rainfall_features:pd.DataFrame,) -> None:
+def save_chirps_feature_outputs(daily_rainfall:pd.DataFrame, rainfall_features:pd.DataFrame,) -> None:
 
     #save both expanded daily rainfall observations and final cumulative CHIRPS features
 
