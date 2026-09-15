@@ -208,7 +208,7 @@ def extract_antecedent_era5_hours(
             "feature_date",
         ],
         how="left",
-        validate="one_to_many",
+        validate="many_to_many",
     )
 
     hourly_counts = (
