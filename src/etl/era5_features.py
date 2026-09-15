@@ -87,8 +87,29 @@ def derive_hourly_meteorology(era5_data: pd.DataFrame) -> pd.DataFrame:
     #metres to millimetres
     dataframe["precipitation_mm"] = dataframe["tp"] * 1000
 
-    if (dataframe["precipitation_mm"] < 0).any():
-        raise ValueError("Negative ERA5-Land precipitation values were detected")
+    negative_precipitation = (
+        dataframe["precipitation_mm"] < 0
+    )
+
+    if negative_precipitation.any():
+
+        minimum_precipitation = (
+            dataframe.loc[
+                negative_precipitation,
+                "precipitation_mm"
+            ].min()
+        )
+
+        if minimum_precipitation < -0.01:
+            raise ValueError(
+                "Materially negative ERA5-Land precipitation "
+                f"value detected: {minimum_precipitation:.6f} mm"
+            )
+
+        dataframe.loc[
+            negative_precipitation,
+            "precipitation_mm"
+        ] = 0.0
 
     #Convert UTC timestamps to Nairobi local time so the
     #antecedent feature day corresponds to the flood-label date.
