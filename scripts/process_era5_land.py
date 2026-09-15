@@ -35,7 +35,7 @@ def main():
     print("Parameter files: ")
 
     for row in inventory.itertuples(index=False):
-        print(f"{row.paramter_group}: {row.file_name}")
+        print(f"{row.parameter_group}: {row.file_name}")
 
     #grid-mapping summary
     print(f"Groundsource locations mapped: {len(grid_mapping):,}")

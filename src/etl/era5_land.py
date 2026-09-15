@@ -1,6 +1,10 @@
 from pathlib import Path
+from tempfile import mkdtemp
+import zipfile
+
 import numpy as np
 import pandas as pd
+
 from config.paths import (ERA5_LAND_DIR, PROCESSED_DIR)
 
 #configuration
@@ -13,7 +17,7 @@ EXPECTED_TOTAL_ROWS = (EXPECTED_GRID_POINTS * EXPECTED_HOURS_PER_GRID_POINT)
 ERA5_VARIABLE_GROUPS = {
     "temperature_dewpoint": {"t2m", "d2m"},
     "pressure_precipitation": {"sp", "tp"},
-    "soil_moisture": {"swvl1", "swvl2"},  
+    "soil_moisture": {"swvl1", "swvl2"},
 }
 ALL_ERA5_VARIABLES = {"t2m", "d2m", "sp", "tp", "swvl1", "swvl2"}
 
@@ -44,6 +48,23 @@ def discover_era5_files() -> dict[str, Path]:
     #discover ERA5-LAND CSV files based on variables contained in each files
 
     csv_files = sorted(ERA5_LAND_DIR.rglob("*.csv"))
+
+    #ERA5-Land source files may still be stored inside the
+    #original CDS ZIP archive. Extract them temporarily for processing.
+    if not csv_files:
+        zip_files = sorted(ERA5_LAND_DIR.rglob("*.zip"))
+
+        if zip_files:
+            extraction_root = Path(mkdtemp(prefix="era5_land_"))
+
+            for zip_file in zip_files:
+                target_directory = extraction_root / zip_file.stem
+                target_directory.mkdir(parents=True, exist_ok=True)
+
+                with zipfile.ZipFile(zip_file, "r") as archive:
+                    archive.extractall(target_directory)
+
+            csv_files = sorted(extraction_root.rglob("*.csv"))
 
     if not csv_files:
         raise FileNotFoundError(f"No ERA5-Land CSV files were found in {ERA5_LAND_DIR}")
@@ -84,7 +105,7 @@ def load_era5_parameter_file(file_path: Path, variables: set[str]) -> pd.DataFra
     longitude_column = find_column(columns, ["longitude", "lon", "lng"], "longitude")
     missing_variables = (variables - columns)
 
-    if missing_variables: 
+    if missing_variables:
         raise ValueError(f"{file_path.name} is missing variables: {sorted(missing_variables)}")
 
     selected_columns = [timestamp_column, latitude_column, longitude_column, *sorted(variables)]
@@ -149,7 +170,7 @@ def validate_era5_archive(dataframe: pd.DataFrame) -> None:
     key_columns = ["timestamp", "latitude", "longitude"]
     missing_columns = (ALL_ERA5_VARIABLES | set(key_columns)) - set(dataframe.columns)
 
-    if missing_columns: 
+    if missing_columns:
         raise ValueError(f"Merged ERA5-Land archive is missing columns: {sorted(missing_columns)}")
 
     if dataframe.duplicated(subset=key_columns).any():
@@ -181,7 +202,7 @@ def validate_era5_archive(dataframe: pd.DataFrame) -> None:
 
     if not invalid_grid_counts.empty:
         raise ValueError(f"One or more ERA5-Land grid points have incomplete hourly coverage: {invalid_grid_counts}")
-    
+
 #distance calculation
 def haversine_distance_km(latitude:float, longitude:float, grid_latitudes: np.ndarray, grid_longitudes: np.ndarray) -> np.ndarray:
 
@@ -289,15 +310,3 @@ def save_era5_outputs(era5_data: pd.DataFrame, grid_mapping:pd.DataFrame, invent
     print(f"Saved canonical ERA5-Land archive: {hourly_output}")
     print(f"Saved Groundsource to ERA5 grid mapping: {mapping_output}")
     print(f"Saved ERA5-Land inventory: {inventory_output}")
-
-
-
-
-
-
-
-
-
-            
-
-            
