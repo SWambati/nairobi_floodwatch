@@ -394,6 +394,21 @@ def extract_icpac_raster(requests: pd.DataFrame, raster_path: Path) -> pd.DataFr
 
     with rasterio.open(raster_path) as dataset:
 
+        raw_values = dataset.read(1, masked=False)
+
+        finite_values = raw_values[np.isfinite(raw_values)]
+        unique_values = np.unique(finite_values)
+
+        positive_values = unique_values[unique_values > 0]
+
+        if len(positive_values) > 0:
+            if not np.allclose(positive_values % 20, 0, atol=1e-4):
+                raise ValueError("Unexpected ICPAC raster encoding. " f"Values are not multiples of 20: " f"{positive_values[:20]}")
+
+            normalized_values = (positive_values / 20)
+            if normalized_values.max() > 6:
+                raise ValueError("Unexpected ICPAC normalized hazard " f"score above 6: " f"{normalized_values.max()}")
+
         for row in dataframe.itertuples(index=False):
             x, y = coordinate_to_raster(dataset, float(row.longitude), float(row.latitude))
             raster_row, raster_col = dataset.index(x, y)
@@ -404,27 +419,70 @@ def extract_icpac_raster(requests: pd.DataFrame, raster_path: Path) -> pd.DataFr
                 fallback_distances.append(0)
                 continue
 
-            sample = dataset.read(1, window=((raster_row, raster_row + 1), (raster_col, raster_col + 1)), masked=False)
-            value = float(sample[0, 0])
+            sample = dataset.read(
+                1,
+                window=(
+                    (
+                        raster_row,
+                        raster_row + 1
+                    ),
+                    (
+                        raster_col,
+                        raster_col + 1
+                    )
+                ),
+                masked=False
+            )
 
-            # ICPAC NoData / non-inundated cells are treated as zero model agreement, not as missing features.
+            raw_value = float(
+                sample[0, 0]
+            )
 
-            if (not np.isfinite(value) or (dataset.nodata is not None and np.isclose(value, dataset.nodata))or value < 0):
+            if (
+                not np.isfinite(raw_value)
+                or raw_value <= 0
+            ):
                 values.append(0.0)
-                methods.append("nodata_as_zero")
+                methods.append("dry_or_nodata")
                 fallback_distances.append(0)
                 continue
 
-            if value > 6:
-                raise ValueError(f"Unexpected ICPAC flood hazard value {value}. Expected model-agreement scores between 0 and 6.")
+            hazard_score = (
+                raw_value / 20.0
+            )
 
-            values.append(value)
-            methods.append("direct")
-            fallback_distances.append(0)
+            if (
+                hazard_score < 0
+                or hazard_score > 6
+            ):
+                raise ValueError(
+                    "Unexpected normalized ICPAC "
+                    f"hazard score: {hazard_score}"
+                )
 
-    dataframe["flood_hazard_score"] = values
-    dataframe["flood_hazard_score_sampling_method"] = methods
-    dataframe["flood_hazard_score_fallback_pixels"] = fallback_distances
+            values.append(
+                hazard_score
+            )
+
+            methods.append(
+                "direct_normalized"
+            )
+
+            fallback_distances.append(
+                0
+            )
+
+    dataframe[
+        "flood_hazard_score"
+    ] = values
+
+    dataframe[
+        "flood_hazard_score_sampling_method"
+    ] = methods
+
+    dataframe[
+        "flood_hazard_score_fallback_pixels"
+    ] = fallback_distances
 
     return dataframe
 
