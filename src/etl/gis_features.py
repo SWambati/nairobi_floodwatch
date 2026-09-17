@@ -400,18 +400,23 @@ def extract_icpac_raster(requests: pd.DataFrame, raster_path: Path) -> pd.DataFr
 
             if not (0 <= raster_row < dataset.height and 0 <= raster_col < dataset.width):
                 values.append(np.nan)
-                methods.append("missing")
+                methods.append("outside_raster")
                 fallback_distances.append(0)
                 continue
 
-            sample = dataset.read(1, window=((raster_row, raster_row + 1), (raster_col, raster_col + 1)),masked=False)
+            sample = dataset.read(1, window=((raster_row, raster_row + 1), (raster_col, raster_col + 1)), masked=False)
             value = float(sample[0, 0])
 
-            if value < 0:
-                values.append(np.nan)
-                methods.append("missing")
+            # ICPAC NoData / non-inundated cells are treated as zero model agreement, not as missing features.
+
+            if (not np.isfinite(value) or (dataset.nodata is not None and np.isclose(value, dataset.nodata))or value < 0):
+                values.append(0.0)
+                methods.append("nodata_as_zero")
                 fallback_distances.append(0)
                 continue
+
+            if value > 6:
+                raise ValueError(f"Unexpected ICPAC flood hazard value {value}. Expected model-agreement scores between 0 and 6.")
 
             values.append(value)
             methods.append("direct")
