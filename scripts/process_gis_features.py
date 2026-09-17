@@ -1,12 +1,18 @@
-from src.etl.gis_features import (process_gis_features, save_gis_feature_outputs)
+from src.etl.gis_features import (
+    process_gis_features,
+    save_gis_feature_outputs
+)
 
 def main():
     print(
-        "Nairobi FloodWatch GIS Environmental Feature Extraction")
+        "Nairobi FloodWatch GIS Environmental Feature Extraction"
+    )
 
     print("-" * 70)
 
-    print("Extracting static and historical environmental features...")
+    print(
+        "Extracting static and historical environmental features..."
+    )
 
     (features, inventory) = process_gis_features()
 
@@ -33,7 +39,11 @@ def main():
 
     print("\nGHSL epoch usage:")
 
-    epoch_counts = (features["ghsl_epoch"].value_counts().sort_index())
+    epoch_counts = (
+        features["ghsl_epoch"]
+        .value_counts()
+        .sort_index()
+    )
 
     for epoch, count in epoch_counts.items():
         print(f"{epoch}: {count:,}")
@@ -41,7 +51,11 @@ def main():
     print("\nWorldCover classes:")
 
     class_counts = (
-        features["worldcover_2021_class"].astype(int).value_counts().sort_index())
+        features["worldcover_2021_class"]
+        .astype(int)
+        .value_counts()
+        .sort_index()
+    )
 
     for class_value, count in class_counts.items():
         print(f"{class_value}: {count:,}")
@@ -58,14 +72,23 @@ def main():
 
     for column in sampling_columns:
         print(f"\n{column}:")
-        counts = (features[column].value_counts(dropna=False))
+
+        counts = (
+            features[column]
+            .value_counts(dropna=False)
+        )
 
         for method, count in counts.items():
             print(f"  {method}: {count:,}")
 
-    save_gis_feature_outputs(features, inventory)
+    save_gis_feature_outputs(
+        features,
+        inventory
+    )
 
-    print("\nGIS environmental feature extraction: OK")
+    print(
+        "\nGIS environmental feature extraction: OK"
+    )
 
 if __name__ == "__main__":
     main()
