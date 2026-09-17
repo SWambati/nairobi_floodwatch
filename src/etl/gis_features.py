@@ -383,6 +383,45 @@ def extract_static_raster(
 
     return dataframe
 
+#ICPAC-specific extractor
+def extract_icpac_raster(requests: pd.DataFrame, raster_path: Path) -> pd.DataFrame:
+
+    dataframe = requests.copy()
+
+    values = []
+    methods = []
+    fallback_distances = []
+
+    with rasterio.open(raster_path) as dataset:
+
+        for row in dataframe.itertuples(index=False):
+            x, y = coordinate_to_raster(dataset, float(row.longitude), float(row.latitude))
+            raster_row, raster_col = dataset.index(x, y)
+
+            if not (0 <= raster_row < dataset.height and 0 <= raster_col < dataset.width):
+                values.append(np.nan)
+                methods.append("missing")
+                fallback_distances.append(0)
+                continue
+
+            sample = dataset.read(1, window=((raster_row, raster_row + 1), (raster_col, raster_col + 1)),masked=False)
+            value = float(sample[0, 0])
+
+            if value < 0:
+                values.append(np.nan)
+                methods.append("missing")
+                fallback_distances.append(0)
+                continue
+
+            values.append(value)
+            methods.append("direct")
+            fallback_distances.append(0)
+
+    dataframe["flood_hazard_score"] = values
+    dataframe["flood_hazard_score_sampling_method"] = methods
+    dataframe["flood_hazard_score_fallback_pixels"] = fallback_distances
+
+    return dataframe
 
 #GHSL epoch selection
 def select_ghsl_epoch(target_date) -> int:
@@ -495,11 +534,9 @@ def process_gis_features() -> tuple[
         minimum_value=0
     )
 
-    features = extract_static_raster(
+    features = extract_icpac_raster(
         features,
-        rasters["icpac"],
-        "flood_hazard_score",
-        minimum_value=0
+        rasters["icpac"]
     )
 
     features = extract_static_raster(
