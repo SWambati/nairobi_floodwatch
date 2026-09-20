@@ -217,9 +217,16 @@ def validate_component_alignment(labels: pd.DataFrame, component: pd.DataFrame, 
             raise ValueError(f"{component_name} longitude alignment failed")
 
     if (date_column is not None and date_column in component.columns):
-        label_dates = pd.to_datetime(comparison["start_date"], errors="raise").dt.date
-        component_dates = pd.to_datetime(comparison[date_column], errors="raise").dt.date
+        if date_column == "start_date":
+            label_date_column = "start_date_label"
+            component_date_column = "start_date_component"
+        else:
+            label_date_column = "start_date"
+            component_date_column = date_column
 
+        label_dates = pd.to_datetime(comparison[label_date_column], errors="raise").dt.date
+        component_dates = pd.to_datetime(comparison[component_date_column], errors="raise").dt.date
+        
         if not (label_dates == component_dates).all():
             raise ValueError(f"{component_name} target-date alignment failed")
 
