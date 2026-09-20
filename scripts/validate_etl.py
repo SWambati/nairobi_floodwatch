@@ -18,18 +18,14 @@ def main():
     passed = int((report["status"] == "PASS").sum())
     failed = int((report["status"] == "FAIL").sum())
 
-    print("\nValidation summary:")
-
+    print("\nValidation summary:" )
     print(f"Passed: {passed:,}")
     print(f"Failed: {failed:,}")
-
     save_validation_report(report)
 
     if failed > 0:
         failed_checks = (report.loc[report["status"] == "FAIL", "check",].tolist())
-
-        raise RuntimeError(
-            f"ETL validation failed for: {failed_checks}")
+        raise RuntimeError(f"ETL validation failed for: {failed_checks}")
 
     print("\nETL validation: OK")
 
