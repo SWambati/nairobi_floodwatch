@@ -2,3 +2,5 @@ alembic>=1.13,<2.0
 SQLAlchemy>=2.0,<3.0
 rasterio>=1.4,<2.0
 pyarrow
+geopandas
+pyogrio
