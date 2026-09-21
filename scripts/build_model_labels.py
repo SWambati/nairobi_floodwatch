@@ -36,7 +36,7 @@ def main():
     print()
     print("Class distribution: ")
 
-    class_counts = (combined["flood_label"].value_counts().sort_values(ascending=False))
+    class_counts = (combined["flood_label"].value_counts().sort_index(ascending=False))
 
     for label, count in (class_counts.items()):
         label_name = ("Flood" if label == 1 else "Presumed Non-Flood")
@@ -49,14 +49,14 @@ def main():
 
     verification_counts = (positives["verification_status"].value_counts())
 
-    for status, count in (verification_counts.item()):
+    for status, count in (verification_counts.items()):
         print(f"{status} {count:,}")
 
 
     print()
     print("Negative Sampling Diagnostics: ")
     print("Same Location as reference positive: yes")
-    print("Citywide known-evejt exclusion: yes")
+    print("Citywide known-event exclusion: yes")
     print("Antecedent-window protection: yes")
     print("random seed: 42")
 
