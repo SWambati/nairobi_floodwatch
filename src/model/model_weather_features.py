@@ -7,7 +7,7 @@ import pandas as pd
 import rasterio
 from rasterio.warp import transform
 
-from config.paths import PROCESSED_DIR
+from config.paths import CHIRPS_DIR, PROCESSED_DIR
 
 
 # ============================================================
@@ -24,13 +24,6 @@ MODEL_LABEL_FILE = (
     / "modeling"
     / "labels"
     / "historical_model_labels.csv"
-)
-
-CHIRPS_INVENTORY_FILE = (
-    PROCESSED_DIR
-    / "weather"
-    / "chirps"
-    / "chirps_archive_inventory.csv"
 )
 
 ERA5_CANONICAL_FILE = (
@@ -137,6 +130,29 @@ def load_model_labels() -> pd.DataFrame:
             "model_record_id must be unique."
         )
 
+    if labels[
+        [
+            "latitude",
+            "longitude",
+        ]
+    ].isna().any().any():
+
+        raise ValueError(
+            "Historical model labels "
+            "contain missing coordinates."
+        )
+
+    if not set(
+        labels["flood_label"].unique()
+    ).issubset(
+        {0, 1}
+    ):
+
+        raise ValueError(
+            "flood_label must contain "
+            "only 0 and 1."
+        )
+
     return labels
 
 
@@ -144,95 +160,59 @@ def load_model_labels() -> pd.DataFrame:
 # CHIRPS
 # ============================================================
 
-def _resolve_raster_path(
-    row: pd.Series,
-) -> Path:
-
-    preferred_columns = [
-        "file_path",
-        "raster_path",
-        "path",
-        "source_path",
-        "filepath",
-    ]
-
-    for column in preferred_columns:
-
-        if column not in row.index:
-            continue
-
-        value = row[column]
-
-        if pd.isna(value):
-            continue
-
-        path = Path(
-            str(value)
-        )
-
-        if path.exists():
-            return path
-
-    # Fall back to searching every inventory
-    # field for an existing TIFF path.
-    for value in row.values:
-
-        if pd.isna(value):
-            continue
-
-        value = str(value)
-
-        if not value.lower().endswith(
-            (".tif", ".tiff")
-        ):
-            continue
-
-        path = Path(value)
-
-        if path.exists():
-            return path
-
-    raise FileNotFoundError(
-        "Could not resolve CHIRPS raster "
-        "path from inventory row."
-    )
-
-
 def load_chirps_archive() -> dict[int, Path]:
 
-    inventory = pd.read_csv(
-        CHIRPS_INVENTORY_FILE
+    raster_files = sorted(
+        list(
+            CHIRPS_DIR.glob(
+                "chirps_v3_sat_nairobi_*.tif"
+            )
+        )
+        + list(
+            CHIRPS_DIR.glob(
+                "chirps_v3_sat_nairobi_*.tiff"
+            )
+        )
     )
 
-    if "year" not in inventory.columns:
+    if not raster_files:
 
-        raise ValueError(
-            "CHIRPS inventory must contain "
-            "a 'year' column."
+        raise FileNotFoundError(
+            "No CHIRPS annual rasters "
+            f"found in {CHIRPS_DIR}"
         )
 
     archive = {}
 
-    for _, row in inventory.iterrows():
+    for path in raster_files:
 
-        year = int(
-            row["year"]
-        )
+        try:
 
-        path = (
-            _resolve_raster_path(
-                row
+            year = int(
+                path.stem.rsplit(
+                    "_",
+                    1,
+                )[-1]
             )
-        )
+
+        except ValueError as exc:
+
+            raise ValueError(
+                "Could not determine year "
+                "from CHIRPS raster filename: "
+                f"{path.name}"
+            ) from exc
+
+        if year in archive:
+
+            raise ValueError(
+                "Duplicate CHIRPS annual "
+                f"raster found for year {year}: "
+                f"{archive[year].name} and "
+                f"{path.name}"
+            )
 
         archive[year] = path
-
-    if not archive:
-
-        raise ValueError(
-            "No CHIRPS annual rasters "
-            "were resolved."
-        )
 
     return archive
 
@@ -255,7 +235,7 @@ def _valid_rainfall_value(
     ):
         return False
 
-    # CHIRPS rainfall should not be negative.
+    # CHIRPS rainfall must not be negative.
     if value < 0:
         return False
 
@@ -358,7 +338,8 @@ def _sample_chirps_value(
             0,
         )
 
-    # Nearest-valid fallback.
+    # Search neighbouring pixels when the
+    # requested CHIRPS pixel contains nodata.
     for radius in range(
         1,
         MAX_CHIRPS_FALLBACK_RADIUS + 1,
@@ -465,7 +446,10 @@ def _sample_chirps_value(
 
 def build_chirps_model_features(
     labels: pd.DataFrame,
-) -> pd.DataFrame:
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+]:
 
     archive = (
         load_chirps_archive()
@@ -576,8 +560,10 @@ def build_chirps_model_features(
                 raise ValueError(
                     "CHIRPS raster has "
                     f"{dataset.count} bands, "
-                    f"but date {request_date.date()} "
-                    f"requires band {band_index}."
+                    f"but date "
+                    f"{request_date.date()} "
+                    f"requires band "
+                    f"{band_index}."
                 )
 
             (
@@ -616,6 +602,19 @@ def build_chirps_model_features(
     daily = pd.DataFrame(
         sampled_rows
     )
+
+    expected_requests = (
+        len(labels)
+        * 7
+    )
+
+    if len(daily) != expected_requests:
+
+        raise ValueError(
+            "Unexpected CHIRPS request count. "
+            f"Expected {expected_requests:,}, "
+            f"received {len(daily):,}."
+        )
 
     if daily[
         "rainfall_mm"
@@ -668,7 +667,11 @@ def build_chirps_model_features(
 
             "rain_3d":
                 rainfall_wide[
-                    [1, 2, 3]
+                    [
+                        1,
+                        2,
+                        3,
+                    ]
                 ].sum(
                     axis=1
                 ),
@@ -692,6 +695,13 @@ def build_chirps_model_features(
         drop=True
     )
 
+    if len(result) != len(labels):
+
+        raise ValueError(
+            "CHIRPS feature row count "
+            "does not match model labels."
+        )
+
     if not (
         (
             result["rain_1d"]
@@ -708,7 +718,10 @@ def build_chirps_model_features(
             "check failed."
         )
 
-    return result, daily
+    return (
+        result,
+        daily,
+    )
 
 
 # ============================================================
@@ -862,7 +875,8 @@ def build_era5_model_features(
     ].isna().any():
 
         raise ValueError(
-            "ERA5 contains invalid timestamps."
+            "ERA5 contains invalid "
+            "timestamps."
         )
 
     grid_points = (
@@ -877,6 +891,13 @@ def build_era5_model_features(
             drop=True
         )
     )
+
+    if grid_points.empty:
+
+        raise ValueError(
+            "ERA5 archive contains no "
+            "grid coordinates."
+        )
 
     mappings = []
 
@@ -1013,12 +1034,66 @@ def build_era5_model_features(
 
     if not bad_counts.empty:
 
+        sample_bad_ids = (
+            bad_counts
+            .head()
+            .to_dict()
+        )
+
         raise ValueError(
             "ERA5 antecedent windows "
             "must contain exactly 24 "
             "hourly rows per observation. "
             f"Invalid observations: "
-            f"{len(bad_counts):,}"
+            f"{len(bad_counts):,}. "
+            f"Examples: {sample_bad_ids}"
+        )
+
+    expected_hourly_rows = (
+        len(labels)
+        * 24
+    )
+
+    if len(hourly) != expected_hourly_rows:
+
+        raise ValueError(
+            "Unexpected ERA5 hourly row "
+            f"count. Expected "
+            f"{expected_hourly_rows:,}, "
+            f"received {len(hourly):,}."
+        )
+
+    required_era5_values = [
+        "d2m",
+        "t2m",
+        "sp",
+        "tp",
+        "swvl1",
+        "swvl2",
+    ]
+
+    if hourly[
+        required_era5_values
+    ].isna().any().any():
+
+        missing = (
+            hourly[
+                required_era5_values
+            ]
+            .isna()
+            .sum()
+        )
+
+        missing = (
+            missing[
+                missing > 0
+            ]
+        )
+
+        raise ValueError(
+            "ERA5 antecedent data "
+            "contains missing values:\n"
+            f"{missing}"
         )
 
     hourly[
@@ -1035,7 +1110,8 @@ def build_era5_model_features(
         - 273.15
     )
 
-    # Magnus approximation.
+    # Magnus approximation for
+    # relative humidity.
     a = 17.625
     b = 243.04
 
@@ -1175,6 +1251,13 @@ def build_era5_model_features(
         )
     )
 
+    if len(grouped) != len(labels):
+
+        raise ValueError(
+            "ERA5 feature row count "
+            "does not match model labels."
+        )
+
     return (
         grouped,
         hourly,
@@ -1250,6 +1333,15 @@ def build_model_weather_features():
         raise ValueError(
             "Weather feature row count "
             "does not match model labels."
+        )
+
+    if combined[
+        "model_record_id"
+    ].duplicated().any():
+
+        raise ValueError(
+            "Combined weather dataset "
+            "contains duplicate model IDs."
         )
 
     if combined[
