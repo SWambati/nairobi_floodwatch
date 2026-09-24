@@ -1,39 +1,103 @@
 from contextlib import ExitStack
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
 import numpy as np
 import pandas as pd
 import rasterio
 from rasterio.warp import transform
+
 from config.paths import PROCESSED_DIR
 
 
+# ============================================================
+# Paths
+# ============================================================
 
-# Path Configurations
-FEATURES_DIR = (PROCESSED_DIR.parent/ "features")
-MODEL_LABEL_FILE = (PROCESSED_DIR/ "modeling"/ "labels"/ "historical_model_labels.csv")
-CHIRPS_INVENTORY_FILE = (PROCESSED_DIR/ "weather"/ "chirps"/ "chirps_archive_inventory.csv")
-ERA5_CANONICAL_FILE = (PROCESSED_DIR/ "weather"/ "era5_land"/ "era5_land_hourly_canonical.parquet")
-MODEL_WEATHER_DIR = (FEATURES_DIR/ "modeling"/ "weather")
+FEATURES_DIR = (
+    PROCESSED_DIR.parent
+    / "features"
+)
 
-CHIRPS_OUTPUT_FILE = (MODEL_WEATHER_DIR/ "historical_model_chirps_features.csv")
-ERA5_OUTPUT_FILE = (MODEL_WEATHER_DIR/ "historical_model_era5_features.csv")
-WEATHER_OUTPUT_FILE = (MODEL_WEATHER_DIR/ "historical_model_weather_features.csv")
+MODEL_LABEL_FILE = (
+    PROCESSED_DIR
+    / "modeling"
+    / "labels"
+    / "historical_model_labels.csv"
+)
 
-NAIROBI_TIMEZONE = ZoneInfo("Africa/Nairobi")
+CHIRPS_INVENTORY_FILE = (
+    PROCESSED_DIR
+    / "weather"
+    / "chirps"
+    / "chirps_archive_inventory.csv"
+)
+
+ERA5_CANONICAL_FILE = (
+    PROCESSED_DIR
+    / "weather"
+    / "era5_land"
+    / "era5_land_hourly_canonical.parquet"
+)
+
+MODEL_WEATHER_DIR = (
+    FEATURES_DIR
+    / "modeling"
+    / "weather"
+)
+
+CHIRPS_OUTPUT_FILE = (
+    MODEL_WEATHER_DIR
+    / "historical_model_chirps_features.csv"
+)
+
+ERA5_OUTPUT_FILE = (
+    MODEL_WEATHER_DIR
+    / "historical_model_era5_features.csv"
+)
+
+WEATHER_OUTPUT_FILE = (
+    MODEL_WEATHER_DIR
+    / "historical_model_weather_features.csv"
+)
+
+
+NAIROBI_TIMEZONE = ZoneInfo(
+    "Africa/Nairobi"
+)
+
 MAX_CHIRPS_FALLBACK_RADIUS = 3
 
 
+# ============================================================
 # Generic helpers
-def _require_columns(dataframe: pd.DataFrame, required_columns: set[str], dataset_name: str) -> None:
-    missing = (required_columns - set(dataframe.columns))
+# ============================================================
+
+def _require_columns(
+    dataframe: pd.DataFrame,
+    required_columns: set[str],
+    dataset_name: str,
+) -> None:
+
+    missing = (
+        required_columns
+        - set(dataframe.columns)
+    )
 
     if missing:
-        raise ValueError(f"{dataset_name} is missing required columns: {sorted(missing)}")
+
+        raise ValueError(
+            f"{dataset_name} is missing "
+            f"required columns: "
+            f"{sorted(missing)}"
+        )
+
 
 def load_model_labels() -> pd.DataFrame:
 
-    labels = pd.read_csv(MODEL_LABEL_FILE)
+    labels = pd.read_csv(
+        MODEL_LABEL_FILE
+    )
 
     _require_columns(
         labels,
@@ -47,19 +111,43 @@ def load_model_labels() -> pd.DataFrame:
         "Historical model labels",
     )
 
-    labels["observation_date"] = pd.to_datetime(labels["observation_date"], errors="coerce").dt.normalize()
+    labels[
+        "observation_date"
+    ] = pd.to_datetime(
+        labels[
+            "observation_date"
+        ],
+        errors="coerce",
+    ).dt.normalize()
 
-    if labels["observation_date"].isna().any():
-        raise ValueError("Historical model labels contain invalid dates.")
+    if labels[
+        "observation_date"
+    ].isna().any():
 
-    if labels["model_record_id"].duplicated().any():
-        raise ValueError("model_record_id must be unique.")
+        raise ValueError(
+            "Historical model labels "
+            "contain invalid dates."
+        )
+
+    if labels[
+        "model_record_id"
+    ].duplicated().any():
+
+        raise ValueError(
+            "model_record_id must be unique."
+        )
 
     return labels
 
 
+# ============================================================
 # CHIRPS
-def _resolve_raster_path(row: pd.Series) -> Path:
+# ============================================================
+
+def _resolve_raster_path(
+    row: pd.Series,
+) -> Path:
+
     preferred_columns = [
         "file_path",
         "raster_path",
@@ -69,6 +157,7 @@ def _resolve_raster_path(row: pd.Series) -> Path:
     ]
 
     for column in preferred_columns:
+
         if column not in row.index:
             continue
 
@@ -77,19 +166,25 @@ def _resolve_raster_path(row: pd.Series) -> Path:
         if pd.isna(value):
             continue
 
-        path = Path(str(value))
+        path = Path(
+            str(value)
+        )
 
         if path.exists():
             return path
 
-    # Fall back to searching every inventory field for an existing TIFF path.
+    # Fall back to searching every inventory
+    # field for an existing TIFF path.
     for value in row.values:
+
         if pd.isna(value):
             continue
 
         value = str(value)
 
-        if not value.lower().endswith((".tif", ".tiff")):
+        if not value.lower().endswith(
+            (".tif", ".tiff")
+        ):
             continue
 
         path = Path(value)
@@ -97,33 +192,67 @@ def _resolve_raster_path(row: pd.Series) -> Path:
         if path.exists():
             return path
 
-    raise FileNotFoundError("Could not resolve CHIRPS raster path from inventory row.")
+    raise FileNotFoundError(
+        "Could not resolve CHIRPS raster "
+        "path from inventory row."
+    )
 
 
 def load_chirps_archive() -> dict[int, Path]:
-    inventory = pd.read_csv(CHIRPS_INVENTORY_FILE)
+
+    inventory = pd.read_csv(
+        CHIRPS_INVENTORY_FILE
+    )
 
     if "year" not in inventory.columns:
-        raise ValueError("CHIRPS inventory must contain a 'year' column.")
+
+        raise ValueError(
+            "CHIRPS inventory must contain "
+            "a 'year' column."
+        )
 
     archive = {}
 
     for _, row in inventory.iterrows():
 
-        year = int(row["year"])
-        path = (_resolve_raster_path(row))
+        year = int(
+            row["year"]
+        )
+
+        path = (
+            _resolve_raster_path(
+                row
+            )
+        )
+
         archive[year] = path
 
     if not archive:
-        raise ValueError("No CHIRPS annual rasters were resolved.")
+
+        raise ValueError(
+            "No CHIRPS annual rasters "
+            "were resolved."
+        )
 
     return archive
 
-def _valid_rainfall_value(value: float, nodata) -> bool:
+
+def _valid_rainfall_value(
+    value: float,
+    nodata,
+) -> bool:
+
     if not np.isfinite(value):
         return False
 
-    if (nodata is not None and np.isfinite(nodata) and np.isclose(value, nodata,)):
+    if (
+        nodata is not None
+        and np.isfinite(nodata)
+        and np.isclose(
+            value,
+            nodata,
+        )
+    ):
         return False
 
     # CHIRPS rainfall should not be negative.
@@ -132,21 +261,77 @@ def _valid_rainfall_value(value: float, nodata) -> bool:
 
     return True
 
-def _coordinates_for_dataset(dataset, longitude: float, latitude: float) -> tuple[float, float]:
-    if (dataset.crs is None or str(dataset.crs).upper() in {"EPSG:4326", "OGC:CRS84",}):
-        return (longitude, latitude,)
 
-    xs, ys = transform("EPSG:4326", dataset.crs, [longitude], [latitude],)
-    return (xs[0], ys[0],)
+def _coordinates_for_dataset(
+    dataset,
+    longitude: float,
+    latitude: float,
+) -> tuple[float, float]:
 
-def _sample_chirps_value(dataset, band_index: int, longitude: float, latitude: float,) -> tuple[float, str, int,]:
+    if (
+        dataset.crs is None
+        or str(dataset.crs).upper()
+        in {
+            "EPSG:4326",
+            "OGC:CRS84",
+        }
+    ):
+
+        return (
+            longitude,
+            latitude,
+        )
+
+    xs, ys = transform(
+        "EPSG:4326",
+        dataset.crs,
+        [longitude],
+        [latitude],
+    )
+
+    return (
+        xs[0],
+        ys[0],
+    )
+
+
+def _sample_chirps_value(
+    dataset,
+    band_index: int,
+    longitude: float,
+    latitude: float,
+) -> tuple[
+    float,
+    str,
+    int,
+]:
+
     x, y = (
-        _coordinates_for_dataset(dataset, longitude, latitude,))
+        _coordinates_for_dataset(
+            dataset,
+            longitude,
+            latitude,
+        )
+    )
 
-    row_index, col_index = (dataset.index(x, y,))
+    row_index, col_index = (
+        dataset.index(
+            x,
+            y,
+        )
+    )
 
-    if (row_index < 0 or row_index >= dataset.height or col_index < 0 or col_index >= dataset.width):
-        raise ValueError("CHIRPS request lies outside the raster extent.")
+    if (
+        row_index < 0
+        or row_index >= dataset.height
+        or col_index < 0
+        or col_index >= dataset.width
+    ):
+
+        raise ValueError(
+            "CHIRPS request lies outside "
+            "the raster extent."
+        )
 
     direct = dataset.read(
         band_index,
@@ -162,15 +347,42 @@ def _sample_chirps_value(dataset, band_index: int, longitude: float, latitude: f
         ),
     )[0, 0]
 
-    if _valid_rainfall_value(direct, dataset.nodata,):
-        return (float(direct), "direct", 0,)
+    if _valid_rainfall_value(
+        direct,
+        dataset.nodata,
+    ):
+
+        return (
+            float(direct),
+            "direct",
+            0,
+        )
 
     # Nearest-valid fallback.
-    for radius in range(1, MAX_CHIRPS_FALLBACK_RADIUS + 1,):
-        row_start = max(0, row_index - radius,)
-        row_end = min(dataset.height, row_index + radius + 1,)
-        col_start = max(0, col_index - radius,)
-        col_end = min(dataset.width, col_index + radius + 1,)
+    for radius in range(
+        1,
+        MAX_CHIRPS_FALLBACK_RADIUS + 1,
+    ):
+
+        row_start = max(
+            0,
+            row_index - radius,
+        )
+
+        row_end = min(
+            dataset.height,
+            row_index + radius + 1,
+        )
+
+        col_start = max(
+            0,
+            col_index - radius,
+        )
+
+        col_end = min(
+            dataset.width,
+            col_index + radius + 1,
+        )
 
         window = dataset.read(
             band_index,
@@ -188,49 +400,127 @@ def _sample_chirps_value(dataset, band_index: int, longitude: float, latitude: f
 
         candidates = []
 
-        for local_row in range(window.shape[0]):
-            for local_col in range(window.shape[1]):
-                value = window[local_row, local_col,]
+        for local_row in range(
+            window.shape[0]
+        ):
 
-                if not _valid_rainfall_value(value, dataset.nodata,):
+            for local_col in range(
+                window.shape[1]
+            ):
+
+                value = window[
+                    local_row,
+                    local_col,
+                ]
+
+                if not _valid_rainfall_value(
+                    value,
+                    dataset.nodata,
+                ):
                     continue
 
-                absolute_row = (row_start + local_row)
-                absolute_col = (col_start + local_col)
+                absolute_row = (
+                    row_start
+                    + local_row
+                )
 
-                distance = np.hypot(absolute_row - row_index, absolute_col - col_index,)
+                absolute_col = (
+                    col_start
+                    + local_col
+                )
 
-                candidates.append((distance, float(value),))
+                distance = np.hypot(
+                    absolute_row
+                    - row_index,
+                    absolute_col
+                    - col_index,
+                )
+
+                candidates.append(
+                    (
+                        distance,
+                        float(value),
+                    )
+                )
 
         if candidates:
-            candidates.sort(key=lambda item: item[0])
-            return (candidates[0][1], "nearest_valid", radius,)
 
-    return (np.nan, "missing", MAX_CHIRPS_FALLBACK_RADIUS,)
+            candidates.sort(
+                key=lambda item:
+                item[0]
+            )
+
+            return (
+                candidates[0][1],
+                "nearest_valid",
+                radius,
+            )
+
+    return (
+        np.nan,
+        "missing",
+        MAX_CHIRPS_FALLBACK_RADIUS,
+    )
 
 
-def build_chirps_model_features(labels: pd.DataFrame) -> pd.DataFrame:
-    archive = (load_chirps_archive())
+def build_chirps_model_features(
+    labels: pd.DataFrame,
+) -> pd.DataFrame:
+
+    archive = (
+        load_chirps_archive()
+    )
 
     requests = []
 
-    for row in labels.itertuples(index=False):
-        observation_date = ( pd.Timestamp(row.observation_date))
+    for row in labels.itertuples(
+        index=False
+    ):
 
-        for lag in range(1, 8,):
-            request_date = (observation_date - pd.Timedelta(days=lag))
+        observation_date = (
+            pd.Timestamp(
+                row.observation_date
+            )
+        )
+
+        for lag in range(
+            1,
+            8,
+        ):
+
+            request_date = (
+                observation_date
+                - pd.Timedelta(
+                    days=lag
+                )
+            )
 
             requests.append(
                 {
-                    "model_record_id": row.model_record_id,
-                    "request_date": request_date,
-                    "lag_day": lag,
-                    "latitude": float(row.latitude),
-                    "longitude": float(row.longitude),
+                    "model_record_id":
+                        row.model_record_id,
+
+                    "request_date":
+                        request_date,
+
+                    "lag_day":
+                        lag,
+
+                    "latitude":
+                        float(
+                            row.latitude
+                        ),
+
+                    "longitude":
+                        float(
+                            row.longitude
+                        ),
                 }
             )
 
-    request_df = pd.DataFrame(requests)
+    request_df = pd.DataFrame(
+        requests
+    )
 
     sampled_rows = []
 
@@ -238,21 +528,57 @@ def build_chirps_model_features(labels: pd.DataFrame) -> pd.DataFrame:
 
         datasets = {}
 
-        for year, path in (archive.items()):
-            datasets[year] = (stack.enter_context(rasterio.open(path)))
+        for year, path in (
+            archive.items()
+        ):
 
-        for row in (request_df.itertuples(index=False)):
-            request_date = (pd.Timestamp(row.request_date))
-            year = (request_date.year)
+            datasets[year] = (
+                stack.enter_context(
+                    rasterio.open(
+                        path
+                    )
+                )
+            )
+
+        for row in (
+            request_df.itertuples(
+                index=False
+            )
+        ):
+
+            request_date = (
+                pd.Timestamp(
+                    row.request_date
+                )
+            )
+
+            year = (
+                request_date.year
+            )
 
             if year not in datasets:
-                raise ValueError(f"Missing CHIRPS raster for year {year}.")
 
-            dataset = (datasets[year])
-            band_index = int(request_date.dayofyear)
+                raise ValueError(
+                    "Missing CHIRPS raster "
+                    f"for year {year}."
+                )
+
+            dataset = (
+                datasets[year]
+            )
+
+            band_index = int(
+                request_date.dayofyear
+            )
 
             if band_index > dataset.count:
-                raise ValueError(f"CHIRPS raster has {dataset.count} bands, but date {request_date.date()} requires band {band_index}.")
+
+                raise ValueError(
+                    "CHIRPS raster has "
+                    f"{dataset.count} bands, "
+                    f"but date {request_date.date()} "
+                    f"requires band {band_index}."
+                )
 
             (
                 rainfall_mm,
@@ -267,73 +593,212 @@ def build_chirps_model_features(labels: pd.DataFrame) -> pd.DataFrame:
 
             sampled_rows.append(
                 {
-                    "model_record_id": row.model_record_id,
-                    "request_date": request_date,
-                    "lag_day":row.lag_day,
-                    "rainfall_mm":rainfall_mm,
-                    "sampling_method": sampling_method,
-                    "fallback_radius_pixels": fallback_radius,
+                    "model_record_id":
+                        row.model_record_id,
+
+                    "request_date":
+                        request_date,
+
+                    "lag_day":
+                        row.lag_day,
+
+                    "rainfall_mm":
+                        rainfall_mm,
+
+                    "sampling_method":
+                        sampling_method,
+
+                    "fallback_radius_pixels":
+                        fallback_radius,
                 }
             )
 
-    daily = pd.DataFrame(sampled_rows)
+    daily = pd.DataFrame(
+        sampled_rows
+    )
 
-    if daily["rainfall_mm"].isna().any():
+    if daily[
+        "rainfall_mm"
+    ].isna().any():
 
-        missing = int(daily["rainfall_mm"].isna().sum())
-        raise ValueError(f"{missing:,} CHIRPS requests could not be resolved.")
+        missing = int(
+            daily[
+                "rainfall_mm"
+            ].isna().sum()
+        )
 
-    counts = (daily.groupby("model_record_id").size())
+        raise ValueError(
+            f"{missing:,} CHIRPS requests "
+            "could not be resolved."
+        )
 
-    if not (counts == 7).all():
-        raise ValueError("Each modelling observation must have exactly seven CHIRPS antecedent days.")
+    counts = (
+        daily
+        .groupby(
+            "model_record_id"
+        )
+        .size()
+    )
+
+    if not (
+        counts == 7
+    ).all():
+
+        raise ValueError(
+            "Each modelling observation "
+            "must have exactly seven "
+            "CHIRPS antecedent days."
+        )
 
     rainfall_wide = (
         daily.pivot(
             index="model_record_id",
             columns="lag_day",
-            values="rainfall_mm",))
+            values="rainfall_mm",
+        )
+    )
 
     result = pd.DataFrame(
         {
-            "model_record_id": rainfall_wide.index,
-            "rain_1d": rainfall_wide[1],
-            "rain_3d":rainfall_wide[[1, 2, 3]].sum(axis=1),
-            "rain_7d": rainfall_wide[[1, 2, 3, 4, 5, 6, 7]].sum(axis=1),
-        }
-    ).reset_index(drop=True)
+            "model_record_id":
+                rainfall_wide.index,
 
-    if not ((result["rain_1d"] <= result["rain_3d"]) & (result["rain_3d"] <= result["rain_7d"])).all():
-        raise ValueError("CHIRPS rainfall consistency check failed.")
+            "rain_1d":
+                rainfall_wide[1],
+
+            "rain_3d":
+                rainfall_wide[
+                    [1, 2, 3]
+                ].sum(
+                    axis=1
+                ),
+
+            "rain_7d":
+                rainfall_wide[
+                    [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                    ]
+                ].sum(
+                    axis=1
+                ),
+        }
+    ).reset_index(
+        drop=True
+    )
+
+    if not (
+        (
+            result["rain_1d"]
+            <= result["rain_3d"]
+        )
+        & (
+            result["rain_3d"]
+            <= result["rain_7d"]
+        )
+    ).all():
+
+        raise ValueError(
+            "CHIRPS rainfall consistency "
+            "check failed."
+        )
 
     return result, daily
 
 
+# ============================================================
 # ERA5-Land
-def _resolve_column(dataframe: pd.DataFrame, candidates: list[str], description: str) -> str:
+# ============================================================
+
+def _resolve_column(
+    dataframe: pd.DataFrame,
+    candidates: list[str],
+    description: str,
+) -> str:
+
     for candidate in candidates:
+
         if candidate in dataframe.columns:
             return candidate
 
-    raise ValueError(f"Unable to identify {description}. Tried: {candidates}")
-
-def _haversine_km(latitude_1, longitude_1, latitude_2, longitude_2):
-    earth_radius_km = (6371.0088)
-    lat1 = np.radians(latitude_1)
-    lon1 = np.radians(longitude_1)
-    lat2 = np.radians(latitude_2)
-    lon2 = np.radians(longitude_2)
-
-    delta_lat = (lat2 - lat1)
-    delta_lon = (lon2 - lon1)
-
-    a = (np.sin(delta_lat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin( delta_lon / 2) ** 2)
-
-    return ( 2 * earth_radius_km * np.arcsin(np.sqrt(a)))
+    raise ValueError(
+        f"Unable to identify "
+        f"{description}. "
+        f"Tried: {candidates}"
+    )
 
 
-def build_era5_model_features(labels: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    era5 = pd.read_parquet(ERA5_CANONICAL_FILE)
+def _haversine_km(
+    latitude_1,
+    longitude_1,
+    latitude_2,
+    longitude_2,
+):
+
+    earth_radius_km = (
+        6371.0088
+    )
+
+    lat1 = np.radians(
+        latitude_1
+    )
+
+    lon1 = np.radians(
+        longitude_1
+    )
+
+    lat2 = np.radians(
+        latitude_2
+    )
+
+    lon2 = np.radians(
+        longitude_2
+    )
+
+    delta_lat = (
+        lat2 - lat1
+    )
+
+    delta_lon = (
+        lon2 - lon1
+    )
+
+    a = (
+        np.sin(
+            delta_lat / 2
+        ) ** 2
+        + np.cos(lat1)
+        * np.cos(lat2)
+        * np.sin(
+            delta_lon / 2
+        ) ** 2
+    )
+
+    return (
+        2
+        * earth_radius_km
+        * np.arcsin(
+            np.sqrt(a)
+        )
+    )
+
+
+def build_era5_model_features(
+    labels: pd.DataFrame,
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+]:
+
+    era5 = pd.read_parquet(
+        ERA5_CANONICAL_FILE
+    )
+
     timestamp_column = (
         _resolve_column(
             era5,
@@ -348,10 +813,26 @@ def build_era5_model_features(labels: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
     )
 
     latitude_column = (
-        _resolve_column(era5, ["latitude", "lat",],"ERA5 latitude column",))
+        _resolve_column(
+            era5,
+            [
+                "latitude",
+                "lat",
+            ],
+            "ERA5 latitude column",
+        )
+    )
 
     longitude_column = (
-        _resolve_column(era5, ["longitude", "lon",], "ERA5 longitude column",))
+        _resolve_column(
+            era5,
+            [
+                "longitude",
+                "lon",
+            ],
+            "ERA5 longitude column",
+        )
+    )
 
     _require_columns(
         era5,
@@ -366,10 +847,23 @@ def build_era5_model_features(labels: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
         "ERA5 canonical archive",
     )
 
-    era5[timestamp_column] = pd.to_datetime(era5[timestamp_column],utc=True, errors="coerce",)
+    era5[
+        timestamp_column
+    ] = pd.to_datetime(
+        era5[
+            timestamp_column
+        ],
+        utc=True,
+        errors="coerce",
+    )
 
-    if era5[timestamp_column].isna().any():
-        raise ValueError("ERA5 contains invalid timestamps.")
+    if era5[
+        timestamp_column
+    ].isna().any():
+
+        raise ValueError(
+            "ERA5 contains invalid timestamps."
+        )
 
     grid_points = (
         era5[
@@ -386,7 +880,9 @@ def build_era5_model_features(labels: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
 
     mappings = []
 
-    for row in labels.itertuples(index=False):
+    for row in labels.itertuples(
+        index=False
+    ):
 
         distances = (
             _haversine_km(
@@ -405,26 +901,67 @@ def build_era5_model_features(labels: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
             )
         )
 
-        nearest_index = int(np.argmin(distances))
+        nearest_index = int(
+            np.argmin(
+                distances
+            )
+        )
 
-        grid_row = (grid_points.iloc[nearest_index])
+        grid_row = (
+            grid_points.iloc[
+                nearest_index
+            ]
+        )
 
         mappings.append(
             {
-                "model_record_id": row.model_record_id,
-                "era5_latitude": float(grid_row[latitude_column]),
-                "era5_longitude": float(grid_row[longitude_column]),
-                "era5_grid_distance_km": float(distances[nearest_index]),
-                "target_local_date": (pd.Timestamp(row.observation_date) - pd.Timedelta(days=1)),
+                "model_record_id":
+                    row.model_record_id,
+
+                "era5_latitude":
+                    float(
+                        grid_row[
+                            latitude_column
+                        ]
+                    ),
+
+                "era5_longitude":
+                    float(
+                        grid_row[
+                            longitude_column
+                        ]
+                    ),
+
+                "era5_grid_distance_km":
+                    float(
+                        distances[
+                            nearest_index
+                        ]
+                    ),
+
+                "target_local_date":
+                    (
+                        pd.Timestamp(
+                            row.observation_date
+                        )
+                        - pd.Timedelta(
+                            days=1
+                        )
+                    ),
             }
         )
 
-    mapping_df = pd.DataFrame(mappings)
+    mapping_df = pd.DataFrame(
+        mappings
+    )
 
     era5 = era5.rename(
         columns={
-            latitude_column: "era5_latitude",
-            longitude_column: "era5_longitude",
+            latitude_column:
+                "era5_latitude",
+
+            longitude_column:
+                "era5_longitude",
         }
     )
 
@@ -644,7 +1181,10 @@ def build_era5_model_features(labels: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
     )
 
 
+# ============================================================
 # Combined weather feature dataset
+# ============================================================
+
 def build_model_weather_features():
 
     labels = (
