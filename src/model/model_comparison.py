@@ -1,8 +1,6 @@
 import json
-
 import numpy as np
 import pandas as pd
-
 from sklearn.metrics import (
     accuracy_score,
     auc,
@@ -14,7 +12,6 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-
 from config.paths import PROCESSED_DIR
 
 
@@ -26,14 +23,11 @@ METRIC_TOLERANCE = 1e-6
 # Paths
 TUNING_DIR = PROCESSED_DIR / "modeling" / "tuning"
 COMPARISON_DIR = PROCESSED_DIR / "modeling" / "comparison"
-
 RF_PREDICTIONS_FILE = TUNING_DIR / "random_forest_tuned_validation_predictions.csv"
 XGB_PREDICTIONS_FILE = TUNING_DIR / "xgboost_tuned_validation_predictions.csv"
 TUNED_METRICS_SOURCE_FILE = TUNING_DIR / "tuned_model_metrics.csv"
-
 RF_FEATURE_IMPORTANCE_FILE = TUNING_DIR / "random_forest_tuned_feature_importance.csv"
 XGB_FEATURE_IMPORTANCE_FILE = TUNING_DIR / "xgboost_tuned_feature_importance.csv"
-
 MODEL_METRICS_FILE = COMPARISON_DIR / "tuned_model_validation_metrics.csv"
 PREDICTION_AGREEMENT_FILE = COMPARISON_DIR / "validation_prediction_agreement.csv"
 DISAGREEMENT_CASES_FILE = COMPARISON_DIR / "validation_disagreement_cases.csv"
@@ -43,9 +37,10 @@ FEATURE_RANK_FILE = COMPARISON_DIR / "feature_rank_comparison.csv"
 COMPARISON_REPORT_FILE = COMPARISON_DIR / "comparative_evaluation_report.json"
 
 
-# Helpers
+# Generic Helpers
 def _require_columns(dataframe: pd.DataFrame, required_columns: set[str], dataset_name: str) -> None:
     missing = required_columns - set(dataframe.columns)
+
     if missing:
         raise ValueError(f"{dataset_name} is missing required columns: {sorted(missing)}")
 
@@ -53,14 +48,19 @@ def _require_columns(dataframe: pd.DataFrame, required_columns: set[str], datase
 def _json_safe(value):
     if isinstance(value, dict):
         return {str(key): _json_safe(item) for key, item in value.items()}
+    
     if isinstance(value, (list, tuple)):
         return [_json_safe(item) for item in value]
+    
     if isinstance(value, np.integer):
         return int(value)
+    
     if isinstance(value, np.floating):
         return float(value)
+    
     if isinstance(value, np.bool_):
         return bool(value)
+    
     return value
 
 
@@ -133,14 +133,8 @@ def load_validation_predictions() -> pd.DataFrame:
     merged["rf_correct"] = merged["rf_predicted_label"] == merged["flood_label"]
     merged["xgb_correct"] = merged["xgb_predicted_label"] == merged["flood_label"]
 
-    merged["prediction_agreement"] = (
-        merged["rf_predicted_label"] == merged["xgb_predicted_label"]
-    )
-
-    merged["probability_difference"] = (
-        merged["rf_probability"] - merged["xgb_probability"]
-    )
-
+    merged["prediction_agreement"] = (merged["rf_predicted_label"] == merged["xgb_predicted_label"])
+    merged["probability_difference"] = (merged["rf_probability"] - merged["xgb_probability"])
     merged["absolute_probability_difference"] = merged["probability_difference"].abs()
 
     conditions = [
@@ -163,12 +157,7 @@ def load_validation_predictions() -> pd.DataFrame:
 
 
 # Metric calculation
-def calculate_model_metrics(
-    model_name: str,
-    y_true: pd.Series,
-    probabilities: pd.Series,
-    predictions: pd.Series,
-) -> dict:
+def calculate_model_metrics(model_name: str, y_true: pd.Series, probabilities: pd.Series, predictions: pd.Series) -> dict:
     matrix = confusion_matrix(y_true, predictions, labels=[0, 1])
     tn, fp, fn, tp = matrix.ravel()
 
@@ -212,7 +201,7 @@ def build_model_metrics(predictions: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame([rf_metrics, xgb_metrics])
 
 
-# Verify Task 23 metrics reproduce Task 22
+# Verify Comparison Model Evaluation (Task 23) metrics reproduce Hyperparameter Tuning (Task 22)
 def verify_task22_metrics(metrics: pd.DataFrame) -> None:
     if not TUNED_METRICS_SOURCE_FILE.exists():
         raise FileNotFoundError(f"Task 22 metrics not found: {TUNED_METRICS_SOURCE_FILE}")
@@ -236,9 +225,7 @@ def verify_task22_metrics(metrics: pd.DataFrame) -> None:
             difference = abs(float(task22[field]) - float(task23[field]))
 
             if difference > METRIC_TOLERANCE:
-                raise ValueError(
-                    f"{model_name} {field} differs from Task 22 by {difference:.8f}."
-                )
+                raise ValueError(f"{model_name} {field} differs from Task 22 by {difference:.8f}.")
 
 
 # Error-overlap analysis
@@ -273,13 +260,8 @@ def build_error_overlap_summary(predictions: pd.DataFrame) -> pd.DataFrame:
     fn_union = int((rf_fn | xgb_fn).sum())
     fp_union = int((rf_fp | xgb_fp).sum())
 
-    probability_correlation = predictions[
-        ["rf_probability", "xgb_probability"]
-    ].corr().iloc[0, 1]
-
-    mean_absolute_probability_difference = predictions[
-        "absolute_probability_difference"
-    ].mean()
+    probability_correlation = predictions[["rf_probability", "xgb_probability"]].corr().iloc[0, 1]
+    mean_absolute_probability_difference = predictions["absolute_probability_difference"].mean()
 
     oracle_correct = int((predictions["rf_correct"] | predictions["xgb_correct"]).sum())
 
@@ -351,10 +333,7 @@ def build_group_error_analysis(predictions: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    return result.sort_values(
-        by=["both_wrong", "prediction_disagreements", "rows"],
-        ascending=[False, False, False],
-    ).reset_index(drop=True)
+    return result.sort_values(by=["both_wrong", "prediction_disagreements", "rows"], ascending=[False, False, False],).reset_index(drop=True)
 
 
 # Feature-rank comparison
@@ -375,14 +354,10 @@ def build_feature_rank_comparison() -> tuple[pd.DataFrame, dict]:
         "importance": "xgb_gain_importance",
     })
 
-    comparison = rf.merge(xgb, on="feature_name", how="outer", validate="one_to-one")
-    comparison["absolute_rank_difference"] = (
-        comparison["rf_rank"] - comparison["xgb_rank"]
-    ).abs()
+    comparison = rf.merge(xgb, on="feature_name", how="outer", validate="one_to_one")
+    comparison["absolute_rank_difference"] = (comparison["rf_rank"] - comparison["xgb_rank"]).abs()
 
-    comparison = comparison.sort_values(
-        by=["rf_rank", "xgb_rank"]
-    ).reset_index(drop=True)
+    comparison = comparison.sort_values(by=["rf_rank", "xgb_rank"]).reset_index(drop=True)
 
     top_5_rf = set(comparison.nsmallest(5, "rf_rank")["feature_name"])
     top_5_xgb = set(comparison.nsmallest(5, "xgb_rank")["feature_name"])
@@ -408,14 +383,8 @@ def compare_tuned_models():
     group_errors = build_group_error_analysis(predictions)
     feature_ranks, feature_summary = build_feature_rank_comparison()
 
-    disagreements = predictions[
-        ~predictions["prediction_agreement"]
-    ].copy()
-
-    disagreements = disagreements.sort_values(
-        by="absolute_probability_difference",
-        ascending=False,
-    ).reset_index(drop=True)
+    disagreements = predictions[~predictions["prediction_agreement"]].copy()
+    disagreements = disagreements.sort_values(by="absolute_probability_difference", ascending=False,).reset_index(drop=True)
 
     rf_metrics = metrics[metrics["model"] == "random_forest"].iloc[0]
     xgb_metrics = metrics[metrics["model"] == "xgboost"].iloc[0]
@@ -473,10 +442,8 @@ def compare_tuned_models():
         },
         "feature_rank_summary": feature_summary,
         "interpretation_note": (
-            "This is a descriptive validation-set comparison. The same validation set "
-            "was used for hyperparameter selection, so final unbiased model performance "
-            "must be measured only on the untouched test set after all model-development "
-            "decisions, including any ensemble decision, are complete."
+            "This is a descriptive validation-set comparison. "
+            "The same validation set was used for hyperparameter selection, so final unbiased model performance must be measured only on the untouched test set after all model-development decisions, including any ensemble decision, are complete."
         ),
     }
 
