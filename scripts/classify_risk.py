@@ -38,9 +38,9 @@ def main():
 
     counts = classified['risk_level'].value_counts()
 
-    low_count = int(counts.get('low', 0))
-    medium_count = int(counts.get('medium', 0))
-    high_count = int(counts.get('high', 0))
+    low_count = int(counts.get('LOW', 0))
+    moderate_count = int(counts.get('MODERATE', 0))
+    high_count = int(counts.get('HIGH', 0))
 
     print("Nairobi FloodWatch Risk Classification")
 
@@ -50,15 +50,18 @@ def main():
     print()
 
     print("Risk Thresholds: ")
-    print(f"Low: score < {classifier.moderate_threshold:.4f}")
-    print(f"Medium: {classifier.moderate_threshold:.4f} <= score < {classifier.high_threshold:.4f}")
-    print(f"High: score >= {classifier.high_threshold:.4f}")
+    print(f"LOW: score < {classifier.moderate_threshold:.4f}")
+    print(f"MODERATE: {classifier.moderate_threshold:.4f} <= score < {classifier.high_threshold:.4f}")
+    print(f"HIGH: score >= {classifier.high_threshold:.4f}")
     print()
 
+    if low_count + moderate_count + high_count != len(classified):
+        print("Risk distribution counts do not match the number of classified rows")
+
     print("Risk distribution: ")
-    print(f"Low: {low_count:,}")
-    print(f"Medium: {medium_count:,}")
-    print(f"High: {high_count:,}")
+    print(f"LOW: {low_count:,}")
+    print(f"MODERATE: {moderate_count:,}")
+    print(f"HIGH: {high_count:,}")
     print()
 
     print(f"Saved classifications: {output_file}")
@@ -67,4 +70,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
