@@ -205,6 +205,28 @@ class OpenMeteoClient:
             "current": pd.concat(current_frames, ignore_index=True),
         }
 
+    def fetch_locations_batched(self, locations: pd.DataFrame, batch_size: int = 40) -> dict[str, pd.DataFrame]:
+        if batch_size < 1:
+            raise ValueError("Batch size must be at least 1.")
+
+        if locations.empty:
+            raise ValueError("Location input contains no rows")
+
+        outputs = {"generic_hourly": [],
+                  "ecmwf_hourly": [],
+                  "current": []
+                  }
+
+        for start in range(0, len(locations), batch_size):
+            subset = locations.iloc[start:start + batch_size].copy()
+            batch = self.fetch_locations(subset)
+
+            for name in outputs:
+                outputs[name].append(batch[name])
+
+        return {name: pd.concat(frames, ignore_index=True)
+                for name, frames in outputs.items()}
+
 
 def save_open_meteo_snapshot(batch: dict[str, pd.DataFrame]) -> dict[str, Path]:
     OPEN_METEO_DIR.mkdir(parents=True, exist_ok=True)
