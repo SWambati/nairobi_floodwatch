@@ -78,10 +78,37 @@ def main():
     print("Running production Random Forest inference...")
 
     inference_engine = FloodInferenceEngine()
-    predictions = inference_engine.predict_batch(model_features)
 
-    # Convert continuous model scores into the operational risk categories: LOW, MODERATE and HIGH.
+    #run the persisted production model. 
+    #inference engine returns prediction outputs but does not retail all 15 predictor columns
+    inference_results = inference_engine.predict_batch(model_features)
+
+    if len(inference_results) != len(model_features):
+        raise ValueError("Inference result count does not match operational feature rows")
+
+    #Preserve the exact 15-feature input row and append the model output
+    #Prediction_data table contains complete feature snapshot used to generate each operational prediction
+    predictions = model_features.reset_index(drop=True).copy()
+    inference_results = inference_results.reset_index(drop=True)
+
+    inference_columns = [
+        "flood_probability",
+        "predicted_label",
+        "decision_threshold",
+        "model_name",
+        "model_version",
+    ]
+    missing_inference_columns = (set(inference_columns) - set(inference_results.columns))
+
+    if missing_inference_columns:
+        raise ValueError(f"Inference output is missing columns: {sorted(missing_inference_columns)}")
+
+    for column in inference_columns:
+        predictions[column] = inference_results[column].to_numpy()
+
+    #convert RF scores into risk classification LOW/MODERATE/HIGH risk bands
     risk_classifier = FloodRiskClassifier()
+
     predictions = risk_classifier.classify_batch(predictions)
 
     # Add location names and coordinates to the output CSV. These fields are
