@@ -5,6 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from src.model.model_dataset import PREDICTOR_COLUMNS
+from config.settings import get_settings
 
 
 # Configuration
@@ -16,15 +17,13 @@ STATIC_FEATURES = ["elevation_m", "slope_deg", "flood_hazard_score", "ghsl_built
 
 # Database connection
 def create_database_engine() -> Engine:
-    #create and validate database connection used by the ETL prediction pipeline
-    database_url = os.getenv("DATABASE_URL")
+    #load PostgreSQL config from the settings module to support local .env files and deployment environment variables
 
-    if not database_url:
-        raise EnvironmentError("DATABASE_URL is not set. Configure the PostgreSQL connection before running the operational pipeline.")
+    settings = get_settings()
 
-    engine = create_engine(database_url, pool_pre_ping=True)
+    engine = create_engine(settings.database_url, pool_pre_ping=True)
 
-    # Run a lightweight query to identify connection issues early
+    #fail immediately if PostgreSQL is not reachable
     with engine.connect() as connection:
         connection.execute(text("SELECT 1"))
 
