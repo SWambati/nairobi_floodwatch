@@ -1,76 +1,30 @@
 from functools import lru_cache
-import pandas as pd
-from sqlalchemy import create_engine, inspect, text
+
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from config.settings import get_settings
 
-#tables already populated by historical and operational pipelines
-REQUIRED_TABLES = ("Location", "weather_data", "flood_risk_prediction", "flood_alert", "model", "data_source", "environment_feature")
-
-#PostgreSQL connection
+#share 1 SQLAlchemy connection pool across all web requests
 @lru_cache(maxsize=1)
 def get_database_engine() -> Engine:
-    #Reuse one SQLAlchemy connection pool across all dashboard requests.
-    #pool_pre_ping checks connection before using them
-    #pool_recycle replaces older pooled connections when needed
-
     settings = get_settings()
 
     return create_engine(settings.database_url, pool_pre_ping=True, pool_recycle=1800, connect_args={"connect_timeout": 10})
 
-#database health check
-def check_database_connection() -> dict:
-    engine = get_database_engine()
-
-    with engine.connect() as connection:
-        result = connection.execute(
-            text(
-                """
-                SELECT
-                    current_database() AS database_name,
-                    current_user AS database_user,
-                    NOW() as server_time
-                """)
-            ).mappings().one()
-
-    return dict(result)
-
-#schema validation
-def get_missing_tables() -> list[str]:
-    #confirm that the database has tables required by the dashboard. This prevents displaying fake/ placeholer records when a table has not been created or the wrong database is connected
-
-    engine = get_database_engine()
-    existing = set(inspect(engine).get_table_names(schema="public"))
-
-    return sorted(set(REQUIRED_TABLES) - existing)
-
-#reusable dashboard queries
-def fetch_dataframe(query: str, parameters: dict | None = None) -> pd.DataFrame:
-    #read application-defied SQL queries into pandas DataFrames
-    #query parameters are bound separately to prevent SQL injection
-
-    engine = get_database_engine()
-
-    with engine.connect() as connection:
-        return pd.read_sql_query(text(query), connection, params=parameters or {})
-
-#database record counts
-def get_table_counts() -> dict[str, int]:
-    missing = get_missing_tables()
-
-    if missing:
-        raise RuntimeError(f"Required database tables are missing: {missing}")
+def fetch_rows(query: str, parameters: dict | None = None) -> list[dict]:
+    #execute application-defined, read-only SQL queries
+    #bind query values separately rather than formatting user input into SQL
     
-    counts = {}
     engine = get_database_engine()
 
     with engine.connect() as connection:
-        for table_name in REQUIRED_TABLES:
-            #table name come only from the fixed internal allowlist above.
-            #user-supplied table names must never be inserted into SQL
+        result = connection.execute(text(query), parameters or {})
 
-            count = connection.execute(text(f'SELECT COUNT(*) FROM "{table_name}"')).scalar_one()
+        return [dict(row) for row in result.mappings().all()]
 
-            counts[table_name] = int(count)
-            
-    return counts
+def check_database_connection() -> bool:
+    #fail explicitly when PostgreSQL is unavailable
+    engine = get_database_engine()
+
+    with engine.connect() as connection:
+        return connection.execute(text("SELECT 1")).scalar_one() == 1
