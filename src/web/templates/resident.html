@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0B1F3A">
+  <title>My Area | Nairobi FloodWatch</title>
+  <link rel="icon" type="image/png" href="/static/images/logo.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="/static/css/resident.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Application navigation">
+    <a class="brand" href="/" aria-label="Nairobi FloodWatch home">
+      <img src="/static/images/logo.png" alt="" width="42" height="42">
+      <span>Flood<span>Watch</span></span>
+    </a>
+    <div class="sidebar-label">NAIROBI FLOOD MONITORING</div>
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a href="/">Monitoring overview</a>
+      <a href="/resident" class="current" aria-current="page">My area</a>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="demo-label">Academic prototype</span>
+      <p>Model-derived assessments are not official emergency warnings.</p>
+    </div>
+  </aside>
+
+  <div class="content-shell">
+    <header class="site-header">
+      <div class="header-title"><span class="eyebrow">RESIDENT DASHBOARD</span><span>Nairobi FloodWatch</span></div>
+      <a class="header-link" href="/">Citywide overview <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="main" class="main-content">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">KNOW YOUR AREA</p>
+          <h1>Your area, clearly understood.</h1>
+          <p class="subtext">Choose a monitored location or find nearby observation points. Your citywide map remains available either way.</p>
+        </div>
+        <span id="freshness" class="freshness" role="status">Loading recorded assessments…</span>
+      </div>
+
+      <div id="errorNotice" class="error-notice" role="alert" hidden></div>
+
+      <section class="location-prompt" aria-labelledby="locTitle">
+        <div class="prompt-copy">
+          <div class="prompt-icon" aria-hidden="true">⌖</div>
+          <div>
+            <h2 id="locTitle">See monitoring points near you</h2>
+            <p>Allow location access only when you choose to. Coordinates stay in this browser session and are not sent to FloodWatch.</p>
+          </div>
+        </div>
+        <div class="prompt-actions">
+          <button id="useLocation" class="button primary" type="button">Use my location</button>
+          <button id="chooseArea" class="button secondary" type="button">Choose an area</button>
+          <button id="clearLocation" class="button subtle" type="button" hidden>Clear my location</button>
+        </div>
+      </section>
+      <p id="locationStatus" class="location-status" role="status" aria-live="polite">Location permission is optional. You can browse without sharing it.</p>
+
+      <div class="dashboard-grid">
+        <section class="main-column">
+          <section class="area-card" aria-labelledby="areaTitle">
+            <div class="area-card-head">
+              <div><p class="eyebrow">LOCAL ASSESSMENT</p><h2 id="areaTitle">Select a monitoring point</h2></div>
+              <span id="areaRisk" class="risk-pill neutral">Not selected</span>
+            </div>
+            <p id="assessmentCaveat" class="subtle-text">Choose an observation point using search, the map or optional device location. Assessments describe monitored points, not individual properties.</p>
+            <div class="assessment-main">
+              <div class="score-display"><span class="metric-label">Latest model score</span><strong id="areaScore">—</strong><span class="metric-help">0–1 relative score · not a calibrated flood probability</span></div>
+              <div class="assessment-meta"><span class="metric-label">Last model assessment</span><strong id="assessmentTime">No location selected</strong><span id="assessmentAge" class="time-warning"></span></div>
+            </div>
+            <div class="weather-strip" aria-label="Latest recorded weather">
+              <div><span>Temperature</span><strong id="temperature">—</strong></div>
+              <div><span>Humidity</span><strong id="humidity">—</strong></div>
+              <div><span>Precipitation reading</span><strong id="rainfall">—</strong></div>
+            </div>
+            <p id="weatherTime" class="data-timestamp">Weather timestamp: —</p>
+          </section>
+
+          <section class="map-card" aria-labelledby="mapTitle">
+            <div class="section-heading"><div><p class="eyebrow">MAP EXPLORER</p><h2 id="mapTitle">Monitoring locations around Nairobi</h2></div><span id="pointCount" class="quiet-count">— points</span></div>
+            <div class="map-toolbar"><label class="search-field"><span class="visually-hidden">Search by ward or monitored location</span><input id="areaSearch" type="search" autocomplete="off" placeholder="Search wards and monitoring points…"></label><label class="filter-field"><span class="visually-hidden">Filter map by risk</span><select id="riskFilter"><option value="ALL">All risk levels</option><option value="LOW">Low</option><option value="MODERATE">Moderate</option><option value="HIGH">High</option><option value="NO_DATA">No assessment</option></select></label></div>
+            <div id="searchResults" class="search-results" aria-label="Matching monitoring locations"></div>
+
+            <!-- Smart location search: external geocoding is only called on request. -->
+            <div id="geoSearchPanel" class="geo-search-panel" hidden>
+                <div>
+                    <strong>Can't see the place you're looking for?</strong>
+                    <p>Search for a Nairobi estate, neighborhood or landmark.</p>
+                </div>
+
+                <button id="geoSearchButton" class="geo-search-button" type="button">
+                    Find place in Nairobi
+                </button>
+            </div>
+            <p id="geoSearchStatus" class="geo-search-status" role="status" aria-live="polite"></p>
+
+            <div id="geoMatches" class="geo-matches" aria-label="Geographic search results"></div>
+
+            <!-- Selected geographic place and nearby database observation points. -->
+            <section id="geoContext" class="geo-context" aria-labelledby="geoContextTitle" hidden>
+                <div class="geo-context-heading">
+                    <div>
+                        <span class="geo-context-eyebrow">AREA FOUND</span>
+                        <h3 id="geoContextTitle">Location results</h3>
+                    </div>
+                    <span class="geo-source">OpenStreetMap</span>
+                </div>
+
+                <p id="geoPlaceDescription" class="geo-place-description"></p>
+                <p id="geoWard" class="geo-ward"></p>
+                
+                <h4>Closest FloodWatch monitoring points</h4>
+                <p class="geo-explanation">
+                    These are nearby observation points, not predictions for the searched neighborhood or individual properties.
+                </p>
+                <div id="geoNearbyResults" class="geo-nearby-results"></div>
+            </section>
+
+            <div id="residentMap" class="map" aria-label="Interactive map of Nairobi monitoring points"></div>
+            <div class="map-legend" aria-label="Risk map legend"><span><i class="dot low"></i>Low</span><span><i class="dot moderate"></i>Moderate</span><span><i class="dot high"></i>High</span><span><i class="dot unknown"></i>Not assessed</span></div>
+            <p class="map-note">These are observation-point assessments, not predictions for entire wards or your exact property. Map tiles © OpenStreetMap contributors.</p>
+          </section>
+        </section>
+
+        <aside class="side-column" aria-label="Nearby context and advisory">
+          <section class="side-card" aria-labelledby="nearbyTitle"><div class="section-heading"><div><p class="eyebrow">LOCATION CONTEXT</p><h2 id="nearbyTitle">Nearby monitoring</h2></div></div><p id="nearbyIntro" class="subtle-text">Use your location to discover the three closest monitored points, or select any point manually.</p><div id="nearbyList" class="nearby-list" aria-live="polite"></div></section>
+          <section class="side-card advisory-card" aria-labelledby="advisoryTitle"><p class="eyebrow">MONITORING GUIDANCE</p><h2 id="advisoryTitle">Advisory status</h2><div id="advisoryStatus" class="advisory-status">No point selected</div><p id="advisoryMessage" class="subtle-text">Select a monitoring point to view a current, unexpired model-generated advisory, if available.</p><p id="advisoryInstructions" class="instruction"></p><p class="advisory-disclaimer">For emergencies, follow official local authorities. FloodWatch does not issue government warnings.</p></section>
+        </aside>
+      </div>
+
+      <section class="history-section" aria-labelledby="historyTitle">
+        <div class="section-heading"><div><p class="eyebrow">RECORDED HISTORY</p><h2 id="historyTitle">How conditions have changed</h2><p class="subtle-text">Available operational records for the selected observation point; gaps are not filled with estimated data.</p></div><button id="downloadHistory" class="button secondary" type="button" disabled>Download history CSV</button></div>
+        <div class="history-grid">
+          <div class="chart-card"><h3>Model score history</h3><p>Latest assessment on each recorded date</p><div class="chart-frame"><canvas id="riskHistoryChart" role="img" aria-label="Historical model risk scores"></canvas></div><p id="riskHistoryFallback" class="chart-fallback">Select a location to view recorded history.</p></div>
+          <div class="chart-card"><h3>Precipitation snapshots</h3><p>Latest stored precipitation reading per recorded day, not a daily total</p><div class="chart-frame"><canvas id="weatherHistoryChart" role="img" aria-label="Historical precipitation readings"></canvas></div><p id="weatherHistoryFallback" class="chart-fallback">Select a location to view stored weather readings.</p></div>
+        </div>
+      </section>
+      <footer class="footer"><span>FloodWatch · Academic prototype</span><span>Citywide trends do not replace official weather or emergency advisories.</span></footer>
+    </main>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script src="/static/js/resident.js"></script>
+<script src="/static/js/place_search.js"></script>
+</body>
+</html>

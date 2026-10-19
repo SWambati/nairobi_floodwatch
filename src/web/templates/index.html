@@ -7,6 +7,7 @@
     <title>Nairobi FloodWatch | Monitoring Dashboard</title>
 
     <!-- Leaflet provides the interactive GIS map, not the dashboard layout. -->
+     <link rel="icon" type="image/png" href="/static/images/logo.png">
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -18,7 +19,7 @@
     <div class="app-shell">
         <aside class="sidebar">
             <a class="brand" href="/" aria-label="Nairobi FloodWatch Home">
-                <span class="brand-icon">≈</span>
+                <img src="/static/images/logo.png" alt="" height="38">.
                 <span>Flood<span class="brand-accent">Watch</span></span>
             </a>
             <p class="brand-subtitle">NAIROBI FLOOD MONITORING SYSTEM</p>
@@ -26,9 +27,9 @@
             <nav class="navigation" aria-label="Main navigation">
                 <a class="nav-item active" href="/">◈ &nbsp; Monitoring Overview</a>
                 <div class="nav-heading">UPCOMING MODULES</div>
-                <span class="nav-item disabled">◎ &nbsp; Historical Analysis</span>
-                <span class="nav-item disabled">▤ &nbsp; Agency Reports</span>
-                <span class="nav-item disabled">⚙ &nbsp; Administration</span>
+                <a class="nav-item" href="/resident">My area</a>
+                <a class="nav-item" href="/resident">My area</a>
+                <a class="nav-item" href="/resident">My area</a>
             </nav>
 
             <div class="sidebar-bottom">
