@@ -1,11 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0B1F3A">
-  <title>My Area | Nairobi FloodWatch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Explore Nairobi flood-risk assessments, nearby observation points and recorded weather conditions.">
+  <title>My Dashboard | Nairobi FloodWatch</title>
   <link rel="icon" type="image/png" href="/static/images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="/static/css/resident.css">
 </head>
@@ -13,45 +18,39 @@
 <a class="skip-link" href="#main">Skip to main content</a>
 <div class="app-shell">
   <aside class="sidebar" aria-label="Application navigation">
-    <a class="brand" href="/" aria-label="Nairobi FloodWatch home">
-      <img src="/static/images/logo.png" alt="" width="42" height="42">
-      <span>Flood<span>Watch</span></span>
-    </a>
-    <div class="sidebar-label">NAIROBI FLOOD MONITORING</div>
-    <nav class="sidebar-nav" aria-label="Primary">
-      <a href="/">Monitoring overview</a>
-      <a href="/resident" class="current" aria-current="page">My area</a>
+    <div>
+      <a class="brand" href="/" aria-label="Nairobi FloodWatch home">
+        <img src="/static/images/logo.png" alt="" width="46" height="46">
+        <span>Flood<span>Watch</span></span>
+      </a>
+      <p class="brand-subtitle">Nairobi FloodWatch</p>
+    </div>
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      <a href="/">Home</a>
+      <a href="/resident" class="current" aria-current="page">My Dashboard</a>
     </nav>
     <div class="sidebar-foot">
-      <span class="demo-label">Academic prototype</span>
       <p>Model-derived assessments are not official emergency warnings.</p>
     </div>
   </aside>
 
   <div class="content-shell">
-    <header class="site-header">
-      <div class="header-title"><span class="eyebrow">RESIDENT DASHBOARD</span><span>Nairobi FloodWatch</span></div>
-      <a class="header-link" href="/">Citywide overview <span aria-hidden="true">↗</span></a>
-    </header>
-
     <main id="main" class="main-content">
       <div class="page-heading">
         <div>
-          <p class="eyebrow">KNOW YOUR AREA</p>
-          <h1>Your area, clearly understood.</h1>
-          <p class="subtext">Choose a monitored location or find nearby observation points. Your citywide map remains available either way.</p>
+          <h1>Monitor Flood Conditions Around You</h1>
+          <p class="subtext">Explore recorded flood-risk assessments near your location, or select any monitoring point across Nairobi.</p>
         </div>
         <span id="freshness" class="freshness" role="status">Loading recorded assessments…</span>
       </div>
-
       <div id="errorNotice" class="error-notice" role="alert" hidden></div>
 
       <section class="location-prompt" aria-labelledby="locTitle">
         <div class="prompt-copy">
           <div class="prompt-icon" aria-hidden="true">⌖</div>
           <div>
-            <h2 id="locTitle">See monitoring points near you</h2>
-            <p>Allow location access only when you choose to. Coordinates stay in this browser session and are not sent to FloodWatch.</p>
+            <h2 id="locTitle">Location Sharing</h2>
+            <p>Your device location is used only during this page session and is not sent to or stored in FloodWatch databases. Sharing is optional.</p>
           </div>
         </div>
         <div class="prompt-actions">
@@ -60,19 +59,31 @@
           <button id="clearLocation" class="button subtle" type="button" hidden>Clear my location</button>
         </div>
       </section>
-      <p id="locationStatus" class="location-status" role="status" aria-live="polite">Location permission is optional. You can browse without sharing it.</p>
+      <p id="locationStatus" class="location-status" role="status" aria-live="polite">You can explore Nairobi without sharing your location.</p>
 
       <div class="dashboard-grid">
-        <section class="main-column">
-          <section class="area-card" aria-labelledby="areaTitle">
+        <div class="main-column">
+          <section class="area-card" aria-labelledby="areaHeading">
             <div class="area-card-head">
-              <div><p class="eyebrow">LOCAL ASSESSMENT</p><h2 id="areaTitle">Select a monitoring point</h2></div>
+              <div>
+                <h2 id="areaHeading">Insights on My Area</h2>
+                <p id="areaTitle" class="selected-place-name">Select a monitoring point</p>
+              </div>
               <span id="areaRisk" class="risk-pill neutral">Not selected</span>
             </div>
             <p id="assessmentCaveat" class="subtle-text">Choose an observation point using search, the map or optional device location. Assessments describe monitored points, not individual properties.</p>
             <div class="assessment-main">
-              <div class="score-display"><span class="metric-label">Latest model score</span><strong id="areaScore">—</strong><span class="metric-help">0–1 relative score · not a calibrated flood probability</span></div>
-              <div class="assessment-meta"><span class="metric-label">Last model assessment</span><strong id="assessmentTime">No location selected</strong><span id="assessmentAge" class="time-warning"></span></div>
+              <div class="score-display">
+                <span class="metric-label">Flood risk model score</span>
+                <strong id="areaScore">—</strong>
+                <span class="metric-help">A relative score from 0 to 1, not a percentage probability.</span>
+                <p id="scoreMeaning" class="score-meaning" aria-live="polite">Select a monitoring point to understand its risk assessment.</p>
+              </div>
+              <div class="assessment-meta">
+                <span class="metric-label">Last model assessment</span>
+                <strong id="assessmentTime">No location selected</strong>
+                <span id="assessmentAge" class="time-warning"></span>
+              </div>
             </div>
             <div class="weather-strip" aria-label="Latest recorded weather">
               <div><span>Temperature</span><strong id="temperature">—</strong></div>
@@ -83,65 +94,100 @@
           </section>
 
           <section class="map-card" aria-labelledby="mapTitle">
-            <div class="section-heading"><div><p class="eyebrow">MAP EXPLORER</p><h2 id="mapTitle">Monitoring locations around Nairobi</h2></div><span id="pointCount" class="quiet-count">— points</span></div>
-            <div class="map-toolbar"><label class="search-field"><span class="visually-hidden">Search by ward or monitored location</span><input id="areaSearch" type="search" autocomplete="off" placeholder="Search wards and monitoring points…"></label><label class="filter-field"><span class="visually-hidden">Filter map by risk</span><select id="riskFilter"><option value="ALL">All risk levels</option><option value="LOW">Low</option><option value="MODERATE">Moderate</option><option value="HIGH">High</option><option value="NO_DATA">No assessment</option></select></label></div>
+            <div class="section-heading">
+              <h2 id="mapTitle">Monitor Locations Within Nairobi</h2>
+              <span id="pointCount" class="quiet-count">— points</span>
+            </div>
+            <div class="map-toolbar">
+              <label class="search-field"><span class="visually-hidden">Search by ward or monitored location</span><input id="areaSearch" type="search" autocomplete="off" placeholder="Search wards, estates and monitoring points…"></label>
+              <label class="filter-field"><span class="visually-hidden">Filter map by risk</span><select id="riskFilter"><option value="ALL">All risk levels</option><option value="LOW">Low</option><option value="MODERATE">Moderate</option><option value="HIGH">High</option><option value="NO_DATA">No assessment</option></select></label>
+            </div>
             <div id="searchResults" class="search-results" aria-label="Matching monitoring locations"></div>
 
-            <!-- Smart location search: external geocoding is only called on request. -->
+            <!-- Geographic lookup is explicitly requested, never run on every keystroke. -->
             <div id="geoSearchPanel" class="geo-search-panel" hidden>
-                <div>
-                    <strong>Can't see the place you're looking for?</strong>
-                    <p>Search for a Nairobi estate, neighborhood or landmark.</p>
-                </div>
-
-                <button id="geoSearchButton" class="geo-search-button" type="button">
-                    Find place in Nairobi
-                </button>
+              <div><strong>Search beyond monitoring points</strong><p>Find Nairobi neighborhoods, estates and landmarks.</p></div>
+              <button id="geoSearchButton" class="geo-search-button" type="button">Find place in Nairobi</button>
+            </div>
+            <!-- Keep loading feedback outside the panel: JavaScript hides the panel while fetching. -->
+            <div id="geoSearchLoading" class="geo-search-loading" role="status" aria-live="polite" hidden>
+              <span class="geo-search-spinner" aria-hidden="true"></span>
+              <span>Searching Nairobi…</span>
             </div>
             <p id="geoSearchStatus" class="geo-search-status" role="status" aria-live="polite"></p>
-
             <div id="geoMatches" class="geo-matches" aria-label="Geographic search results"></div>
-
-            <!-- Selected geographic place and nearby database observation points. -->
             <section id="geoContext" class="geo-context" aria-labelledby="geoContextTitle" hidden>
-                <div class="geo-context-heading">
-                    <div>
-                        <span class="geo-context-eyebrow">AREA FOUND</span>
-                        <h3 id="geoContextTitle">Location results</h3>
-                    </div>
-                    <span class="geo-source">OpenStreetMap</span>
-                </div>
-
-                <p id="geoPlaceDescription" class="geo-place-description"></p>
-                <p id="geoWard" class="geo-ward"></p>
-                
-                <h4>Closest FloodWatch monitoring points</h4>
-                <p class="geo-explanation">
-                    These are nearby observation points, not predictions for the searched neighborhood or individual properties.
-                </p>
-                <div id="geoNearbyResults" class="geo-nearby-results"></div>
+              <div class="geo-context-heading">
+                <div><span class="geo-context-eyebrow">Selected location</span><h3 id="geoContextTitle">Location results</h3></div>
+                <span class="geo-source">OpenStreetMap</span>
+              </div>
+              <p id="geoPlaceDescription" class="geo-place-description"></p>
+              <p id="geoWard" class="geo-ward"></p>
+              <h4>Closest Nairobi FloodWatch monitoring points</h4>
+              <p class="geo-explanation">These are nearby observation points, not predictions for the searched neighborhood or individual properties.</p>
+              <div id="geoNearbyResults" class="geo-nearby-results"></div>
             </section>
 
             <div id="residentMap" class="map" aria-label="Interactive map of Nairobi monitoring points"></div>
-            <div class="map-legend" aria-label="Risk map legend"><span><i class="dot low"></i>Low</span><span><i class="dot moderate"></i>Moderate</span><span><i class="dot high"></i>High</span><span><i class="dot unknown"></i>Not assessed</span></div>
-            <p class="map-note">These are observation-point assessments, not predictions for entire wards or your exact property. Map tiles © OpenStreetMap contributors.</p>
+            <div class="map-legend" aria-label="Risk map legend">
+              <span><i class="dot low"></i>Low</span><span><i class="dot moderate"></i>Moderate</span>
+              <span><i class="dot high"></i>High</span><span><i class="dot unknown"></i>Not assessed</span>
+            </div>
+            <p class="map-note">Risk levels represent monitored observation points, not entire wards or properties. Map tiles © OpenStreetMap contributors.</p>
           </section>
-        </section>
+        </div>
 
-        <aside class="side-column" aria-label="Nearby context and advisory">
-          <section class="side-card" aria-labelledby="nearbyTitle"><div class="section-heading"><div><p class="eyebrow">LOCATION CONTEXT</p><h2 id="nearbyTitle">Nearby monitoring</h2></div></div><p id="nearbyIntro" class="subtle-text">Use your location to discover the three closest monitored points, or select any point manually.</p><div id="nearbyList" class="nearby-list" aria-live="polite"></div></section>
-          <section class="side-card advisory-card" aria-labelledby="advisoryTitle"><p class="eyebrow">MONITORING GUIDANCE</p><h2 id="advisoryTitle">Advisory status</h2><div id="advisoryStatus" class="advisory-status">No point selected</div><p id="advisoryMessage" class="subtle-text">Select a monitoring point to view a current, unexpired model-generated advisory, if available.</p><p id="advisoryInstructions" class="instruction"></p><p class="advisory-disclaimer">For emergencies, follow official local authorities. FloodWatch does not issue government warnings.</p></section>
+        <aside class="side-column" aria-label="Nearby monitoring and advisory information">
+          <section class="side-card" aria-labelledby="nearbyTitle">
+            <h2 id="nearbyTitle">Monitor Areas Near You</h2>
+            <p id="nearbyIntro" class="subtle-text">Use your location to discover the three closest monitored points, or select any point manually.</p>
+            <div id="nearbyList" class="nearby-list" aria-live="polite"></div>
+          </section>
+          <section class="side-card advisory-card" aria-labelledby="advisoryTitle">
+            <h2 id="advisoryTitle">Advisory status</h2>
+            <div id="advisoryStatus" class="advisory-status">No point selected</div>
+            <p id="advisoryMessage" class="subtle-text">Select a monitoring point to view an unexpired model-generated advisory, if available.</p>
+            <p id="advisoryInstructions" class="instruction"></p>
+            <p class="advisory-disclaimer">For emergencies, follow official local authorities. Nairobi FloodWatch does not issue government warnings.</p>
+          </section>
         </aside>
       </div>
 
       <section class="history-section" aria-labelledby="historyTitle">
-        <div class="section-heading"><div><p class="eyebrow">RECORDED HISTORY</p><h2 id="historyTitle">How conditions have changed</h2><p class="subtle-text">Available operational records for the selected observation point; gaps are not filled with estimated data.</p></div><button id="downloadHistory" class="button secondary" type="button" disabled>Download history CSV</button></div>
+        <div class="section-heading history-heading">
+          <div><h2 id="historyTitle">How conditions have changed</h2><p class="subtle-text">Recorded observations for the selected point; missing dates have not been estimated.</p></div>
+          <button id="downloadHistory" class="button secondary" type="button" disabled>Download history CSV</button>
+        </div>
         <div class="history-grid">
           <div class="chart-card"><h3>Model score history</h3><p>Latest assessment on each recorded date</p><div class="chart-frame"><canvas id="riskHistoryChart" role="img" aria-label="Historical model risk scores"></canvas></div><p id="riskHistoryFallback" class="chart-fallback">Select a location to view recorded history.</p></div>
-          <div class="chart-card"><h3>Precipitation snapshots</h3><p>Latest stored precipitation reading per recorded day, not a daily total</p><div class="chart-frame"><canvas id="weatherHistoryChart" role="img" aria-label="Historical precipitation readings"></canvas></div><p id="weatherHistoryFallback" class="chart-fallback">Select a location to view stored weather readings.</p></div>
+          <div class="chart-card"><h3>Historical Rainfall Records</h3><p>Latest stored precipitation reading per recorded day, not daily rainfall totals</p><div class="chart-frame"><canvas id="weatherHistoryChart" role="img" aria-label="Historical precipitation readings"></canvas></div><p id="weatherHistoryFallback" class="chart-fallback">Select a location to view recorded precipitation.</p></div>
         </div>
       </section>
-      <footer class="footer"><span>FloodWatch · Academic prototype</span><span>Citywide trends do not replace official weather or emergency advisories.</span></footer>
+
+      <footer class="emergency-footer" aria-labelledby="emergencyTitle">
+        <div class="emergency-intro">
+          <div class="emergency-symbol" aria-hidden="true">✳</div>
+          <div>
+            <h2 id="emergencyTitle">Need emergency evacuation or assistance?</h2>
+            <p>Contact the relevant authorities directly when flooding puts you and your loved ones in danger. Nairobi FloodWatch cannot dispatch emergency responders.</p>
+          </div>
+        </div>
+        <div class="emergency-contacts">
+          <div class="emergency-contact">
+            <h3>National Disaster Operations Centre</h3>
+            <span>Disaster coordination · Toll-free contact</span>
+            <a class="emergency-phone" href="tel:0800721571">0800 721 571</a>
+            <a href="https://ndoc.go.ke/contact-us-0" target="_blank" rel="noopener noreferrer">Official contact page ↗</a>
+          </div>
+          <div class="emergency-contact">
+            <h3>Kenya Red Cross Society</h3>
+            <span>Humanitarian organization · General contact</span>
+            <a class="emergency-phone" href="tel:+254703037000">+254 703 037 000</a>
+            <a href="https://redcross.or.ke/contact-us/" target="_blank" rel="noopener noreferrer">Official contact page ↗</a>
+          </div>
+        </div>
+        <p class="footer-disclaimer">These contacts are provided for convenience and should be checked periodically. Nairobi FloodWatch's risk scores are not official emergency or evacuation instructions.</p>
+      </footer>
     </main>
   </div>
 </div>

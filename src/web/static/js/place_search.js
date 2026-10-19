@@ -156,9 +156,10 @@ function renderGeoNearby(place) {
 
         information.append(name, detail);
 
+        const category = riskOf(point);
         const risk = document.createElement("span");
-        risk.className = "geo-nearby-risk";
-        risk.textContent = riskOf(point).replace("_", " ");
+        risk.className = `geo-nearby-risk ${category}`;
+        risk.textContent = category === "NO_DATA" ? "Not assessed" : category;
 
         button.append(information, risk);
 
@@ -314,8 +315,10 @@ function renderGeographicCandidates(results) {
 
 
 // The external geographic lookup runs only on an explicit user action.
+
 async function searchGeographicPlace() {
-    const query = geoElement("areaSearch").value.trim();
+    const input = geoElement("areaSearch");
+    const query = input.value.trim();
 
     if (query.length < 3 || query.length > 70) {
         geoWrite(
@@ -327,33 +330,37 @@ async function searchGeographicPlace() {
 
     const serial = ++geoSearchState.requestSerial;
     const button = geoElement("geoSearchButton");
+    const panel = geoElement("geoSearchPanel");
+    const loading = geoElement("geoSearchLoading");
 
+    // Replace the fallback prompt and old local-search message
+    // with a single animated loading indicator.
     button.disabled = true;
+    panel.hidden = true;
+    loading.hidden = false;
 
     geoElement("searchResults").replaceChildren();
     geoElement("geoMatches").replaceChildren();
-
-    geoWrite(
-        "geoSearchStatus",
-        `Looking for "${query}" in Nairobi…`
-    );
+    geoWrite("geoSearchStatus", "");
 
     try {
         const response = await fetch(
             `/api/places/search?q=${encodeURIComponent(query)}`,
             {
-                headers: {Accept: "application/json"},
+                headers: { Accept: "application/json" },
                 cache: "no-store",
             }
         );
 
         if (!response.ok) {
-            throw new Error(`Geographic lookup returned HTTP ${response.status}`);
+            throw new Error(
+                `Geographic lookup returned HTTP ${response.status}`
+            );
         }
 
         const payload = await response.json();
 
-        // Ignore old requests if the resident has changed their search.
+        // Discard results from an outdated search.
         if (serial !== geoSearchState.requestSerial) {
             return;
         }
@@ -361,37 +368,49 @@ async function searchGeographicPlace() {
         if (!Array.isArray(payload.results) || !payload.results.length) {
             geoWrite(
                 "geoSearchStatus",
-                `No geographic match was found for "${query}". Try a nearby landmark or a different spelling.`
+                `No geographic match was found for "${query}" within the Nairobi search area. Try another spelling or a nearby landmark.`
             );
+
+            // Allow a repeat search after an unsuccessful lookup.
+            updateGeoSearchAction();
             return;
         }
 
         renderGeographicCandidates(payload.results);
-        geoElement("geoSearchPanel").hidden = true;
 
         geoWrite(
             "geoSearchStatus",
             payload.results.length === 1
                 ? "Location found. Select it to view nearby monitoring points."
-                : `${payload.results.length} locations found. Select your desired location.`
+                : `${payload.results.length} locations found. Select the place you meant.`
         );
+
+        // The search action is no longer relevant after success.
+        panel.hidden = true;
 
     } catch (error) {
         if (serial !== geoSearchState.requestSerial) {
             return;
         }
 
-        console.error("Smart location search failed:", error);
+        console.error("Geographic search failed:", error);
 
         geoWrite(
             "geoSearchStatus",
-            "Geographic lookup is temporarily unavailable. You can still search the stored monitoring points."
+            "Location search is temporarily unavailable. You can retry or choose a monitoring point manually."
         );
 
+        updateGeoSearchAction();
+
     } finally {
-        button.disabled = false;
+        // Never let an outdated request change a newer search's UI.
+        if (serial === geoSearchState.requestSerial) {
+            loading.hidden = true;
+            button.disabled = false;
+        }
     }
 }
+
 
 
 // Connect the enhancement to our existing resident search bar.
@@ -403,7 +422,10 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("input", () => {
         geoSearchState.requestSerial++;
         geoElement("geoMatches").replaceChildren();
+        geoElement("geoSearchLoading").hidden = true;
+        geoElement("geoSearchButton").disabled = false;
         geoWrite("geoSearchStatus", "");
+
 
         clearSearchedPlace();
 
