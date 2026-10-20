@@ -105,6 +105,7 @@ function initializeMap() {
         maxZoom: 19, attribution: "© OpenStreetMap contributors",
     }).addTo(state.map);
     state.markers = L.layerGroup().addTo(state.map);
+   
 }
 
 function filteredPoints() {
@@ -142,27 +143,81 @@ function renderSearchResults(points) {
     }
 }
 
+
 function renderMap() {
     const points = filteredPoints();
+
     write("pointCount", `${points.length} points`);
     renderSearchResults(points);
-    if (!state.map || !state.markers) return;
+
+    if (!state.map || !state.markers) {
+        return;
+    }
+
+    // Clear existing markers before rendering the current risk filter.
     state.markers.clearLayers();
+
     for (const point of points) {
-        if (!hasValidCoordinates(point)) continue;
+        if (!hasValidCoordinates(point)) {
+            continue;
+        }
+
+        const latitude = Number(point.latitude);
+        const longitude = Number(point.longitude);
+
         const category = riskOf(point);
-        const selected = Number(point.location_id) === Number(state.selected?.location_id);
-        const marker = L.circleMarker([Number(point.latitude), Number(point.longitude)], {
-            radius: selected ? 10 : 7,
-            color: selected ? "#102746" : "#fff", weight: selected ? 3 : 2,
-            fillColor: colors[category] || colors.NO_DATA, fillOpacity: .94,
-        }).addTo(state.markers);
+
+        const selected = (
+            Number(point.location_id) ===
+            Number(state.selected?.location_id)
+        );
+
+        // The color comes from our fixed risk palette, never from
+        // user-generated text or arbitrary database CSS.
+        const markerColor = colors[category] || colors.NO_DATA;
+
+        // MarkerCluster is designed to work with Leaflet markers.
+        // DivIcon lets us preserve our familiar circular risk colors.
+        const icon = L.divIcon({
+            className: (
+                "floodwatch-point-marker" +
+                (selected ? " is-selected" : "")
+            ),
+            html: (
+                `<span class="point-marker-core" ` +
+                `style="background:${markerColor}"></span>`
+            ),
+            iconSize: [22, 22],
+            iconAnchor: [11, 11],
+        });
+
+        const marker = L.marker(
+            [latitude, longitude],
+            {
+                icon,
+                keyboard: true,
+                title: `${point.name} - ${category}`,
+                zIndexOffset: selected ? 1000 : 0,
+            }
+        );
+
+        // Use textContent so location names cannot inject HTML.
         const tooltip = document.createElement("span");
-        tooltip.textContent = `${point.name} · ${category.replace("_", " ")}`;
+
+        tooltip.textContent = (
+            `${point.name} · ${category.replace("_", " ")}`
+        );
+
         marker.bindTooltip(tooltip);
-        marker.on("click", () => selectPoint(point));
+
+        marker.on("click", () => {
+            selectPoint(point);
+        });
+
+        state.markers.addLayer(marker);
     }
 }
+
 
 function setAdvisory(point) {
     if (point.alert_title) {

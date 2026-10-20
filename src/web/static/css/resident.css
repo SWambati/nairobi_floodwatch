@@ -124,6 +124,220 @@ h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: -.035em; }
     color: var(--unknown);
 }
 
+/* Distinguish the selected observation point from nearby markers. */
+.floodwatch-point-marker.is-selected .point-marker-core {
+    outline: 3px solid #173657;
+    outline-offset: 2px;
+    box-shadow: 0 2px 8px rgba(15, 43, 76, .35);
+}
+
+/* Slightly clearer focus and hover feedback for GIS controls. */
+.gis-toggle:hover {
+    background: #eff6ff;
+    border-color: #9ebfe7;
+}
+
+.gis-toggle:focus-within {
+    outline: 3px solid #337ff0;
+    outline-offset: 2px;
+}
+
+
+/* Task 29C.2 - Historical mapped road exposure */
+.road-exposure-section {
+    margin-top: 23px;
+    padding-top: 21px;
+    border-top: 1px solid var(--line);
+}
+
+.road-exposure-heading h3 {
+    margin: 0 0 7px;
+    color: var(--navy);
+    font-size: 19px;
+}
+
+.road-exposure-heading p {
+    max-width: 720px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.road-exposure-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    margin: 18px 0 13px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.road-exposure-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.road-line {
+    display: inline-block;
+    width: 23px;
+    height: 0;
+    border-top: 4px solid;
+    border-radius: 3px;
+}
+
+
+/* Historical road-exposure evidence, distinct from live risk categories */
+.evidence-limited {
+    border-color: #79B6EB;
+}
+
+.evidence-moderate {
+    border-color: #4679C0;
+}
+
+.evidence-stronger {
+    border-color: #442E88;
+}
+
+.road-agreement {
+    max-width: 150px;
+    padding: 7px 10px;
+    background: #f2f6fc;
+    border-left: 4px solid;
+    border-radius: 6px;
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+    white-space: normal;
+    text-align: left;
+}
+
+.road-agreement.limited {
+    border-left-color: #79B6EB;
+}
+
+.road-agreement.moderate {
+    border-left-color: #4679C0;
+}
+
+.road-agreement.stronger {
+    border-left-color: #442E88;
+}
+
+
+.road-exposure-status {
+    margin: 15px 0;
+    color: #365a7e;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.road-exposure-list {
+    display: grid;
+    gap: 9px;
+}
+
+.road-exposure-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    width: 100%;
+    padding: 15px 17px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-align: left;
+    color: var(--ink);
+    transition: background-color .15s, border-color .15s;
+}
+
+.road-exposure-item:hover {
+    background: #f2f7ff;
+    border-color: #a4c5e9;
+}
+
+.road-exposure-info {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.road-exposure-info strong {
+    color: var(--navy);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.road-exposure-info small {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.road-agreement {
+    flex-shrink: 0;
+    padding: 5px 9px;
+    color: #294563;
+    background: #f0f5fb;
+    border-left: 4px solid #4679c0;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.road-exposure-disclaimer {
+    margin: 19px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+@media (max-width: 720px) {
+    .road-exposure-heading h3 {
+        font-size: 18px;
+    }
+
+    .road-exposure-item {
+        padding: 13px;
+    }
+
+    .road-exposure-legend {
+        gap: 10px;
+    }
+}
+
+/* Individual observation points without numbered clusters */
+.floodwatch-point-marker .point-marker-core {
+    transform: scale(0.72);
+    transform-origin: center;
+    transition: transform 0.15s ease;
+}
+
+/* Provide clearer feedback when hovering over a point. */
+.floodwatch-point-marker:hover .point-marker-core {
+    transform: scale(1);
+}
+
+/* Keep the selected monitoring point clearly distinguishable. */
+.floodwatch-point-marker.is-selected .point-marker-core {
+    transform: scale(1.1);
+    outline: 3px solid #173657;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .floodwatch-point-marker .point-marker-core {
+        transition: none;
+    }
+}
+
+
 /* Risk information and map: keep actual data visually distinct from labels. */
 .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 21px; align-items: start; }
 .main-column, .side-column { display: grid; gap: 21px; min-width: 0; }
