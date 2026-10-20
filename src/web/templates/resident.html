@@ -127,12 +127,84 @@
               <p class="geo-explanation">These are nearby observation points, not predictions for the searched neighborhood or individual properties.</p>
               <div id="geoNearbyResults" class="geo-nearby-results"></div>
             </section>
+            
+            <!-- Residents can choose which GIS layers are visible. -->
+            <div class="gis-controls" role="group" aria-label="Map layers">
+              <label class="gis-toggle">
+                <input id="toggleObservations" type="checkbox" checked>
+                <span>Monitoring points</span>
+              </label>
+              
+              <label class="gis-toggle">
+                <input id="toggleWards" type="checkbox" checked disabled>
+                <span>Ward boundaries</span>
+              </label>
+              
+              <label class="gis-toggle">
+                <input id="toggleSubcounties" type="checkbox" disabled>
+                <span>Subcounties</span>
+              </label>
+              <label class="gis-toggle">
+                <input id="toggleRoadExposure" type="checkbox">
+                <span>Mapped Road exposure</span>
+              </label>
+            </div>
+            
+            <p id="gisLayerStatus" class="gis-status" role="status" aria-live="polite">
+              Checking GIS layers…
+            </p>
+            
+            <div id="residentMap" class="map" aria-label="Interactive map of Nairobi monitoring points and administrative boundaries">
 
-            <div id="residentMap" class="map" aria-label="Interactive map of Nairobi monitoring points"></div>
+            </div>
+
             <div class="map-legend" aria-label="Risk map legend">
               <span><i class="dot low"></i>Low</span><span><i class="dot moderate"></i>Moderate</span>
               <span><i class="dot high"></i>High</span><span><i class="dot unknown"></i>Not assessed</span>
             </div>
+            
+            <!-- Mapped road exposure is separate from model-derived risk categories. -->
+            <section id="roadExposureSection" class="road-exposure-section" aria-labelledby="roadExposureTitle">
+              <div class="road-exposure-heading">
+                <div>
+                  <h3 id="roadExposureTitle">Roads in Flood-Prone Areas</h3>
+                  <p>
+                    Explore road sections that overlap areas identified in historical flood-risk mapping.
+                    Select a road to view more details
+                  </p>
+                </div>
+              </div>
+              <div id="roadExposureLegend" class="road-exposure-legend" hidden>
+                <span>
+                  <i class="road-line evidence-limited"></i>
+                  Limited mapped evidence
+                </span>
+                <span>
+                  <i class="road-line evidence-moderate"></i>
+                  Moderate mapped evidence
+                </span>
+                <span>
+                  <i class="road-line evidence-stronger"></i>
+                  Stronger mapped evidence
+                </span>
+              </div>
+
+              <p id="roadExposureStatus" class="road-exposure-status" role="status" aria-live="polite">
+                Enable mapped road exposure to explore nearby road sections.
+              </p>
+              <div id="roadExposureList" class="road-exposure-list"></div>
+              <p class="road-exposure-disclaimer">
+                <p class="road-exposure-disclaimer">
+                  Based on ICPAC's 100-year flood-inundation scenario and
+                  OpenStreetMap roads. Highlighted sections have mapped flood
+                  exposure, not confirmed flooding or closures. Roads without
+                  highlights should not be assumed safe.
+                </p>
+              </p>
+            </section>
+
+
+
             <p class="map-note">Risk levels represent monitored observation points, not entire wards or properties. Map tiles © OpenStreetMap contributors.</p>
           </section>
         </div>
@@ -195,5 +267,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script src="/static/js/resident.js"></script>
 <script src="/static/js/place_search.js"></script>
+<script src="/static/js/gis_layers.js"></script>
+<script src="/static/js/road_exposure.js"></script>
 </body>
 </html>
