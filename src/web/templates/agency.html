@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Monitor Nairobi flood-risk assessments, administrative comparisons, GIS exposure and historical trends.">
+    <title>Agency Dashboard | Nairobi FloodWatch</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="/static/css/resident.css">
+    <link rel="stylesheet" href="/static/css/agency.css">
+</head>
+
+<body>
+
+<a class="skip-link" href="#main"> Skip to main content </a>
+
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Application navigation">
+        <div>
+            <a class="brand" href="/" aria-label="Nairobi FloodWatch home">
+                <img src="/static/images/logo.png" alt="" width="46" height="46">
+                <span>
+                    Flood<span>Watch</span>
+                </span>
+            </a>
+            <p class="brand-subtitle"> Nairobi FloodWatch </p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="/"> Home </a>
+            <a href="/agency" class="current" aria-current="page"> Agency Dashboard </a>
+        </nav>
+
+        <div class="sidebar-foot">
+            <p> Model-derived assessments are not official emergency warnings. </p>
+        </div>
+    </aside>
+
+    <div class="content-shell">
+        <main id="main" class="main-content agency-main">
+            <div class="page-heading">
+                <div>
+                    <h1>
+                        Monitor Flood Conditions Across Nairobi
+                    </h1>
+                    <p class="subtext">
+                        Explore recorded flood-risk assessments,
+                        compare monitoring locations across wards
+                        and subcounties, and analyze historical
+                        conditions to support disaster preparedness.
+                    </p>
+
+                </div>
+
+                <span id="freshness" class="freshness"  role="status">
+                    Loading recorded assessments…
+                </span>
+
+            </div>
+            <div id="errorNotice" class="error-notice" role="alert" hidden>
+            </div>
+
+            <section class="agency-summary-section" aria-labelledby="summaryTitle">
+                <div class="section-heading agency-summary-header">
+                    <div>
+                        <h2 id="summaryTitle">
+                            Nairobi Monitoring Summary
+                        </h2>
+
+                        <p class="subtle-text">
+                            Latest recorded flood-risk assessments
+                            across Nairobi's monitored locations.
+                        </p>
+                    </div>
+
+                    <div class="agency-summary-actions">
+                        <button id="refreshData" class="button primary" type="button">
+                            Refresh data
+                        </button>
+
+                        <a href="#agencyReports" class="button secondary">
+                            View reports
+                        </a>
+                    </div>
+                </div>
+
+                <div class="agency-stat-grid">
+                    <article class="agency-stat">
+                        <span>
+                            Monitored Locations
+                        </span>
+                        <strong id="totalPoints">
+                            —
+                        </strong>
+                        <small>
+                            Observation points across Nairobi
+                        </small>
+                    </article>
+
+                    <article class="agency-stat">
+                        <span>
+                            Assessed Locations
+                        </span>
+                        <strong id="assessedPoints">
+                            —
+                        </strong>
+                        <small>
+                            Points with recorded model results
+                        </small>
+                    </article>
+
+                    <article class="agency-stat">
+                        <span>
+                            High-Risk Classifications
+                        </span>
+                        <strong id="highPoints">
+                            —
+                        </strong>
+                        <small>
+                            Latest stored point assessments
+                        </small>
+                    </article>
+
+                    <article class="agency-stat">
+                        <span>
+                            Active Model Advisories
+                        </span>
+                        <strong id="activeAdvisories">
+                            —
+                        </strong>
+                        <small>
+                            Advisories linked to monitoring points
+                        </small>
+                    </article>
+                </div>
+            </section>
+
+            <div class="dashboard-grid">
+                <div class="main-column">
+                    <section class="map-card" aria-labelledby="agencyMapTitle">
+                        <div class="section-heading">
+                            <h2 id="agencyMapTitle">
+                                Monitor Locations Within Nairobi
+                            </h2>
+                            <span id="visibleCount" class="quiet-count">
+                                — points
+                            </span>
+                        </div>
+
+                        <div class="agency-filters">
+                            <label class="agency-field">
+                                <span>
+                                    Search monitoring locations
+                                </span>
+                                <input id="searchPoints" type="search" autocomplete="off" placeholder="Search monitoring points…">
+                            </label>
+
+                            <label class="agency-field">
+                                <span> Risk Classification </span>
+
+                                <select id="riskFilter">
+                                    <option value="ALL"> All risk levels </option>
+                                    <option value="LOW"> Low </option>
+                                    <option value="MODERATE"> Moderate </option>
+                                    <option value="HIGH"> High </option>
+                                    <option value="NO_DATA"> No assessment </option>
+                                </select>
+                            </label>
+
+                            <label class="agency-field">
+                                <span>Subcounty</span>
+                                <select id="subcountyFilter">
+                                    <option value="ALL"> All subcounties </option>
+                                </select>
+                            </label>
+
+                            <label class="agency-field">
+                                <span>Ward</span>
+                                <select id="wardFilter">
+                                    <option value="ALL"> All wards </option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <!-- Search estates and landmarks beyond registered monitoring points. -->
+                        <div class="agency-location-tools">
+                            <button id="findMapPlace" class="button secondary" type="button" disabled>
+                                Find Nairobi area
+                            </button>
+                            <p id="mapSearchStatus" class="subtle-text" role="status">
+                                Search monitoring points, wards or subcounties,
+                                or find a Nairobi estate or landmark.
+                            </p>
+                            <div id="mapPlaceResults" class="agency-place-results" aria-label="Nairobi location matches">
+                            </div>
+                            <div id="mapNearbyResults" class="agency-nearby-results" aria-label="Nearby monitoring points">
+                            </div>
+                        </div>
+
+                        <div class="gis-controls" role="group" aria-label="Map layers">
+                            <label class="gis-toggle">
+                                <input id="showPoints" type="checkbox" checked>
+                                <span> Monitoring points </span>
+                            </label>
+
+                            <label class="gis-toggle">
+                                <input id="showWards" type="checkbox">
+                                <span> Ward boundaries </span>
+                            </label>
+
+                            <label class="gis-toggle">
+                                <input id="showSubcounties" type="checkbox" checked>
+                                <span> Subcounties </span>
+                            </label>
+                            <label class="gis-toggle">
+                                <input id="showRoadExposure" type="checkbox" disabled>
+                                <span> Mapped Road Exposure </span>
+                            </label>
+                        </div>
+
+                        <p id="layerStatus" class="gis-status" role="status" aria-live="polite">
+                            Checking GIS layers…
+                        </p>
+                        <div id="agencyMap" class="map agency-map" role="region" aria-label="Interactive map of Nairobi monitoring points and administrative boundaries">
+                        </div>
+
+                        <div class="map-legend" aria-label="Risk map legend">
+                            <span>
+                                <i class="dot low"></i>
+                                Low
+                            </span>
+                            <span>
+                                <i class="dot moderate"></i>
+                                Moderate
+                            </span>
+                            <span>
+                                <i class="dot high"></i>
+                                High
+                            </span>
+                            <span>
+                                <i class="dot unknown"></i>
+                                Not assessed
+                            </span>
+                        </div>
+     
+                        <section id="agencyRoadExposureSection" class="road-exposure-section"  aria-labelledby="roadExposureTitle">
+                            <div class="road-exposure-heading">
+                                <div>
+                                    <h3 id="roadExposureTitle">
+                                        Roads in Flood-Prone Areas
+                                    </h3>
+                                    <p>
+                                        Explore road sections that
+                                        overlap areas identified in
+                                        historical flood-inundation mapping.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div id="roadExposureLegend" class="road-exposure-legend" hidden>
+                                <span>
+                                    <i class="road-line evidence-limited"></i>
+                                    Limited mapped evidence
+                                </span>
+
+                                <span>
+                                    <i class="road-line evidence-moderate"></i>
+                                    Moderate mapped evidence
+                                </span>
+
+                                <span>
+                                    <i class="road-line evidence-stronger"></i>
+                                    Stronger mapped evidence
+                                </span>
+                            </div>
+
+                            <p id="roadExposureStatus" class="road-exposure-status" role="status" aria-live="polite">
+                                Agency road-exposure analysis
+                                will be available after GIS
+                                layer integration.
+                            </p>
+
+                            <div id="roadExposureList" class="road-exposure-list">
+                            </div>
+
+                            <p class="road-exposure-disclaimer">
+                                Based on ICPAC's 100-year
+                                flood-inundation scenario
+                                and OpenStreetMap roads.
+
+                                Mapped exposure does not
+                                indicate confirmed flooding,
+                                road closures or road safety.
+
+                            </p>
+                        </section>
+
+                        <p class="map-note">
+                            Model risk classifications represent
+                            monitored observation points, not
+                            entire wards or properties.
+
+                            Administrative boundaries show
+                            geographic coverage only.
+
+                            Map tiles © OpenStreetMap contributors.
+                        </p>
+                    </section>
+                </div>
+
+                <aside class="side-column" aria-label="Selected monitoring and advisory information">
+                    <section class="side-card" aria-labelledby="agencyFocusTitle">
+                        <h2 id="agencyFocusTitle">
+                            Monitoring Point Details
+                        </h2>
+
+                        <p id="selectedPrompt" class="subtle-text">
+                            Select a monitoring point from
+                            the GIS map or monitoring records
+                            to view its latest assessment.
+                        </p>
+
+                        <div id="selectedDetails" hidden>
+                            <h3 id="pointName" class="agency-point-name">
+                            </h3>
+
+                            <div class="agency-point-badges">
+                                <span id="pointRisk" class="agency-risk-badge">
+                                    —
+                                </span>
+                                <span id="pointScore">
+                                    —
+                                </span>
+                            </div>
+                            <dl class="agency-details">
+                                <div>
+                                    <dt>
+                                        Last model assessment
+                                    </dt>
+                                    <dd id="pointTime">
+                                        —
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Administrative area
+                                    </dt>
+                                    <dd id="pointArea">
+                                        —
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Precipitation reading
+                                    </dt>
+
+                                    <dd id="pointRain">
+                                        —
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Temperature
+                                    </dt>
+                                    <dd id="pointTemp">
+                                        —
+                                    </dd>
+                                </div>
+                            </dl>
+
+                            <p id="pointAdvisory" class="agency-advisory">
+                            </p>
+
+                            <p class="subtle-text">
+                                This assessment describes a
+                                monitoring observation point,
+                                not the flood risk of an entire
+                                neighborhood or property.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section class="side-card advisory-card" aria-labelledby="agencyAdvisoryTitle">
+                        <h2 id="agencyAdvisoryTitle">
+                            Active Flood Advisories
+                        </h2>
+
+                        <p class="subtle-text">
+                            Review unexpired model-generated
+                            advisories associated with
+                            monitored locations.
+                        </p>
+
+                        <ul id="advisoryList" class="agency-alerts" aria-live="polite">
+                            <li>
+                                Loading advisory records…
+                            </li>
+                        </ul>
+
+                        <p class="advisory-disclaimer">
+                            These are system-generated
+                            monitoring advisories,
+                            not official government
+                            emergency warnings.
+                        </p>
+                    </section>
+                </aside>
+
+            </div>
+            <section class="agency-panel agency-compare" aria-labelledby="agencyCompareTitle">
+                <div class="section-heading agency-wrap">
+                    <div>
+                        <h2 id="agencyCompareTitle">
+                            Geographic Risk Comparisons
+                        </h2>
+
+                        <p class="subtle-text">
+                            Compare recorded monitoring-point
+                            classifications across Nairobi's
+                            administrative areas.
+                        </p>
+                    </div>
+
+                    <label class="agency-field agency-compare-select">
+                        <span>Compare by</span>
+                        <select id="compareBy">
+                            <option value="subcounty"> Subcounty </option>
+                            <option value="ward"> Ward </option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="agency-table-scroll">
+                    <table class="agency-table">
+                        <thead>
+                            <tr>
+                                <th scope="col"> Administrative Area </th>
+
+                                <th scope="col"> Monitoring Points </th>
+                                <th scope="col"> High </th>
+                                <th scope="col"> Moderate </th>
+                                <th scope="col"> Low </th>
+                                <th scope="col"> No Assessment </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="comparisonRows">
+                            <tr>
+                                <td colspan="6">
+                                    Loading geographic comparisons…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="map-note">
+                    These comparisons show the distribution
+                    of point-level model classifications
+                    within mapped administrative boundaries.
+
+                    The number of monitoring points may vary
+                    between areas, so counts should not be
+                    interpreted as comparable population or
+                    property exposure.
+                </p>
+            </section>
+
+            <section class="history-section" aria-labelledby="historyTitle">
+                <div class="section-heading history-heading">
+                    <div>
+                        <h2 id="historyTitle">
+                            How Flood Conditions Have Changed
+                        </h2>
+                        <p class="subtle-text">
+                            Explore stored model assessments
+                            and historical observations.
+                            Missing dates are not replaced
+                            with estimated values.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="history-grid">
+                    <div class="chart-card">
+                        <h3>
+                            Historical Flood Risk Assessments
+                        </h3>
+
+                        <p>
+                            Latest recorded model score per
+                            day for the selected monitoring point.
+                        </p>
+
+                        <div class="chart-frame">
+                            <canvas id="pointHistoryChart" role="img" aria-label="Historical flood risk model scores for selected monitoring point">
+                            </canvas>
+                        </div>
+
+                        <p id="historyStatus" class="chart-fallback" role="status" aria-live="polite">
+                            Select a monitoring point to
+                            view recorded model history.
+                        </p>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>
+                            Historical Monitoring Trends
+                        </h3>
+
+                        <p>
+                            Recorded changes in monitoring
+                            classifications across Nairobi
+                            over time.
+                        </p>
+
+                        <div class="chart-frame">
+                            <canvas id="areaTrendChart" role="img" aria-label="Historical monitoring classification trends">
+                            </canvas>
+                        </div>
+
+
+                        <p id="areaTrendStatus" class="chart-fallback" role="status" aria-live="polite">
+                            Area-level historical analytics
+                            will be connected to the
+                            agency reporting API.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="agencyReports" class="agency-panel agency-records" aria-labelledby="agencyReportsTitle">
+                <div class="section-heading agency-wrap">
+                    <div>
+                        <h2 id="agencyReportsTitle">
+                            Monitoring Data and Reports
+                        </h2>
+
+                        <p class="subtle-text">
+                            Search by ward, subcounty, area or monitoring
+                            point to view and export recorded assessments.
+                        </p>
+                    </div>
+                    
+                    <div class="agency-report-actions">
+                        <button id="downloadPDF" class="button secondary" type="button" disabled>
+                            Download PDF
+                        </button>
+
+                        <button id="downloadCSV" class="button primary" type="button" disabled>
+                            Download CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Independent report search; does not change map filters. -->
+                 <div class="agency-report-search">
+                    <label class="agency-field">
+                        <span>Search report records</span>
+                        <input id="reportSearch" type="search" autocomplete="off" placeholder="e.g. Kamukunji, Madaraka, Airbase Ward...">
+                    </label>
+
+                    <button id="findReportPlace" class="button secondary" type="button" disabled>
+                        Find nearby points
+                    </button>
+                </div>
+
+                <p id="reportStatus" class="agency-note" role="status" aria-live="polite">
+                    Search to select monitoring records for reporting.
+                </p>
+                
+                <div id="reportPlaceResults" class="agency-place-results" aria-label="Report geographic search results">
+                </div>
+                <div class="agency-table-scroll">
+                    <table class="agency-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Monitoring Location</th>
+                                <th scope="col">Subcounty</th>
+                                <th scope="col">Ward</th>
+                                <th scope="col">Risk Level</th>
+                                <th scope="col">Model Score</th>
+                                <th scope="col">Last Assessment</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="recordRows">
+                            <tr>
+                                <td colspan="7">
+                                    Search for an area or monitoring point
+                                    to view reports.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="agency-report-footer">
+                    <p id="tableCount" class="agency-note">
+                        No report selected.
+                    </p>
+
+                    <div id="reportPagination" class="agency-pagination" hidden>
+                        <button id="prevReportPage" class="button secondary" type="button">
+                            Previous
+                        </button>
+
+                        <span id="reportPageStatus" aria-live="polite">
+                            Page 1
+                        </span>
+
+                        <button id="nextReportPage" class="button secondary" type="button">
+                            Next
+                        </button>
+                    </div>
+                </div>
+                <p class="map-note">
+                    Reports describe recorded monitoring-point assessments.
+                    Coordinates are excluded. Model scores are not
+                    calibrated flood probabilities or official warnings.
+                </p>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"> </script>
+<script src="/static/vendor/jspdf.umd.min.js" defer></script>
+<script src="/static/vendor/jspdf.plugin.autotable.min.js" defer></script>
+<script src="/static/js/agency.js" defer></script>
+</body>
+</html>

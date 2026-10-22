@@ -34,3 +34,7 @@ def homepage():
 @app.get('/resident', include_in_schema=False)
 def resident_page():
     return FileResponse(WEB_DIR / "templates" / "resident.html")
+
+@app.get('/agency', include_in_schema=False)
+def agency_page():
+    return FileResponse(WEB_DIR / "templates" / "agency.html")
