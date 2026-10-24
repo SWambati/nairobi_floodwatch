@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Administrator Login | Nairobi FloodWatch</title>
+    <link rel="stylesheet" href="/static/css/resident.css">
+
+    <style>
+        .login-page {
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            padding: 24px;
+            background: linear-gradient(145deg, #eef4fb, #f8fbff);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 38px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 0 18px 50px rgba(18, 43, 74, .08);
+        }
+
+        .login-brand {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .login-brand h1 {
+            margin: 0;
+            color: var(--navy);
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .login-brand h1 span {
+            color: var(--blue);
+        }
+
+        .login-brand p {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .login-heading {
+            margin-bottom: 8px;
+            color: var(--navy);
+            font-size: 23px;
+        }
+
+        .login-description {
+            margin-bottom: 25px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .login-field {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .login-field label {
+            color: var(--navy);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .login-field input {
+            width: 100%;
+            min-height: 48px;
+            padding: 12px 14px;
+            background: #fff;
+            border: 1px solid #bdcddd;
+            border-radius: 9px;
+            color: var(--ink);
+            outline: none;
+        }
+
+        .login-field input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px #1755ba18;
+        }
+
+        .login-submit {
+            width: 100%;
+            min-height: 48px;
+        }
+
+        .login-message {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            color: #9c2533;
+            background: #fff0f1;
+            border: 1px solid #e9c2c6;
+            border-radius: 9px;
+            font-size: 13px;
+        }
+
+        .login-footer {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+        }
+
+        .login-footer a {
+            color: var(--blue);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .login-note {
+            margin: 25px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 26px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="login-page">
+    <section class="login-card" aria-labelledby="loginTitle">
+        <div class="login-brand">
+            <h1>Flood<span>Watch</span></h1>
+            <p>Nairobi FloodWatch</p>
+        </div>
+
+        <h2 id="loginTitle" class="login-heading">
+            Administrator Login
+        </h2>
+
+        <p class="login-description">
+            Sign in to access System Administrator dashboard features
+        </p>
+
+        <div id="loginError" class="login-message" role="alert" hidden>
+        </div>
+
+        <form id="loginForm">
+            <div class="login-field">
+                <label for="adminKey">
+                    Administrator Credential
+                </label>
+
+                <input id="adminKey" name="adminKey" type="password" placeholder="Enter administrator credential" autocomplete="off" autocapitalize="off" spellcheck="false" minlength="32" required>
+            </div>
+
+            <button id="loginButton" type="submit" class="button primary login-submit">
+                Sign In
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <a href="/">Return to FloodWatch Home</a>
+        </div>
+
+        <p class="login-note">
+            Restricted access · Local development authentication
+        </p>
+    </section>
+</main>
+
+<script>
+(() => {
+    "use strict";
+
+    const form = document.getElementById("loginForm");
+    const input = document.getElementById("adminKey");
+    const button = document.getElementById("loginButton");
+    const errorBox = document.getElementById("loginError");
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        button.disabled = true;
+        button.textContent = "Signing in…";
+        errorBox.hidden = true;
+
+        const credential = input.value;
+        input.value = "";
+
+        try {
+            const response = await fetch("/admin/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin",
+                cache: "no-store",
+                body: JSON.stringify({admin_key: credential})
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Administrator login failed.");
+            }
+
+            if (data.authenticated !== true) {
+                throw new Error("Session was not established.");
+            }
+
+            window.location.replace("/admin");
+
+        } catch (error) {
+            errorBox.textContent = error.message;
+            errorBox.hidden = false;
+        } finally {
+            button.disabled = false;
+            button.textContent = "Sign In";
+        }
+    });
+})();
+</script>
+</body>
+</html>

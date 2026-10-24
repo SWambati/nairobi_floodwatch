@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <title>Admin Dashboard | Nairobi FloodWatch</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="/static/css/resident.css">
+    <link rel="stylesheet" href="/static/css/agency.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Admin navigation">
+        <div class="brand-group">
+            <a class="brand" href="/" aria-label="Nairobi FloodWatch home">
+                <img src="/static/images/logo.png" alt="" width="46" height="46">
+                <span>Flood<span>Watch</span></span>
+            </a>
+            <p class="brand-subtitle">Nairobi FloodWatch</p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="/"> Home </a>
+            <a href="#system" data-admin-tab="system" class="current" aria-current="location"> System Monitoring </a>
+            <a href="#flood" data-admin-tab="flood"> Flood Monitoring </a>
+        </nav>
+
+        <div class="sidebar-foot">
+            <p>
+                Restricted system administration.
+                Operational information is intended for authorized administrators only.
+            </p>
+        </div>
+    </aside>
+
+    <div class="content-shell">
+        <main id="main" class="main-content agency-main admin-main">
+            <header class="page-heading">
+                <div>
+                    <h1 id="adminPageTitle"> Nairobi FloodWatch System Monitoring </h1>
+                    <p id="adminPageDescription" class="subtext">
+                        Monitor ETL operations, database connectivity,
+                        Random Forest inference, pipeline performance,
+                        alerts and system logs.
+                    </p>
+                </div>
+                <span id="opsUpdated" class="freshness" role="status"> Awaiting operational telemetry… </span>
+            </header>
+            <div id="adminAuthNotice" class="error-notice" role="alert">
+                A verified administrator session is required
+                to access operational monitoring information.
+            </div>
+            <div id="adminError" class="error-notice" role="alert" hidden></div>
+
+            <div id="adminSystemTab" class="admin-tab-panel" aria-label="System Monitoring">
+                <section id="operations" class="admin-section" aria-labelledby="operationsTitle">
+                    <div class="section-heading admin-section-heading">
+                        <div>
+                            <h2 id="operationsTitle">System Overview</h2>
+                            <p class="subtle-text">
+                                Latest recorded health checks and operational
+                                execution results.
+                            </p>
+                        </div>
+                        <button id="refreshOperations" class="button primary" type="button">Refresh system status</button>
+                    </div>
+
+                    <div class="admin-health-grid">
+                        <article class="admin-health-card">
+                            <span class="admin-card-label">FastAPI Service</span>
+                            <strong id="apiReachabilityState"> Awaiting telemetry </strong>
+                            <small id="apiHealthDetail"> Application availability check </small>
+                        </article>
+
+                        <article class="admin-health-card">
+                            <span class="admin-card-label"> PostgreSQL Database </span>
+                            <strong id="dbConnectionState"> Awaiting telemetry </strong>
+                            <small id="dbHealthDetail"> Database connectivity </small>
+                        </article>
+
+                        <article class="admin-health-card">
+                            <span class="admin-card-label"> Operational Pipeline </span>
+                            <strong id="pipelineRunState"> Awaiting telemetry</strong>
+                            <small id="pipelineHealthDetail"> Latest recorded execution </small>
+                        </article>
+
+                        <article class="admin-health-card">
+                            <span class="admin-card-label"> Open-Meteo / ETL </span>
+                            <strong id="etlRunState"> Awaiting telemetry </strong>
+                            <small id="etlHealthDetail"> Latest data-acquisition stage </small>
+                        </article>
+
+                        <article class="admin-health-card">
+                            <span class="admin-card-label"> Random Forest Model </span>
+                            <strong id="modelRunState"> Awaiting telemetry </strong>
+                            <small id="modelHealthDetail"> Latest inference stage </small>
+                        </article>
+
+                        <article class="admin-health-card">
+                            <span class="admin-card-label"> Alert Generation </span>
+                            <strong id="alertRunState"> Awaiting telemetry </strong>
+                            <small id="alertHealthDetail"> Latest alert-processing stage </small>
+                        </article>
+                    </div>
+
+                    <p class="admin-interpretation">
+                        A successful previous pipeline run does not guarantee
+                        that every service is currently available.
+                        Health checks and historical execution results are displayed separately.
+                    </p>
+                </section>
+
+                <section class="admin-section" aria-labelledby="executionSummaryTitle">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="executionSummaryTitle"> Pipeline Execution Summary </h2>
+                            <p class="subtle-text"> Recorded execution history and operational metrics. </p>
+                        </div>
+                    </div>
+
+                    <div class="admin-metric-grid">
+                        <article class="agency-stat">
+                            <span>Last Execution</span>
+                            <strong id="lastRunTime">—</strong>
+                            <small>Recorded pipeline start time</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Execution Duration</span>
+                            <strong id="lastRunDuration">—</strong>
+                            <small>Latest run duration</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Runs in Last 24 Hours</span>
+                            <strong id="runs24Total">—</strong>
+                            <small>Recorded pipeline executions</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Failed Runs in Last 24 Hours</span>
+                            <strong id="runs24Failed">—</strong>
+                            <small>Executions marked failed</small>
+                        </article>
+                    </div>
+
+                    <div class="admin-execution-meta">
+                        <p>
+                            <strong>Latest run ID:</strong>
+                            <span id="latestRunId"> Not available </span>
+                        </p>
+
+                        <p>
+                            <strong>Last successful run:</strong>
+                            <span id="lastSuccessfulRun"> Not available </span>
+                        </p>
+                    </div>
+                </section>
+
+                <section id="pipelineHistory" class="agency-panel admin-section" aria-labelledby="pipelineHistoryTitle">
+                    <div class="section-heading admin-section-heading">
+                        <div>
+                            <h2 id="pipelineHistoryTitle"> Pipeline Execution History </h2>
+                            <p class="subtle-text">
+                                Review operational prediction runs,
+                                processing durations and recorded failures.
+                            </p>
+                        </div>
+
+                        <label class="agency-field admin-limit-control">
+                            <span>Show recent runs</span>
+                            <select id="runLimit">
+                                <option value="10">10 runs</option>
+                                <option value="20" selected>20 runs</option>
+                                <option value="50">50 runs</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="agency-table-scroll">
+                        <table class="agency-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Execution Time</th>
+                                    <th scope="col">Job</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Duration</th>
+                                    <th scope="col">Locations</th>
+                                    <th scope="col">Predictions</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="runRows">
+                                <tr>
+                                    <td colspan="7"> Awaiting operational records… </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p id="runHistoryStatus" class="agency-note" role="status"> No pipeline history loaded.</p>
+                </section>
+
+                <section class="agency-panel admin-section" aria-labelledby="stageTitle">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="stageTitle"> Pipeline Component Performance </h2>
+                            <p class="subtle-text">
+                                Execution status and duration of individual
+                                processing stages from the latest recorded run.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="admin-component-layout">
+                        <div class="agency-table-scroll">
+                            <table class="agency-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Component</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Duration</th>
+                                        <th scope="col">Recorded At</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="stageRows">
+                                    <tr>
+                                        <td colspan="4"> Awaiting pipeline stage records… </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="admin-stage-chart">
+                            <h3> Processing Time by Component </h3>
+                            <div class="chart-frame">
+                                <canvas id="stageDurationChart" role="img" aria-label="Recorded execution durations by pipeline component"></canvas>
+                            </div>
+                            <p id="stageChartStatus" class="agency-note"> Awaiting duration measurements. </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section" aria-labelledby="modelMetricsTitle">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="modelMetricsTitle"> Model and Alert Monitoring </h2>
+                            <p class="subtle-text">
+                                Metrics from the most recent recorded
+                                operational prediction run.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="admin-metric-grid">
+                        <article class="agency-stat">
+                            <span>Locations Processed</span>
+                            <strong id="opsLocations">—</strong>
+                            <small>Latest pipeline run</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Predictions Generated</span>
+                            <strong id="opsPredictions">—</strong>
+                            <small>Random Forest inference results</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Weather Records Written</span>
+                            <strong id="opsWeatherRows">—</strong>
+                            <small>Database persistence operation</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Alerts Created</span>
+                            <strong id="opsAlertsCreated">—</strong>
+                            <small>Latest alert-generation stage</small>
+                        </article>
+                    </div>
+
+                    <div class="admin-detail-grid">
+                        <section class="agency-panel">
+                            <h3> Latest Risk Classification Distribution </h3>
+                            <div class="chart-frame">
+                                <canvas id="adminRiskChart" role="img" aria-label="Low moderate and high classification counts"></canvas>
+                            </div>
+                            <p id="adminRiskStatus" class="agency-note"> Awaiting model classification metrics. </p>
+                        </section>
+
+                        <section class="agency-panel">
+                            <h3>Alert Lifecycle</h3>
+                            <dl class="admin-key-values">
+                                <div>
+                                    <dt>Active advisories</dt>
+                                    <dd id="opsAlertsActive">—</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Updated</dt>
+                                    <dd id="opsAlertsUpdated">—</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Resolved</dt>
+                                    <dd id="opsAlertsResolved">—</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Expired</dt>
+                                    <dd id="opsAlertsExpired">—</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Superseded</dt>
+                                    <dd id="opsAlertsSuperseded">—</dd>
+                                </div>
+                            </dl>
+                            <p class="agency-note">
+                                Alert lifecycle counters describe different
+                                operations; they should not be added together
+                                as a total number of simultaneous alerts.
+                            </p>
+                        </section>
+                    </div>
+                </section>
+
+                <section id="systemLogs" class="agency-panel admin-section" aria-labelledby="logsTitle">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="logsTitle">Operational Logs</h2>
+                            <p class="subtle-text">
+                                Review recorded pipeline events,
+                                processing failures and component activity.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="admin-log-filters">
+                        <label class="agency-field">
+                            <span>Severity</span>
+                            <select id="eventLevelFilter">
+                                <option value="ALL">All levels</option>
+                                <option value="INFO">Info</option>
+                                <option value="WARNING">Warning</option>
+                                <option value="ERROR">Error</option>
+                            </select>
+                        </label>
+
+                        <label class="agency-field">
+                            <span>Component</span>
+                            <select id="eventComponentFilter">
+                                <option value="ALL">All components</option>
+                            </select>
+                        </label>
+
+                        <label class="agency-field">
+                            <span>Search events</span>
+                            <input id="eventSearch" type="search" placeholder="Search messages…">
+                        </label>
+                    </div>
+
+                    <p id="selectedRunLabel" class="agency-note" role="status">Select a pipeline run to inspect its events.</p>
+                    <div class="agency-table-scroll">
+                        <table class="agency-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Timestamp</th>
+                                    <th scope="col">Severity</th>
+                                    <th scope="col">Component</th>
+                                    <th scope="col">Event</th>
+                                    <th scope="col">Duration</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="eventRows">
+                                <tr>
+                                    <td colspan="5">No execution selected.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p id="eventCount" class="agency-note">No events selected.</p>
+                    <div class="admin-errors">
+                        <h3>Recent Operational Errors</h3>
+                        <div class="agency-table-scroll">
+                            <table class="agency-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Timestamp</th>
+                                        <th scope="col">Component</th>
+                                        <th scope="col">Error</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="recentErrorsRows">
+                                    <tr>
+                                        <td colspan="3">Awaiting error records…</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="adminFloodTab" class="admin-tab-panel" aria-label="Flood Monitoring" hidden>
+                <section id="floodMonitoring" class="admin-section" aria-labelledby="floodMonitoringTitle">
+                    <div class="section-heading agency-summary-header">
+                        <div>
+                            <h2 id="floodMonitoringTitle">Nairobi Flood Monitoring</h2>
+                            <p class="subtle-text">
+                                View the monitoring information available
+                                through the FloodWatch system.
+                            </p>
+                            <p id="freshness" class="agency-note" role="status">Loading assessments…</p>
+                        </div>
+
+                        <div class="agency-summary-actions">
+                            <button id="refreshData" class="button primary" type="button">Refresh monitoring</button>
+                            <a href="#agencyReports" class="button secondary">View reports</a>
+                        </div>
+                    </div>
+
+                    <div id="errorNotice" class="error-notice" role="alert" hidden></div>
+                    <div class="agency-stat-grid">
+                        <article class="agency-stat">
+                            <span>Monitored Locations</span>
+                            <strong id="totalPoints">—</strong>
+                            <small>Stored observation points</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Assessed Locations</span>
+                            <strong id="assessedPoints">—</strong>
+                            <small>Points with recorded assessments</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>High Classifications</span>
+                            <strong id="highPoints">—</strong>
+                            <small>Latest point-level assessments</small>
+                        </article>
+
+                        <article class="agency-stat">
+                            <span>Active Model Advisories</span>
+                            <strong id="activeAdvisories">—</strong>
+                            <small>Advisories associated with monitoring points</small>
+                        </article>
+                    </div>
+                </section>
+
+                <div class="dashboard-grid admin-monitoring-grid">
+                    <div class="main-column">
+                        <section class="map-card" aria-labelledby="agencyMapTitle">
+                            <div class="section-heading">
+                                <h2 id="agencyMapTitle"> Monitor Locations Within Nairobi </h2>
+                                <span id="visibleCount" class="quiet-count"> — points </span>
+                            </div>
+
+                            <div class="agency-filters">
+                                <label class="agency-field">
+                                    <span>Search monitoring locations</span>
+                                    <input id="searchPoints" type="search" placeholder="Search points or areas…">
+                                </label>
+
+                                <label class="agency-field">
+                                    <span>Risk Classification</span>
+                                    <select id="riskFilter">
+                                        <option value="ALL">All risk levels</option>
+                                        <option value="LOW">Low</option>
+                                        <option value="MODERATE">Moderate</option>
+                                        <option value="HIGH">High</option>
+                                        <option value="NO_DATA">No assessment</option>
+                                    </select>
+                                </label>
+
+                                <label class="agency-field">
+                                    <span>Subcounty</span>
+                                    <select id="subcountyFilter">
+                                        <option value="ALL">All subcounties</option>
+                                    </select>
+                                </label>
+
+                                <label class="agency-field">
+                                    <span>Ward</span>
+                                    <select id="wardFilter">
+                                        <option value="ALL">All wards</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="agency-location-tools">
+                                <button id="findMapPlace" class="button secondary" type="button" disabled>Find Nairobi area</button>
+                                <p id="mapSearchStatus" class="subtle-text" role="status">
+                                    Search points, wards, subcounties
+                                    or Nairobi areas.
+                                </p>
+                                <div id="mapPlaceResults" class="agency-place-results"></div>
+                                <div id="mapNearbyResults" class="agency-nearby-results"></div>
+                            </div>
+
+                            <div class="gis-controls" role="group" aria-label="Map layers">
+                                <label class="gis-toggle">
+                                    <input id="showPoints" type="checkbox" checked>
+                                    <span>Monitoring points</span>
+                                </label>
+
+                                <label class="gis-toggle">
+                                    <input id="showWards" type="checkbox">
+                                    <span>Ward boundaries</span>
+                                </label>
+
+                                <label class="gis-toggle">
+                                    <input id="showSubcounties" type="checkbox" checked>
+                                    <span>Subcounties</span>
+                                </label>
+
+                                <label class="gis-toggle">
+                                    <input id="showRoadExposure" type="checkbox" disabled>
+                                    <span>Mapped Road Exposure</span>
+                                </label>
+                            </div>
+
+                            <p id="layerStatus" class="gis-status" role="status">Loading GIS boundaries...</p>
+                            <div id="agencyMap" class="map agency-map" role="region" aria-label="Interactive map of Nairobi monitoring points"></div>
+                            <div class="map-legend" aria-label="Risk classifications">
+                                <span>
+                                    <i class="dot low"></i>
+                                    Low
+                                </span>
+
+                                <span>
+                                    <i class="dot moderate"></i>
+                                    Moderate
+                                </span>
+
+                                <span>
+                                    <i class="dot high"></i>
+                                    High
+                                </span>
+
+                                <span>
+                                    <i class="dot unknown"></i>
+                                    Not assessed
+                                </span>
+                            </div>
+
+                            <section class="road-exposure-section">
+                                <div class="road-exposure-heading">
+                                    <div>
+                                        <h3>Mapped Road Exposure</h3>
+                                        <p>
+                                            Historical flood-inundation evidence
+                                            for mapped road sections.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div id="roadExposureLegend" class="road-exposure-legend" hidden>
+                                    <span>
+                                        <i class="road-line evidence-limited"></i>
+                                        Limited evidence
+                                    </span>
+
+                                    <span>
+                                        <i class="road-line evidence-moderate"></i>
+                                        Moderate evidence
+                                    </span>
+
+                                    <span>
+                                        <i class="road-line evidence-stronger"></i>
+                                        Stronger evidence
+                                    </span>
+                                </div>
+
+                                <p id="roadExposureStatus" class="road-exposure-status" role="status">
+                                    Enable mapped road exposure to inspect
+                                    historical inundation evidence.
+                                </p>
+
+                                <div id="roadExposureList" class="road-exposure-list"></div>
+                                <p class="road-exposure-disclaimer">
+                                    Historical mapped exposure does not confirm
+                                    current flooding or road closures.
+                                </p>
+                            </section>
+
+                            <p class="map-note">
+                                Risk classifications describe monitoring points,
+                                not entire administrative regions or properties.
+                            </p>
+                        </section>
+                    </div>
+
+                    <aside class="side-column">
+                        <section class="side-card" aria-labelledby="agencyFocusTitle">
+                            <h2 id="agencyFocusTitle">Monitoring Point Details</h2>
+
+                            <p id="selectedPrompt" class="subtle-text">
+                                Select a monitoring point from the map
+                                or records.
+                            </p>
+
+                            <div id="selectedDetails" hidden>
+                                <h3 id="pointName" class="agency-point-name"></h3>
+                                <div class="agency-point-badges">
+                                    <span id="pointRisk" class="agency-risk-badge"> — </span>
+                                    <span id="pointScore">—</span>
+                                </div>
+
+                                <dl class="agency-details">
+                                    <div>
+                                        <dt>Last assessment</dt>
+                                        <dd id="pointTime">—</dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Administrative area</dt>
+                                        <dd id="pointArea">—</dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Precipitation</dt>
+                                        <dd id="pointRain">—</dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Temperature</dt>
+                                        <dd id="pointTemp">—</dd>
+                                    </div>
+                                </dl>
+                                <p id="pointAdvisory" class="agency-advisory"></p>
+                            </div>
+                        </section>
+
+                        <section class="side-card advisory-card">
+                            <h2>Active Model Advisories</h2>
+                            <p class="subtle-text">
+                                Latest advisories associated with
+                                monitored observation points.
+                            </p>
+
+                            <ul id="advisoryList" class="agency-alerts">
+                                <li>Loading advisory records…</li>
+                            </ul>
+
+                            <p class="advisory-disclaimer">
+                                Model-generated advisories are not
+                                official government warnings.
+                            </p>
+                        </section>
+                    </aside>
+                </div>
+
+                <section class="agency-panel agency-compare admin-section" aria-labelledby="agencyCompareTitle">
+                    <div class="section-heading agency-wrap">
+                        <div>
+                            <h2 id="agencyCompareTitle">Geographic Risk Comparisons</h2>
+                            <p class="subtle-text">Recorded monitoring-point classification by ward or subcounty.</p>
+                        </div>
+
+                        <label class="agency-field agency-compare-select">
+                            <span>Compare by</span>
+                            <select id="compareBy">
+                                <option value="subcounty">Subcounty</option>
+                                <option value="ward">Ward</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="agency-table-scroll">
+                        <table class="agency-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Administrative Area </th>
+                                    <th scope="col">Points</th>
+                                    <th scope="col">High</th>
+                                    <th scope="col">Moderate</th>
+                                    <th scope="col">Low</th>
+                                    <th scope="col">Not Assessed</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="comparisonRows">
+                                <tr>
+                                    <td colspan="6"> Loading geographic comparisons… </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="map-note">
+                        These are counts of classified monitoring points,
+                        not area-wide flood-risk probabilities.
+                    </p>
+                </section>
+
+                <section class="history-section admin-section" aria-labelledby="historyTitle">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="historyTitle"> Historical Flood Monitoring </h2>
+                            <p class="subtle-text"> Recorded model assessments and monitoring trends. </p>
+                        </div>
+                    </div>
+
+                    <div class="history-grid">
+                        <article class="chart-card">
+                            <h3>Monitoring Point History</h3>
+                            <p> Daily model scores for the selected monitoring point.</p>
+                            <div class="chart-frame">
+                                <canvas id="pointHistoryChart" role="img" aria-label="Selected monitoring point history"></canvas>
+                            </div>
+                            <p id="historyStatus" class="chart-fallback" role="status"> Select a monitoring point to view history. </p>
+                        </article>
+
+                        <article class="chart-card">
+                            <h3>Historical Monitoring Trends</h3>
+                            <p> Recorded classification counts over time. </p>
+                            <div class="chart-frame">
+                                <canvas id="areaTrendChart" role="img" aria-label="Historical risk classification counts"></canvas>
+                            </div>
+                            <p id="areaTrendStatus" class="chart-fallback" role="status"> Awaiting historical analytics. </p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="agencyReports" class="agency-panel agency-records admin-section" aria-labelledby="agencyReportsTitle">
+                    <div class="section-heading agency-wrap">
+                        <div>
+                            <h2 id="agencyReportsTitle"> Monitoring Data and Reports </h2>
+                            <p class="subtle-text">
+                                Search monitoring areas and export
+                                recorded assessments.
+                            </p>
+                        </div>
+
+                        <div class="agency-report-actions">
+                            <button id="downloadPDF" class="button secondary" type="button" disabled> Download PDF </button>
+                            <button id="downloadCSV" class="button primary" type="button" disabled> Download CSV </button>
+                        </div>
+                    </div>
+
+                    <div class="agency-report-search">
+                        <label class="agency-field">
+                            <span>Search report records</span>
+                            <input id="reportSearch" type="search" placeholder="Search a ward, subcounty or area…">
+                        </label>
+                        <button id="findReportPlace" class="button secondary" type="button" disabled> Find nearby points </button>
+                    </div>
+
+                    <p id="reportStatus" class="agency-note" role="status"> Search for a location to view report records. </p>
+                    <div id="reportPlaceResults" class="agency-place-results"></div>
+                    <div class="agency-table-scroll">
+                        <table class="agency-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">Subcounty</th>
+                                    <th scope="col">Ward</th>
+                                    <th scope="col">Risk</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Assessment Time</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="recordRows">
+                                <tr>
+                                    <td colspan="7"> Search to view monitoring records. </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="agency-report-footer">
+                        <p id="tableCount" class="agency-note"> No report selected. </p>
+                        <div id="reportPagination" class="agency-pagination" hidden>
+                            <button id="prevReportPage" class="button secondary" type="button"> Previous </button>
+                            <span id="reportPageStatus"> Page 1 </span>
+                            <button id="nextReportPage" class="button secondary" type="button"> Next </button>
+                        </div>
+                    </div>
+
+                    <p class="map-note">
+                        Exports contain monitoring-point assessments.
+                        Model scores are not calibrated flood probabilities.
+                    </p>
+                </section>
+            </div>
+
+            <footer class="admin-footer">
+                <span> Nairobi FloodWatch · System Administration </span>
+            </footer>
+        </main>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script src="/static/vendor/jspdf.umd.min.js" defer></script>
+<script src="/static/vendor/jspdf.plugin.autotable.min.js" defer></script>
+<script src="/static/js/agency.js" defer></script>
+<script src="/static/js/admin.js" defer></script>
+</body>
+</html>
