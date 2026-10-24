@@ -35,7 +35,7 @@ app.include_router(admin_auth_router)
 
 @app.get("/", include_in_schema=False)
 def homepage():
-    return FileResponse(WEB_DIR / "templates" / "index.html")
+    return FileResponse(WEB_DIR / "templates" / "home.html")
 
 @app.get('/resident', include_in_schema=False)
 def resident_page():
@@ -54,3 +54,13 @@ def admin_page( _: str = Depends(require_admin)):
 def admin_login_page():
     template = (Path(__file__).resolve().parent / "src" / "web" / "templates" / "admin_login.html")
     return FileResponse(template, headers={"Cache-Control": "no-store"},)
+
+# @app.get("/", include_in_schema=False)
+# def homepage():
+#     return FileResponse(
+#         Path(__file__).resolve().parent
+#         / "src"
+#         / "web"
+#         / "templates"
+#         / "home.html"
+#     )

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Nairobi FloodWatch provides data-driven flood-risk assessments, interactive GIS monitoring, and flood preparedness information for Nairobi.">
+    <title>Nairobi FloodWatch | Home</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/resident.css">
+    <link rel="stylesheet" href="/static/css/home.css">
+    <script src="/static/js/home.js" defer></script>
+</head>
+
+<body class="home-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="home-header" id="top">
+    <nav class="home-nav" aria-label="Main navigation">
+        <a class="home-brand" href="/" aria-label="Nairobi FloodWatch homepage">
+            <img src="/static/images/logo.png" alt="" width="46" height="46">
+            <span class="home-brand-text">
+                <strong>Flood<span>Watch</span></strong>
+                <small>Nairobi FloodWatch</small>
+            </span>
+        </a>
+
+        <button id="mobileMenuToggle" class="home-menu-toggle" type="button" aria-expanded="false" aria-controls="homeNavLinks">
+            <span>Menu</span>
+            <span aria-hidden="true">☰</span>
+        </button>
+
+        <div id="homeNavLinks" class="home-nav-links">
+            <a href="#home" class="home-nav-link is-active">Home</a>
+            <a href="#features" class="home-nav-link">Our Features</a>
+            <a href="#sources" class="home-nav-link">Data Sources</a>
+            <a href="#about" class="home-nav-link">About Us</a>
+            <a href="#contact" class="home-nav-link">Contact Us</a>
+            <a class="home-login-link" href="/admin/login">
+                Login
+                <span aria-hidden="true">↗</span>
+            </a>
+        </div>
+    </nav>
+</header>
+
+
+<main id="main">
+    <section id="home" class="home-hero" aria-labelledby="heroTitle">
+        <img class="home-hero-image" src="/static/images/home.jpg" alt="" fetchpriority="high">
+        <div class="home-hero-overlay"></div>
+        <div class="home-container home-hero-content">
+            <span class="home-eyebrow">NAIROBI FLOOD RISK AWARENESS AND MONITORING</span>
+
+            <h1 id="heroTitle">When the rain comes, <span>know where you stand.</span></h1>
+
+            <p class="home-hero-description">
+                Explore flood-risk assessments and monitoring
+                information across Nairobi using data-driven
+                predictions and geographic insights.
+            </p>
+
+            <div class="home-hero-actions">
+                <a class="home-btn home-btn-primary" href="/resident">
+                    Resident Dashboard
+                    <span aria-hidden="true">↗</span>
+                </a>
+
+                <a class="home-btn home-btn-outline" href="/agency">
+                    Agency Dashboard
+                    <span aria-hidden="true">↗</span>
+                </a>
+            </div>
+
+            <p class="home-hero-note">
+                Explore Nairobi's monitoring network, model-generated
+                risk classifications, and flood-awareness information.
+            </p>
+        </div>
+
+        <a class="home-scroll-cue" href="#features">
+            Explore FloodWatch
+            <span aria-hidden="true">↓</span>
+        </a>
+    </section>
+
+    <section class="home-highlights" aria-label="System highlights">
+        <div class="home-container home-highlights-grid">
+            <div class="home-highlight">
+                <strong>237</strong>
+                <span>Monitoring Locations</span>
+            </div>
+
+            <div class="home-highlight">
+                <strong>15</strong>
+                <span>Model Predictors</span>
+            </div>
+
+            <div class="home-highlight">
+                <strong>77.23%</strong>
+                <span>Held-out Test Accuracy</span>
+            </div>
+
+            <div class="home-highlight">
+                <strong>0.8509</strong>
+                <span>Held-out Test ROC-AUC</span>
+            </div>
+        </div>
+
+        <p class="home-metrics-note">
+            Monitoring-point count reflects the verified project configuration.
+            Model evaluation metrics are from a held-out test dataset,
+            not guarantees of real-world flood prediction accuracy.
+        </p>
+    </section>
+
+    <section id="features" class="home-section home-features" aria-labelledby="featuresTitle">
+        <div class="home-container">
+            <div class="home-section-heading">
+                <div>
+                    <span class="home-section-eyebrow">WHAT WE OFFER</span>
+                    <h2 id="featuresTitle">Flood intelligence, made accessible.</h2>
+                    <p>
+                        From environmental data acquisition to
+                        location-based assessments, Nairobi FloodWatch
+                        brings multiple capabilities into one system.
+                    </p>
+                </div>
+
+                <div class="home-carousel-controls">
+                    <button class="home-carousel-arrow" type="button" data-carousel-prev="featuresCarousel" aria-label="Previous feature">
+                        ←</button>
+                    <button class="home-carousel-arrow" type="button" data-carousel-next="featuresCarousel" aria-label="Next feature">
+                        →</button>
+                </div>
+            </div>
+
+            <div id="featuresCarousel" class="home-carousel home-feature-carousel" tabindex="0" aria-label="Explore FloodWatch features">
+                <article class="home-feature-card">
+                    <div class="home-feature-number">01</div>
+                    <span class="home-feature-tag">
+                        DATA ENGINEERING
+                    </span>
+                    <h3>Near-Real-Time Weather Monitoring</h3>
+                    <p>
+                        Our ETL pipeline retrieves weather information
+                        through Open-Meteo, transforms environmental
+                        observations into model-ready features, and
+                        stores operational results in PostgreSQL.
+                    </p>
+                    <span class="home-card-detail">
+                        Open-Meteo · ETL · PostgreSQL
+                    </span>
+                </article>
+
+                <article class="home-feature-card">
+                    <div class="home-feature-number">02</div>
+                    <span class="home-feature-tag">MACHINE LEARNING</span>
+                    <h3>Random Forest Flood Predictions</h3>
+                    <p>
+                        A trained Random Forest model uses 15 predictors
+                        to estimate flood risk at Nairobi monitoring
+                        locations, producing Low, Moderate, and High
+                        risk classifications.
+                    </p>
+
+                    <div class="home-feature-metrics">
+                        <span>
+                            <strong>77.23%</strong>
+                            Test Accuracy
+                        </span>
+                        <span>
+                            <strong>0.8509</strong>
+                            Test ROC-AUC
+                        </span>
+                    </div>
+                </article>
+
+                <article class="home-feature-card">
+                    <div class="home-feature-number">03</div>
+                    <span class="home-feature-tag">GEOSPATIAL ANALYTICS</span>
+                    <h3>Interactive GIS Monitoring</h3>
+                    <p>
+                        Explore monitoring locations on an interactive
+                        Nairobi map with ward and subcounty boundaries,
+                        geographic searches, and historical mapped
+                        road-exposure information.
+                    </p>
+                    <span class="home-card-detail">
+                        Interactive Maps · GIS Layers · Location Search
+                    </span>
+                </article>
+
+                <article class="home-feature-card">
+                    <div class="home-feature-number">04</div>
+                    <span class="home-feature-tag">INTERACTIVE DASHBOARDS</span>
+                    <h3>Information for Different Users</h3>
+                    <p>
+                        Residents can explore flood assessments and
+                        advisories. Agency personnel can analyze
+                        monitoring data and reports, while administrators
+                        oversee system operations.
+                    </p>
+                    <span class="home-card-detail">
+                        Resident · Agency · Administration
+                    </span>
+                </article>
+
+                <article class="home-feature-card">
+                    <div class="home-feature-number">05</div>
+                    <span class="home-feature-tag">ADVISORIES & REPORTING</span>
+                    <h3>Actionable Monitoring Information</h3>
+                    <p>
+                        View model-generated flood advisories, compare
+                        risk classifications, inspect historical records,
+                        and export monitoring reports in CSV and PDF formats.
+                    </p>
+                    <span class="home-card-detail">
+                        Advisories · Analytics · Reports
+                    </span>
+                </article>
+            </div>
+
+            <p class="home-carousel-hint">
+                Scroll horizontally or use the arrows to explore more features.
+            </p>
+        </div>
+    </section>
+
+    <section id="sources" class="home-section home-sources" aria-labelledby="sourcesTitle">
+        <div class="home-container">
+            <div class="home-section-heading">
+                <div>
+                    <span class="home-section-eyebrow">TRANSPARENCY & RESEARCH</span>
+                    <h2 id="sourcesTitle">Built on data. Grounded in research.</h2>
+                    <p>
+                        Explore the environmental, historical,
+                        and geospatial sources supporting our
+                        research, model development, and
+                        flood-monitoring capabilities.
+                    </p>
+                </div>
+
+                <div class="home-carousel-controls">
+                    <button class="home-carousel-arrow" type="button" data-carousel-prev="sourcesCarousel" aria-label="Previous data source">
+                        ←</button>
+
+                    <button class="home-carousel-arrow" type="button" data-carousel-next="sourcesCarousel" aria-label="Next data source">
+                        →</button>
+                </div>
+            </div>
+
+            <div id="sourcesCarousel" class="home-carousel home-source-carousel" tabindex="0" aria-label="Explore FloodWatch data sources">
+                <article class="home-source-card">
+                    <span class="home-source-category">OPERATIONAL WEATHER</span>
+                    <h3>Open-Meteo API</h3>
+                    <p>
+                        Supplies operational weather information,
+                        including precipitation, temperature,
+                        humidity, pressure, and wind variables.
+                    </p>
+
+                    <a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer">
+                        Explore Open-Meteo ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category"> HISTORICAL WEATHER</span>
+                    <h3>ECMWF / ERA5-Land</h3>
+                    <p>
+                        Historical land-surface and atmospheric
+                        reanalysis information used in
+                        environmental feature development.
+                    </p>
+
+                    <a href="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land" target="_blank" rel="noopener noreferrer">
+                        Explore ERA5-Land ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">RAINFALL DATA</span>
+                    <h3>CHIRPS</h3>
+                    <p>
+                        Satellite and rain-gauge-based historical
+                        precipitation estimates supporting
+                        rainfall analysis and antecedent rainfall features.
+                    </p>
+
+                    <a href="https://www.chc.ucsb.edu/data/chirps" target="_blank" rel="noopener noreferrer">
+                        Explore CHIRPS ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">SATELLITE PRECIPITATION</span>
+                    <h3>NASA GPM / IMERG</h3>
+                    <p>
+                        Satellite-derived precipitation products
+                        providing additional historical and
+                        spatial rainfall information.
+                    </p>
+
+                    <a href="https://gpm.nasa.gov/data/imerg" target="_blank" rel="noopener noreferrer">
+                        Explore NASA IMERG ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">HISTORICAL FLOOD EVENTS</span>
+                    <h3>DesInventar Sendai</h3>
+                    <p>
+                        Historical disaster-loss information
+                        supporting the identification and
+                        contextualization of past flood events.
+                    </p>
+
+                    <a href="https://www.desinventar.net/" target="_blank" rel="noopener noreferrer">
+                        Explore DesInventar ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">DISASTER DATABASE</span>
+                    <h3>EM-DAT</h3>
+                    <p>
+                        International disaster-event records
+                        used to research and cross-check
+                        historical flood occurrences.
+                    </p>
+
+                    <a href="https://doc.emdat.be/" target="_blank" rel="noopener noreferrer">
+                        Explore EM-DAT ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">
+                        EVENT VERIFICATION
+                    </span>
+                    <h3>ReliefWeb</h3>
+                    <p>
+                        Humanitarian situation reports and
+                        historical event information supporting
+                        flood-event verification and context.
+                    </p>
+
+                    <a href="https://reliefweb.int/" target="_blank" rel="noopener noreferrer">
+                        Explore ReliefWeb ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">FLOOD EXPOSURE</span>
+                    <h3>ICPAC Flood Inundation</h3>
+                    <p>
+                        Historical 100-year return-period flood
+                        inundation scenarios used as geospatial
+                        evidence for mapped road exposure.
+                        These do not show live road flooding.
+                    </p>
+
+                    <a href="https://geoportal.icpac.net/layers/geonode%3AKenya_flood_inundation" target="_blank" rel="noopener noreferrer">
+                        Explore ICPAC Data ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">LAND COVER</span>
+                    <h3>ESA WorldCover</h3>
+                    <p>
+                        Satellite-derived land-cover information
+                        supporting geospatial and environmental
+                        feature analysis.
+                    </p>
+
+                    <a href="https://esa-worldcover.org/en/data-access" target="_blank" rel="noopener noreferrer">
+                        Explore WorldCover ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">ROADS & PLACES</span>
+                    <h3>OpenStreetMap</h3>
+                    <p>
+                        Community-maintained geographic information
+                        supporting mapped roads, location searches,
+                        and geographic context.
+                    </p>
+
+                    <a href="https://www.openstreetmap.org/about" target="_blank" rel="noopener noreferrer">
+                        Explore OpenStreetMap ↗
+                    </a>
+                </article>
+
+                <article class="home-source-card">
+                    <span class="home-source-category">OFFICIAL WEATHER ADVISORIES</span>
+                    <h3>Kenya Meteorological Department</h3>
+                    <p>
+                        An official source of weather warnings
+                        and advisories that users should consult
+                        alongside FloodWatch assessments.
+                    </p>
+
+                    <a href="https://meteo.go.ke/weather-warnings/" target="_blank" rel="noopener noreferrer">
+                        View Official Warnings ↗
+                    </a>
+                </article>
+            </div>
+
+            <div class="home-sources-note">
+                <strong>How we use these sources</strong>
+                <p>
+                    Data sources serve different purposes:
+                    some support historical model development,
+                    others provide operational weather updates,
+                    geospatial reference layers, or independent
+                    event verification. They are not all
+                    continuously queried by the live system.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="home-section home-about" aria-labelledby="aboutTitle">
+        <div class="home-container home-about-layout">
+            <div class="home-about-content">
+                <span class="home-section-eyebrow">ABOUT NAIROBI FLOODWATCH</span>
+                <h2 id="aboutTitle">
+                    Turning environmental data into
+                    meaningful flood awareness.
+                </h2>
+                <p>
+                    Nairobi FloodWatch is an academic flood-monitoring
+                    information system developed to explore how
+                    data engineering, machine learning, and
+                    geographic information systems can improve
+                    access to localized flood-risk information.
+                </p>
+                <p>
+                    By combining historical environmental data,
+                    operational weather information, flood-event
+                    records, and geospatial analysis, the platform
+                    supports informed awareness of flood-risk
+                    conditions across Nairobi.
+                </p>
+
+                <a class="home-btn home-btn-secondary" href="#features">
+                    Explore Our Capabilities
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <div class="home-about-aside">
+                <div class="home-about-card">
+                    <span class="home-about-card-label">OUR PURPOSE</span>
+                    <h3>Make flood-risk information easier to access.</h3>
+                    <p>
+                        Provide residents and relevant agencies
+                        with understandable, geographically
+                        contextualized monitoring information.
+                    </p>
+                </div>
+
+                <div class="home-about-card">
+                    <span class="home-about-card-label">OUR APPROACH</span>
+                    <h3>Connect data, predictions, and maps.</h3>
+                    <p>
+                        Bring environmental data acquisition,
+                        Random Forest classification, GIS analysis,
+                        and model-generated advisories together
+                        in one information system.
+                    </p>
+                </div>
+
+                <div class="home-about-card home-about-card-accent">
+                    <span class="home-about-card-label">ACADEMIC PROTOTYPE</span>
+                    <h3>Supporting awareness, not replacing official warnings.</h3>
+                    <p>
+                        FloodWatch is a research and educational
+                        prototype. It is not an official emergency
+                        alerting service.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-demo-teaser" aria-labelledby="demoTitle">
+        <div class="home-container home-demo-inner">
+            <div>
+                <span class="home-section-eyebrow">COMING LATER</span>
+                <h2 id="demoTitle">New to FloodWatch?</h2>
+                <p>
+                    A guided platform walkthrough is planned
+                    to demonstrate location search, flood-risk
+                    interpretation, GIS layers, and dashboards.
+                </p>
+            </div>
+
+            <span class="home-demo-status">Guided Demo · Planned</span>
+        </div>
+    </section>
+
+    <section id="contact" class="home-section home-contact" aria-labelledby="contactTitle">
+        <div class="home-container">
+            <div class="home-section-heading">
+                <div>
+                    <span class="home-section-eyebrow">CONNECT WITH US</span>
+                    <h2 id="contactTitle">Help us make FloodWatch better.</h2>
+                    <p>
+                        Have feedback about your experience,
+                        ideas for improvement, or questions
+                        about the system? We'd love to hear them.
+                    </p>
+                </div>
+            </div>
+
+            <div class="home-contact-layout">
+                <div class="home-contact-info">
+                    <h3>Get in touch</h3>
+                    <p>
+                        Nairobi FloodWatch is an academic prototype
+                        developed for research and educational
+                        purposes.
+                    </p>
+                    <div class="home-contact-detail">
+                        <span>Contact email</span>
+                        <strong>nairobi.floodwatch@example.com</strong>
+                        <!-- <small>
+                            Placeholder only — this mailbox is not active.
+                        </small> -->
+                    </div>
+
+                    <div class="home-contact-detail">
+                        <span>Project focus</span>
+                        <strong>Nairobi, Kenya</strong>
+                        <small>Flood monitoring, prediction, and geospatial information.</small>
+                    </div>
+
+                    <div class="home-contact-disclaimer">
+                        For official weather warnings, consult the
+                        <a href="https://meteo.go.ke/weather-warnings/" target="_blank" rel="noopener noreferrer">
+                            Kenya Meteorological Department
+                        </a>.
+                    </div>
+                </div>
+
+                <div class="home-feedback-card">
+                    <h3>Rate Your Experience</h3>
+                    <p>Tell us what you think of Nairobi FloodWatch.</p>
+                    <form id="reviewForm" data-preview-only="true">
+                        <fieldset class="home-rating-fieldset">
+                            <legend>
+                                How would you rate the platform?
+                            </legend>
+                            <div class="home-star-rating" id="reviewStars">
+                                <label class="home-star-option">
+                                    <input type="radio" name="rating" value="1" aria-label="1 star" required>
+                                    <span aria-hidden="true">★</span>
+                                </label>
+
+                                <label class="home-star-option">
+                                    <input type="radio" name="rating" value="2" aria-label="2 stars">
+                                    <span aria-hidden="true">★</span>
+                                </label>
+
+                                <label class="home-star-option">
+                                    <input type="radio" name="rating" value="3" aria-label="3 stars">
+                                    <span aria-hidden="true">★</span>
+                                </label>
+
+                                <label class="home-star-option">
+                                    <input type="radio" name="rating" value="4" aria-label="4 stars">
+                                    <span aria-hidden="true">★</span>
+                                </label>
+
+                                <label class="home-star-option">
+                                    <input type="radio" name="rating" value="5" aria-label="5 stars">
+                                    <span aria-hidden="true">★</span>
+                                </label>
+                            </div>
+
+                            <p id="ratingDescription" class="home-rating-description" aria-live="polite">
+                                Select a star rating
+                            </p>
+                        </fieldset>
+
+                        <div class="home-form-field">
+                            <label for="reviewEmail">Email Address</label>
+                            <input id="reviewEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
+                        </div>
+
+                        <div class="home-form-field">
+                            <label for="reviewMessage">Your Feedback</label>
+                            <textarea id="reviewMessage" name="message" rows="5" minlength="10" maxlength="2000" placeholder="Tell us what you liked or what we can improve…" required></textarea>
+                        </div>
+
+                        <button class="home-btn home-btn-primary home-feedback-submit" type="submit" id="submitReview">
+                            Preview My Feedback
+                            <span aria-hidden="true">→</span>
+                        </button>
+
+                        <p id="reviewStatus" class="home-review-status" role="status" aria-live="polite"></p>
+                        <p class="home-form-note">
+                            Preview only: reviews are not yet
+                            saved, emailed, or submitted.
+                            Feedback storage will be added later.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="home-footer">
+    <div class="home-container">
+        <div class="home-footer-grid">
+            <div class="home-footer-brand">
+                <a class="home-brand" href="/" aria-label="Return to Nairobi FloodWatch homepage">
+                    <img src="/static/images/logo.png" alt="" width="44" height="44">
+                    <span class="home-brand-text">
+                        <strong>Flood<span>Watch</span></strong>
+                        <small>Nairobi FloodWatch</small>
+                    </span>
+                </a>
+
+                <p>
+                    Bringing together environmental data,
+                    machine learning, and geographic intelligence
+                    to support flood awareness in Nairobi.
+                </p>
+            </div>
+
+            <div class="home-footer-links">
+                <h3>Explore</h3>
+                <a href="#home">Home</a>
+                <a href="#features">Our Features</a>
+                <a href="#sources">Data Sources</a>
+                <a href="#about">About Us</a>
+                <a href="#contact">Contact Us</a>
+            </div>
+
+            <div class="home-footer-links">
+                <h3>Dashboards</h3>
+                <a href="/resident">Resident Dashboard</a>
+                <a href="/agency">Agency Dashboard</a>
+                <a href="/admin/login">Administrator Login</a>
+            </div>
+
+            <div class="home-footer-links">
+                <h3>Official Information</h3>
+                <a href="https://meteo.go.ke/" target="_blank" rel="noopener noreferrer">
+                    Kenya Meteorological Department ↗
+                </a>
+                <a href="https://meteo.go.ke/weather-warnings/" target="_blank" rel="noopener noreferrer">
+                    Official Weather Warnings ↗
+                </a>
+                <a href="#sources">Explore Data Sources</a>
+            </div>
+        </div>
+
+        <div class="home-footer-disclaimer">
+            <strong>Important Notice</strong>
+            <p>
+                Nairobi FloodWatch is an academic prototype and
+                is not an official flood-warning or emergency-response
+                service. Flood-risk classifications and advisories
+                are model-generated assessments and may contain
+                uncertainty. They do not confirm that flooding is
+                occurring at a specific location.
+            </p>
+            <p>
+                Always consult official advisories from the
+                Kenya Meteorological Department and follow
+                instructions from relevant emergency authorities.
+            </p>
+        </div>
+
+        <div class="home-footer-bottom">
+            <span>
+                © <span id="footerYear">2026</span>
+                Nairobi FloodWatch. Academic Prototype.
+            </span>
+            <a href="#top">Back to Top ↑</a>
+        </div>
+    </div>
+</footer>
+
+<script src="/static/js/home.js" defer></script>
+</body>
+</html>
+
