@@ -1,0 +1,698 @@
+
+
+.admin-main {
+    min-width: 0;
+}
+
+.admin-main .section-heading h2 {
+    color: var(--navy);
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.admin-section {
+    min-width: 0;
+    margin-bottom: 34px;
+    scroll-margin-top: 24px;
+}
+
+.admin-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.admin-section-heading > div {
+    min-width: 0;
+}
+
+.admin-section-heading .subtle-text {
+    margin: 5px 0 0;
+}
+
+.admin-section-heading .button {
+    flex-shrink: 0;
+}
+
+
+/* 2. Quick navigation */
+
+.admin-jump-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+.admin-jump-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    padding: 9px 15px;
+
+    color: var(--blue);
+    background: var(--surface);
+
+    border: 1px solid var(--line);
+    border-radius: 9px;
+
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.admin-jump-links a:hover {
+    background: #edf5ff;
+    border-color: #a4c4eb;
+}
+
+
+/* 3. System-health cards */
+
+.admin-health-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.admin-health-card {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+
+    min-width: 0;
+    min-height: 158px;
+    padding: 23px 24px;
+
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid #b9c8da;
+    border-radius: 14px;
+}
+
+.admin-card-label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.admin-health-card strong {
+    color: var(--navy);
+    font-family: var(--font-heading);
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.admin-health-card small {
+    margin-top: auto;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Status colors are applied only after receiving backend data. */
+
+.admin-health-card[data-status="succeeded"],
+.admin-health-card[data-status="healthy"],
+.admin-health-card[data-status="reachable"] {
+    border-left-color: var(--low);
+}
+
+.admin-health-card[data-status="succeeded"] strong,
+.admin-health-card[data-status="healthy"] strong,
+.admin-health-card[data-status="reachable"] strong {
+    color: var(--low);
+}
+
+.admin-health-card[data-status="running"] {
+    border-left-color: var(--blue);
+}
+
+.admin-health-card[data-status="running"] strong {
+    color: var(--blue);
+}
+
+.admin-health-card[data-status="degraded"],
+.admin-health-card[data-status="stale"] {
+    border-left-color: var(--moderate);
+}
+
+.admin-health-card[data-status="degraded"] strong,
+.admin-health-card[data-status="stale"] strong {
+    color: var(--moderate);
+}
+
+.admin-health-card[data-status="failed"],
+.admin-health-card[data-status="unavailable"] {
+    border-left-color: var(--high);
+}
+
+.admin-health-card[data-status="failed"] strong,
+.admin-health-card[data-status="unavailable"] strong {
+    color: var(--high);
+}
+
+.admin-interpretation {
+    margin: 16px 2px 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+
+/* 4. Execution summary cards */
+
+.admin-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 17px;
+}
+
+.admin-metric-grid .agency-stat {
+    min-height: 150px;
+}
+
+.admin-metric-grid .agency-stat strong {
+    font-size: clamp(20px, 2vw, 30px);
+    letter-spacing: -0.6px;
+    overflow-wrap: anywhere;
+}
+
+.admin-execution-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+
+    margin-top: 18px;
+    padding: 17px 20px;
+
+    background: #eef4fb;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+.admin-execution-meta p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.admin-execution-meta strong {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+#latestRunId {
+    overflow-wrap: anywhere;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12px;
+}
+
+
+/* 5. Pipeline history */
+
+.admin-limit-control {
+    min-width: 155px;
+    max-width: 220px;
+}
+
+#pipelineHistory .agency-table {
+    min-width: 880px;
+}
+
+#pipelineHistory .agency-table td:last-child,
+#pipelineHistory .agency-table th:last-child {
+    min-width: 105px;
+    white-space: nowrap;
+}
+
+#pipelineHistory .agency-table button {
+    min-width: 75px;
+    white-space: nowrap;
+}
+
+.admin-run-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px 11px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.admin-run-status[data-status="succeeded"] {
+    color: var(--low);
+    background: #e5f5ec;
+}
+
+.admin-run-status[data-status="failed"] {
+    color: var(--high);
+    background: #ffebee;
+}
+
+.admin-run-status[data-status="running"] {
+    color: var(--blue);
+    background: #e8f1ff;
+}
+
+.admin-run-status[data-status="unknown"] {
+    color: var(--unknown);
+    background: #ecf1f7;
+}
+
+
+/* 6. Component monitoring */
+
+.admin-component-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+    align-items: start;
+    gap: 23px;
+}
+
+.admin-component-layout > * {
+    min-width: 0;
+}
+
+.admin-component-layout .agency-table {
+    min-width: 600px;
+}
+
+.admin-stage-chart {
+    min-width: 0;
+    padding: 20px;
+
+    background: #f7fafe;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+}
+
+.admin-stage-chart h3 {
+    margin: 0 0 16px;
+    color: var(--navy);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.admin-stage-chart .chart-frame {
+    position: relative;
+    width: 100%;
+    height: 330px;
+    min-height: 330px;
+}
+
+.admin-stage-chart .chart-frame canvas {
+    max-width: 100%;
+}
+
+#stageRows td:first-child {
+    font-weight: 600;
+}
+
+#stageRows td:nth-child(3) {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+
+/* 7. Risk monitoring and alert metrics */
+
+.admin-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 20px;
+    margin-top: 21px;
+}
+
+.admin-detail-grid > * {
+    min-width: 0;
+}
+
+.admin-detail-grid .agency-panel {
+    margin: 0;
+    padding: 24px;
+}
+
+.admin-detail-grid h3 {
+    margin: 0 0 18px;
+    color: var(--navy);
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.admin-detail-grid .chart-frame {
+    position: relative;
+    height: 285px;
+    min-height: 285px;
+}
+
+.admin-detail-grid .chart-frame canvas {
+    max-width: 100%;
+}
+
+.admin-key-values {
+    display: grid;
+    gap: 0;
+    margin: 0 0 16px;
+}
+
+.admin-key-values > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    padding: 13px 3px;
+    border-bottom: 1px solid var(--line);
+}
+
+.admin-key-values > div:last-child {
+    border-bottom: none;
+}
+
+.admin-key-values dt {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.admin-key-values dd {
+    margin: 0;
+    color: var(--navy);
+    font-family: var(--font-heading);
+    font-size: 19px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* 8. Operational logs */
+
+.admin-log-filters {
+    display: grid;
+    grid-template-columns:
+        minmax(140px, 0.65fr)
+        minmax(180px, 0.8fr)
+        minmax(220px, 1.4fr);
+
+    gap: 13px;
+    margin: 20px 0 16px;
+}
+
+#systemLogs .agency-table {
+    min-width: 850px;
+}
+
+#eventRows td:nth-child(3) {
+    font-weight: 600;
+}
+
+#eventRows td:nth-child(4) {
+    max-width: 380px;
+    overflow-wrap: anywhere;
+}
+
+.admin-event-level {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-event-level.INFO {
+    color: var(--blue);
+    background: #e8f1ff;
+}
+
+.admin-event-level.WARNING {
+    color: var(--moderate);
+    background: #fff3dc;
+}
+
+.admin-event-level.ERROR {
+    color: var(--high);
+    background: #ffebee;
+}
+
+.admin-errors {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+}
+
+.admin-errors h3 {
+    margin: 0 0 16px;
+    color: var(--navy);
+    font-size: 19px;
+}
+
+.admin-errors .agency-table {
+    min-width: 570px !important;
+}
+
+#recentErrorsRows td:last-child {
+    overflow-wrap: anywhere;
+}
+
+#selectedRunLabel {
+    margin: 8px 0 16px;
+}
+
+
+/* 9. Flood monitoring */
+
+.admin-monitoring-grid {
+    margin: 22px 0 32px;
+}
+
+.admin-main .admin-monitoring-grid {
+    grid-template-columns: minmax(0, 1fr) 345px;
+}
+
+.admin-main .admin-monitoring-grid > *,
+.admin-main .admin-monitoring-grid .main-column,
+.admin-main .admin-monitoring-grid .side-column {
+    min-width: 0;
+}
+
+.admin-main .agency-summary-header {
+    margin-bottom: 21px;
+}
+
+.admin-main .agency-compare {
+    margin-top: 0;
+}
+
+.admin-main .agency-records {
+    margin-top: 0;
+}
+
+.admin-main .map-card {
+    min-width: 0;
+}
+
+.admin-main .agency-table-scroll {
+    max-width: 100%;
+}
+
+
+/* 10. Footer */
+
+.admin-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    margin-top: 38px;
+    padding: 23px 0 5px;
+
+    border-top: 1px solid var(--line);
+
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* 11. Responsive: smaller laptops */
+
+@media (max-width: 1300px) {
+    .admin-health-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-component-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-main .admin-monitoring-grid {
+        grid-template-columns: minmax(0, 1fr) 280px;
+    }
+}
+
+
+/* 12. Responsive: tablets */
+
+@media (max-width: 980px) {
+    .admin-main .admin-monitoring-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-main .admin-monitoring-grid .side-column {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-log-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-log-filters .agency-field:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .admin-section {
+        margin-bottom: 28px;
+    }
+}
+
+
+/* 13. Responsive: mobile */
+
+@media (max-width: 720px) {
+    .admin-health-grid,
+    .admin-metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .admin-health-card {
+        min-height: 145px;
+        padding: 17px;
+    }
+
+    .admin-health-card strong {
+        font-size: 17px;
+    }
+
+    .admin-card-label {
+        font-size: 12px;
+    }
+
+    .admin-metric-grid .agency-stat strong {
+        font-size: 22px;
+    }
+
+    .admin-main .admin-monitoring-grid .side-column {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-section-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-section-heading .button {
+        width: 100%;
+    }
+
+    .admin-log-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-log-filters .agency-field:last-child {
+        grid-column: auto;
+    }
+
+    .admin-stage-chart {
+        padding: 15px;
+    }
+
+    .admin-execution-meta {
+        flex-direction: column;
+    }
+
+    .admin-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+
+/* 14. Responsive: very small devices */
+
+@media (max-width: 480px) {
+    .admin-health-grid,
+    .admin-metric-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-health-card {
+        min-height: 120px;
+    }
+
+    .admin-jump-links {
+        gap: 7px;
+    }
+
+    .admin-jump-links a {
+        font-size: 12px;
+        padding: 8px 11px;
+    }
+
+    .admin-section-heading h2,
+    .admin-main .section-heading h2 {
+        font-size: 21px;
+    }
+
+    .admin-detail-grid .agency-panel {
+        padding: 18px;
+    }
+}
+
+
+/* 15. Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-jump-links a {
+        transition: none;
+    }
+}
