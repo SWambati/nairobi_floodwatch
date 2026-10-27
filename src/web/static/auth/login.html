@@ -1,0 +1,1603 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Sign In | Nairobi FloodWatch</title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="/static/images/logo.png"
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        /* =============================================
+           NAIROBI FLOODWATCH AUTHENTICATION
+           ============================================= */
+
+        :root {
+            --navy: #163A70;
+            --navy-deep: #102F57;
+
+            --blue: #245CA8;
+            --blue-hover: #1D4D8E;
+            --sky: #4E8FD1;
+
+            --background: #F4F7FB;
+            --white: #FFFFFF;
+
+            --text: #163A70;
+            --muted: #627A96;
+            --border: #D7E2EE;
+            --input-bg: #EEF4FB;
+
+            --focus: rgba(36, 92, 168, 0.18);
+
+            --error: #B33A3A;
+            --success: #17644D;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            background: var(--background);
+            font-family: "Manrope", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* =============================================
+           PAGE LAYOUT
+           ============================================= */
+
+        .page {
+            display: grid;
+            grid-template-columns:
+                minmax(300px, 0.9fr)
+                minmax(380px, 1.1fr);
+
+            min-height: 100vh;
+        }
+
+        /* =============================================
+           LEFT BRANDING SECTION
+           ============================================= */
+
+        .intro {
+            background: var(--navy-deep);
+            color: var(--white);
+
+            padding: 42px clamp(28px, 5vw, 82px);
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+
+            align-self: flex-start;
+
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand-name {
+            font-size: 25px;
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .brand-name span {
+            color: var(--sky);
+        }
+
+        .brand-subtitle {
+            color: var(--sky);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        /* Reduced gap between branding and heading */
+
+        .intro-content {
+            max-width: 440px;
+            margin-top: 58px;
+        }
+
+        .intro-content h1 {
+            margin: 0 0 20px;
+
+            font-size: clamp(35px, 3.6vw, 53px);
+            font-weight: 800;
+            line-height: 1.22;
+            letter-spacing: -2px;
+        }
+
+        .intro-description {
+            margin: 0;
+            max-width: 370px;
+
+            color: #C8D9EB;
+            font-size: 14px;
+            line-height: 1.95;
+        }
+
+        .intro-footer {
+            margin-top: auto;
+            padding-top: 50px;
+
+            color: #ABC2D9;
+            font-size: 11px;
+            line-height: 1.9;
+        }
+
+        /* =============================================
+           RIGHT AUTHENTICATION SECTION
+           ============================================= */
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 46px 30px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 29px;
+
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--blue);
+        }
+
+        .auth-heading h2 {
+            margin: 0 0 8px;
+
+            color: var(--navy);
+            font-size: 29px;
+            font-weight: 800;
+            letter-spacing: -1.1px;
+        }
+
+        .auth-heading p {
+            margin: 0 0 27px;
+
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* =============================================
+           LOGIN / REGISTRATION TABS
+           ============================================= */
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+
+            margin-bottom: 26px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 13px 10px;
+
+            border: 0;
+            border-bottom: 2px solid transparent;
+
+            background: transparent;
+            color: var(--muted);
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition:
+                color 0.2s,
+                border-color 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--blue);
+        }
+
+        .tab.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+        }
+
+        /* =============================================
+           GOOGLE AUTHENTICATION
+           ============================================= */
+
+        .google-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+
+            min-height: 48px;
+            padding: 10px 16px;
+
+            background: var(--white);
+            color: var(--text);
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+
+            transition:
+                border-color 0.2s,
+                background 0.2s;
+        }
+
+        .google-button:hover {
+            border-color: #AFC4DD;
+            background: #F9FBFE;
+        }
+
+        .google-button svg {
+            width: 19px;
+            height: 19px;
+            flex-shrink: 0;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+
+            margin: 22px 0;
+
+            color: #8198B2;
+            font-size: 11px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: var(--border);
+        }
+
+        /* =============================================
+           FORMS
+           ============================================= */
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field label {
+            color: var(--navy);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .field input {
+            display: block;
+            width: 100%;
+            min-height: 48px;
+
+            padding: 0 14px;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            background: var(--input-bg);
+            color: var(--text);
+
+            font-size: 13px;
+            outline: none;
+
+            transition:
+                border-color 0.2s,
+                box-shadow 0.2s,
+                background 0.2s;
+        }
+
+        .field input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--focus);
+            background: var(--white);
+        }
+
+        .field input::placeholder {
+            color: #96A9BD;
+        }
+
+        /* =============================================
+           PASSWORD VISIBILITY BUTTONS
+           ============================================= */
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 52px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            width: 34px;
+            height: 34px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 0;
+
+            border: 0;
+            border-radius: 50%;
+
+            background: transparent;
+            color: var(--blue);
+
+            transition:
+                background 0.2s,
+                color 0.2s;
+        }
+
+        .password-toggle:hover {
+            background: rgba(36, 92, 168, 0.10);
+            color: var(--blue-hover);
+        }
+
+        .password-toggle:focus-visible {
+            outline: 2px solid var(--sky);
+            outline-offset: 2px;
+        }
+
+        .password-toggle svg {
+            width: 19px;
+            height: 19px;
+            display: block;
+        }
+
+        .password-toggle .icon-eye-off {
+            display: none;
+        }
+
+        .password-toggle[aria-pressed="true"] .icon-eye {
+            display: none;
+        }
+
+        .password-toggle[aria-pressed="true"] .icon-eye-off {
+            display: block;
+        }
+
+        /* =============================================
+           PASSWORD HINTS / LINKS
+           ============================================= */
+
+        .hint {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .forgot-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -4px;
+        }
+
+        .text-button {
+            padding: 0;
+            border: 0;
+
+            background: transparent;
+            color: var(--blue);
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .text-button:hover {
+            text-decoration: underline;
+        }
+
+        /* =============================================
+           PRIMARY ACTION BUTTONS
+           ============================================= */
+
+        .submit-button {
+            width: 100%;
+            min-height: 49px;
+
+            margin-top: 5px;
+            padding: 12px 18px;
+
+            border: 1px solid var(--blue);
+            border-radius: 9px;
+
+            background: var(--blue);
+            color: var(--white);
+
+            font-size: 13px;
+            font-weight: 800;
+
+            transition:
+                background 0.2s,
+                border-color 0.2s;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: var(--blue-hover);
+            border-color: var(--blue-hover);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* =============================================
+           FEEDBACK NOTICES
+           ============================================= */
+
+        .feedback {
+            padding: 13px 15px;
+            margin-bottom: 21px;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .feedback.error {
+            color: var(--error);
+            background: #FFF1F2;
+            border-color: #F2C9CE;
+        }
+
+        .feedback.success {
+            color: var(--success);
+            background: #EFFAF6;
+            border-color: #C5E9DB;
+        }
+
+        /* =============================================
+           AGENCY INFORMATION
+           ============================================= */
+
+        .account-note {
+            margin-top: 25px;
+            padding: 14px;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            background: #EAF2FB;
+            color: #526C88;
+
+            font-size: 11px;
+            line-height: 1.85;
+        }
+
+        .account-note strong {
+            color: var(--navy);
+        }
+
+        .bottom-note {
+            margin: 28px 0 0;
+
+            color: var(--muted);
+            text-align: center;
+
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        /* =============================================
+           RESPONSIVE DESIGN
+           ============================================= */
+
+        @media (max-width: 850px) {
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .intro {
+                padding: 24px;
+            }
+
+            .brand-logo {
+                width: 49px;
+                height: 49px;
+            }
+
+            .brand-name {
+                font-size: 23px;
+            }
+
+            .intro-content,
+            .intro-footer {
+                display: none;
+            }
+
+            .auth-section {
+                align-items: flex-start;
+                padding: 38px 24px 65px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-section {
+                padding: 30px 20px 55px;
+            }
+
+            .auth-heading h2 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="page">
+
+    <!-- =========================================
+         LEFT: FLOODWATCH BRANDING
+         ========================================= -->
+
+    <aside class="intro">
+
+        <a
+            href="/"
+            class="brand"
+            aria-label="Nairobi FloodWatch home"
+        >
+            <img
+                src="/static/images/logo.png"
+                alt=""
+                class="brand-logo"
+            >
+
+            <span class="brand-copy">
+
+                <span class="brand-name">
+                    Flood<span>Watch</span>
+                </span>
+
+                <span class="brand-subtitle">
+                    Nairobi FloodWatch
+                </span>
+
+            </span>
+        </a>
+
+        <div class="intro-content">
+
+            <h1>
+                Stay informed.<br>
+                Stay prepared.
+            </h1>
+
+            <p class="intro-description">
+                Access localized flood-risk assessments,
+                explore monitoring information, and stay
+                informed about conditions across Nairobi.
+            </p>
+
+        </div>
+
+        <div class="intro-footer">
+            Nairobi FloodWatch · Academic research prototype<br>
+            Model assessments are not official emergency warnings.
+        </div>
+
+    </aside>
+
+    <!-- =========================================
+         RIGHT: AUTHENTICATION
+         ========================================= -->
+
+    <section class="auth-section" aria-labelledby="pageTitle">
+
+        <div class="auth-container">
+
+            <a class="back-link" href="/">
+                ← Back to home
+            </a>
+
+            <div class="auth-heading">
+
+                <h2 id="pageTitle">
+                    Welcome back
+                </h2>
+
+                <p id="pageDescription">
+                    Sign in to access your FloodWatch account.
+                </p>
+
+            </div>
+
+            <!-- FEEDBACK -->
+
+            <div
+                id="feedback"
+                class="feedback"
+                role="status"
+                aria-live="polite"
+                hidden
+            ></div>
+
+            <!-- LOGIN / SIGNUP TABS -->
+
+            <div
+                id="authTabs"
+                class="tabs"
+                role="group"
+                aria-label="Authentication options"
+            >
+
+                <button
+                    type="button"
+                    class="tab active"
+                    data-mode="login"
+                    aria-pressed="true"
+                >
+                    Sign in
+                </button>
+
+                <button
+                    type="button"
+                    class="tab"
+                    data-mode="register"
+                    aria-pressed="false"
+                >
+                    Create account
+                </button>
+
+            </div>
+
+            <!-- GOOGLE LOGIN -->
+
+            <div id="socialLogin">
+
+                <a
+                    class="google-button"
+                    href="/auth/google/login"
+                >
+
+                    <svg
+                        viewBox="0 0 48 48"
+                        aria-hidden="true"
+                    >
+                        <path
+                            fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 5.38 6.51 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                        />
+                        <path
+                            fill="#4285F4"
+                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.27 5.48-4.8 7.18l7.73 6C44.38 38.03 46.98 31.88 46.98 24.55z"
+                        />
+                        <path
+                            fill="#FBBC05"
+                            d="M10.53 28.59A14.41 14.41 0 0 1 9.75 24c0-1.59.27-3.12.76-4.59l-7.98-6.2A23.88 23.88 0 0 0 0 24c0 3.87.93 7.51 2.56 10.78l7.97-6.19z"
+                        />
+                        <path
+                            fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                        />
+                    </svg>
+
+                    Continue with Google
+
+                </a>
+
+                <div class="divider">
+                    or continue with email
+                </div>
+
+            </div>
+
+            <!-- =====================================
+                 EMAIL / PASSWORD LOGIN
+                 ===================================== -->
+
+            <form id="loginForm" class="form">
+
+                <div class="field">
+
+                    <label for="loginEmail">
+                        Email address
+                    </label>
+
+                    <input
+                        id="loginEmail"
+                        type="email"
+                        autocomplete="email"
+                        maxlength="254"
+                        placeholder="you@example.com"
+                        required
+                    >
+
+                </div>
+
+                <div class="field">
+
+                    <label for="loginPassword">
+                        Password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            id="loginPassword"
+                            type="password"
+                            autocomplete="current-password"
+                            placeholder="Enter your password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-toggle-password="loginPassword"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            title="Show password"
+                        >
+
+                            <!-- EYE -->
+
+                            <svg
+                                class="icon-eye"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M2 12C3.8 8.5 7.4 6 12 6s8.2 2.5 10 6c-1.8 3.5-5.4 6-10 6S3.8 15.5 2 12Z"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linejoin="round"
+                                />
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="3"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                />
+                            </svg>
+
+                            <!-- EYE OFF -->
+
+                            <svg
+                                class="icon-eye-off"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M3 3L21 21"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+                                <path
+                                    d="M10.6 10.7A3 3 0 0 0 13.3 13.4"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+                                <path
+                                    d="M9.9 5.2A11.3 11.3 0 0 1 12 5c4.6 0 8.2 2.5 10 6a11.8 11.8 0 0 1-4.1 4.5"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                                <path
+                                    d="M6.2 6.3A11.8 11.8 0 0 0 2 12c1.8 3.5 5.4 6 10 6 1.4 0 2.8-.2 4-.7"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="forgot-row">
+
+                    <button
+                        type="button"
+                        class="text-button"
+                        data-mode="recover"
+                    >
+                        Forgot password?
+                    </button>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    Sign in
+                </button>
+
+            </form>
+
+            <!-- =====================================
+                 CREATE ACCOUNT
+                 ===================================== -->
+
+            <form id="registerForm" class="form" hidden>
+
+                <div class="field">
+
+                    <label for="registerName">
+                        Full name
+                    </label>
+
+                    <input
+                        id="registerName"
+                        type="text"
+                        autocomplete="name"
+                        maxlength="150"
+                        placeholder="Your full name"
+                        required
+                    >
+
+                </div>
+
+                <div class="field">
+
+                    <label for="registerEmail">
+                        Email address
+                    </label>
+
+                    <input
+                        id="registerEmail"
+                        type="email"
+                        autocomplete="email"
+                        maxlength="254"
+                        placeholder="you@example.com"
+                        required
+                    >
+
+                </div>
+
+                <div class="field">
+
+                    <label for="registerPassword">
+                        Create password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            id="registerPassword"
+                            type="password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            maxlength="128"
+                            placeholder="Create your password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-toggle-password="registerPassword"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            title="Show password"
+                        >
+
+                            <svg
+                                class="icon-eye"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M2 12C3.8 8.5 7.4 6 12 6s8.2 2.5 10 6c-1.8 3.5-5.4 6-10 6S3.8 15.5 2 12Z"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linejoin="round"
+                                />
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="3"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                />
+                            </svg>
+
+                            <svg
+                                class="icon-eye-off"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M3 3L21 21"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+                                <path
+                                    d="M10.6 10.7A3 3 0 0 0 13.3 13.4"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+                                <path
+                                    d="M9.9 5.2A11.3 11.3 0 0 1 12 5c4.6 0 8.2 2.5 10 6a11.8 11.8 0 0 1-4.1 4.5"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                                <path
+                                    d="M6.2 6.3A11.8 11.8 0 0 0 2 12c1.8 3.5 5.4 6 10 6 1.4 0 2.8-.2 4-.7"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                    <span class="hint">
+                        At least 8 characters, including an uppercase
+                        letter, a number and a special character.
+                    </span>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="confirmPassword">
+                        Confirm password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            maxlength="128"
+                            placeholder="Repeat your password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-toggle-password="confirmPassword"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            title="Show password"
+                        >
+
+                            <svg
+                                class="icon-eye"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M2 12C3.8 8.5 7.4 6 12 6s8.2 2.5 10 6c-1.8 3.5-5.4 6-10 6S3.8 15.5 2 12Z"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linejoin="round"
+                                />
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="3"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                />
+                            </svg>
+
+                            <svg
+                                class="icon-eye-off"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M3 3L21 21"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+                                <path
+                                    d="M10.6 10.7A3 3 0 0 0 13.3 13.4"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+                                <path
+                                    d="M9.9 5.2A11.3 11.3 0 0 1 12 5c4.6 0 8.2 2.5 10 6a11.8 11.8 0 0 1-4.1 4.5"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                                <path
+                                    d="M6.2 6.3A11.8 11.8 0 0 0 2 12c1.8 3.5 5.4 6 10 6 1.4 0 2.8-.2 4-.7"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    Create account
+                </button>
+
+            </form>
+
+            <!-- =====================================
+                 PASSWORD RECOVERY
+                 ===================================== -->
+
+            <form id="recoverForm" class="form" hidden>
+
+                <div class="field">
+
+                    <label for="recoverEmail">
+                        Email address
+                    </label>
+
+                    <input
+                        id="recoverEmail"
+                        type="email"
+                        autocomplete="email"
+                        maxlength="254"
+                        placeholder="you@example.com"
+                        required
+                    >
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    Send reset instructions
+                </button>
+
+                <button
+                    type="button"
+                    class="text-button"
+                    data-mode="login"
+                >
+                    Return to sign in
+                </button>
+
+            </form>
+
+            <!-- AGENCY INFORMATION -->
+
+            <div id="accountNote" class="account-note">
+
+                <strong>Agency officer?</strong>
+
+                Sign in using your approved FloodWatch account.
+                Agency access requires identity verification,
+                administrator approval and MFA.
+
+            </div>
+
+            <p class="bottom-note">
+                Secure account access · Nairobi FloodWatch
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- =============================================
+     AUTHENTICATION JAVASCRIPT
+     ============================================= -->
+
+<script>
+"use strict";
+
+/* =============================================
+   ELEMENTS
+   ============================================= */
+
+const forms = {
+    login: document.getElementById("loginForm"),
+    register: document.getElementById("registerForm"),
+    recover: document.getElementById("recoverForm")
+};
+
+const titles = {
+    login: [
+        "Welcome back",
+        "Sign in to access your FloodWatch account."
+    ],
+    register: [
+        "Create your account",
+        "Get started with Nairobi FloodWatch."
+    ],
+    recover: [
+        "Reset your password",
+        "Enter your email to request password recovery instructions."
+    ]
+};
+
+const feedback = document.getElementById("feedback");
+
+
+/* =============================================
+   FEEDBACK HANDLING
+   ============================================= */
+
+function showFeedback(message, type = "error") {
+    feedback.textContent = message;
+    feedback.className = `feedback ${type}`;
+    feedback.hidden = false;
+}
+
+function clearFeedback() {
+    feedback.textContent = "";
+    feedback.hidden = true;
+}
+
+
+/* =============================================
+   LOGIN / REGISTER / RECOVERY TABS
+   ============================================= */
+
+function setMode(mode) {
+    if (!forms[mode]) {
+        return;
+    }
+
+    clearFeedback();
+
+    for (const [key, form] of Object.entries(forms)) {
+        form.hidden = key !== mode;
+    }
+
+    document.getElementById("pageTitle").textContent =
+        titles[mode][0];
+
+    document.getElementById("pageDescription").textContent =
+        titles[mode][1];
+
+    document.getElementById("authTabs").hidden =
+        mode === "recover";
+
+    document.getElementById("socialLogin").hidden =
+        mode === "recover";
+
+    document.getElementById("accountNote").hidden =
+        mode === "recover";
+
+    document.querySelectorAll(".tab").forEach(tab => {
+        const active = tab.dataset.mode === mode;
+
+        tab.classList.toggle("active", active);
+
+        tab.setAttribute(
+            "aria-pressed",
+            String(active)
+        );
+    });
+}
+
+document.querySelectorAll("[data-mode]").forEach(button => {
+    button.addEventListener("click", () => {
+        setMode(button.dataset.mode);
+    });
+});
+
+
+/* =============================================
+   PASSWORD VISIBILITY TOGGLE
+   ============================================= */
+
+document.querySelectorAll(
+    "[data-toggle-password]"
+).forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const input = document.getElementById(
+            button.dataset.togglePassword
+        );
+
+        if (!input) {
+            return;
+        }
+
+        const isVisible = input.type === "text";
+
+        input.type = isVisible
+            ? "password"
+            : "text";
+
+        button.setAttribute(
+            "aria-label",
+            isVisible
+                ? "Show password"
+                : "Hide password"
+        );
+
+        button.setAttribute(
+            "title",
+            isVisible
+                ? "Show password"
+                : "Hide password"
+        );
+
+        button.setAttribute(
+            "aria-pressed",
+            String(!isVisible)
+        );
+
+    });
+
+});
+
+
+/* =============================================
+   SHARED API REQUEST HANDLER
+   ============================================= */
+
+async function postAuth(path, payload) {
+
+    const response = await fetch(path, {
+        method: "POST",
+        credentials: "same-origin",
+
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+
+        body: JSON.stringify(payload)
+    });
+
+    const result = await response
+        .json()
+        .catch(() => ({}));
+
+    if (!response.ok) {
+
+        const message =
+            typeof result.detail === "string"
+                ? result.detail
+                : "Unable to complete the request. Please try again.";
+
+        throw new Error(message);
+    }
+
+    return result;
+}
+
+
+/* =============================================
+   PREVENT DUPLICATE FORM SUBMISSIONS
+   ============================================= */
+
+async function submitForm(form, action) {
+
+    const button = form.querySelector(
+        '[type="submit"]'
+    );
+
+    const originalText = button.textContent;
+
+    clearFeedback();
+
+    button.disabled = true;
+    button.textContent = "Please wait...";
+
+    try {
+
+        await action();
+
+    } catch (error) {
+
+        showFeedback(
+            error instanceof TypeError
+                ? "Unable to connect to FloodWatch."
+                : error.message
+        );
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = originalText;
+
+    }
+}
+
+
+/* =============================================
+   LOCAL EMAIL / PASSWORD LOGIN
+   ============================================= */
+
+forms.login.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        await submitForm(forms.login, async () => {
+
+            const result = await postAuth(
+                "/auth/local/login",
+                {
+                    email: document
+                        .getElementById("loginEmail")
+                        .value.trim(),
+
+                    password: document
+                        .getElementById("loginPassword")
+                        .value
+                }
+            );
+
+            const destination = result.next;
+
+            if (
+                typeof destination !== "string" ||
+                !destination.startsWith("/") ||
+                destination.startsWith("//") ||
+                destination.startsWith("/\\")
+            ) {
+                throw new Error(
+                    "Invalid login destination."
+                );
+            }
+
+            window.location.assign(destination);
+
+        });
+
+    }
+);
+
+
+/* =============================================
+   REGISTRATION
+   ============================================= */
+
+forms.register.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        const password = document
+            .getElementById("registerPassword")
+            .value;
+
+        const confirmation = document
+            .getElementById("confirmPassword")
+            .value;
+
+        if (password !== confirmation) {
+
+            showFeedback(
+                "Passwords do not match."
+            );
+
+            return;
+        }
+
+        const validPassword =
+            password.length >= 8 &&
+            /[A-Z]/.test(password) &&
+            /[0-9]/.test(password) &&
+            /[^A-Za-z0-9\s]/.test(password);
+
+        if (!validPassword) {
+
+            showFeedback(
+                "Use at least 8 characters, an uppercase " +
+                "letter, a number and a special character."
+            );
+
+            return;
+        }
+
+        await submitForm(forms.register, async () => {
+
+            const result = await postAuth(
+                "/auth/local/register",
+                {
+                    display_name: document
+                        .getElementById("registerName")
+                        .value.trim(),
+
+                    email: document
+                        .getElementById("registerEmail")
+                        .value.trim(),
+
+                    password: password
+                }
+            );
+
+            forms.register.reset();
+
+            showFeedback(
+                result.message ||
+                "Registration request received.",
+                "success"
+            );
+
+        });
+
+    }
+);
+
+
+/* =============================================
+   PASSWORD RECOVERY
+   ============================================= */
+
+forms.recover.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        await submitForm(forms.recover, async () => {
+
+            const result = await postAuth(
+                "/auth/local/request-password-reset",
+                {
+                    email: document
+                        .getElementById("recoverEmail")
+                        .value.trim()
+                }
+            );
+
+            forms.recover.reset();
+
+            showFeedback(
+                result.message ||
+                "Password recovery request received.",
+                "success"
+            );
+
+        });
+
+    }
+);
+
+
+/* =============================================
+   DIRECT REGISTRATION LINKS
+   ============================================= */
+
+const initialMode = new URLSearchParams(
+    window.location.search
+).get("mode");
+
+setMode(
+    initialMode === "register"
+        ? "register"
+        : "login"
+);
+
+</script>
+
+</body>
+</html>

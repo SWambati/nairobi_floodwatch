@@ -603,26 +603,51 @@
 
         } catch (error) {
             if (error.status === 401 || error.status === 403) {
-                state.authenticated = false;
-                $("adminAuthNotice").hidden = false;
-
-                text("opsUpdated", "Admin sign-in required");
-
-                showError(
-                    "Operational API access requires a verified admin session. " +
-                    "Do not put an API key in browser JavaScript."
-                );
+                let sessionValid = false;
+                try {
+                    const healthResponse = await fetch("/api/admin/health", {
+                        credentials: "same-origin",
+                        cache: "no-store",
+                    });
+                    sessionValid = healthResponse.ok;
+                } catch (healthError) {
+                    console.warn(
+                        "Could not verify administrator access:",
+                        healthError
+                    );
+                }
+                if (sessionValid) {
+                    state.authenticated = true;
+                    $("adminAuthNotice").hidden = true;
+                    text("opsUpdated", "Operational data access issue");
+                    showError(
+                        "Your administrator session is verified, but an " +
+                        "operational monitoring request was denied. " +
+                        `HTTP ${error.status}. ` +
+                        "Check the browser console for the affected endpoint."
+                    );
+                } else {
+                    state.authenticated = false;
+                    $("adminAuthNotice").hidden = false;
+                    text("opsUpdated", "Admin verification required");
+                    showError(
+                        "Administrator access could not be verified. " +
+                        "Please complete authentication and try again."
+                    );
+                }
             } else {
                 text("opsUpdated", "Operational update failed");
-
                 showError(
                     "Could not update operational telemetry. " +
                     "Previously displayed values may be stale."
                 );
             }
-
-            console.warn("Admin monitoring update:", error);
-
+            console.warn("Admin monitoring update:", {
+                endpoint: error.adminEndpoint || "Unknown request",
+                resource: error.adminResource || "Operational monitoring",
+                status: error.status,
+                message: error.message,
+            });
         } finally {
             state.refreshing = false;
             $("refreshOperations").disabled = false;
