@@ -7,14 +7,14 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.dashboard.admin_queries import (get_operational_overview, get_recent_runs, get_run_events, get_latest_stage_results, get_recent_errors)
 from src.operational.persistence import create_database_engine
-from src.dashboard.admin_auth import require_admin
+from src.auth.authorization import require_admin_access
 
 logger = logging.getLogger("floodwatch.admin")
 
 router = APIRouter(
     prefix="/api/admin",
     tags=["Admin Monitoring"],
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_admin_access)],
     include_in_schema=False,
 )
 

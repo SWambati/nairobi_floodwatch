@@ -1,0 +1,1061 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="referrer" content="no-referrer">
+
+    <title>Account Security | Nairobi FloodWatch</title>
+
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --navy: #122b4a;
+            --blue: #1755ba;
+            --blue-dark: #104394;
+            --ocean: #087eac;
+            --ink: #20344d;
+            --muted: #52657a;
+            --line: #dce5ef;
+            --page: #f5f7fb;
+            --surface: #ffffff;
+            --success: #14754b;
+            --danger: #b42a39;
+            --font-body: "IBM Plex Sans", system-ui, sans-serif;
+            --font-heading: "Manrope", system-ui, sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--page);
+            color: var(--ink);
+            font: 16px/1.6 var(--font-body);
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--navy);
+            font-family: var(--font-heading);
+            letter-spacing: -.035em;
+        }
+
+        p {
+            color: var(--muted);
+            margin-top: 0;
+        }
+
+        a {
+            color: var(--blue);
+        }
+
+        :focus-visible {
+            outline: 3px solid #337ff0;
+            outline-offset: 3px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -60px;
+            left: 12px;
+            padding: 10px 15px;
+            background: var(--navy);
+            color: white;
+            border-radius: 8px;
+            z-index: 100;
+        }
+
+        .skip-link:focus {
+            top: 12px;
+        }
+
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .header-inner {
+            max-width: 1180px;
+            margin: auto;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--navy);
+            font: 800 23px/1.2 var(--font-heading);
+            letter-spacing: -.8px;
+        }
+
+        .brand img {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+        }
+
+        .brand-name span {
+            color: var(--blue);
+        }
+
+        .brand:hover {
+            text-decoration: none;
+        }
+
+        .header-home {
+            padding: 10px 15px;
+            border-radius: 9px;
+            text-decoration: none;
+            color: var(--blue);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .header-home:hover {
+            background: #eff5fd;
+        }
+
+        .main-content {
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 58px 20px 65px;
+        }
+
+        .eyebrow {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--ocean);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+        }
+
+        .page-heading {
+            margin-bottom: 24px;
+        }
+
+        .page-heading h1 {
+            margin-bottom: 10px;
+            font-size: clamp(27px, 4vw, 34px);
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .page-heading p {
+            max-width: 540px;
+            margin-bottom: 0;
+            font-size: 15px;
+        }
+
+        .auth-card {
+            padding: 32px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-top: 4px solid var(--blue);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(18, 43, 74, .05);
+        }
+
+        .auth-card h2 {
+            font-size: 21px;
+            margin-bottom: 9px;
+        }
+
+        .auth-card p {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 13px 16px;
+            margin-bottom: 22px;
+            background: #eff5fe;
+            border: 1px solid #d4e3f5;
+            border-radius: 9px;
+        }
+
+        .account-info strong {
+            color: var(--navy);
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .account-info span {
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+
+        .info-panel {
+            padding: 16px;
+            margin: 20px 0;
+            border: 1px solid #d4e3f5;
+            border-left: 3px solid var(--blue);
+            background: #f1f7ff;
+            border-radius: 9px;
+            color: #365778;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 47px;
+            width: 100%;
+            padding: 11px 18px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font: 700 14px/1.4 var(--font-heading);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color .16s, border-color .16s;
+        }
+
+        .button.primary {
+            color: #ffffff;
+            background: var(--blue);
+            border-color: var(--blue);
+        }
+
+        .button.primary:hover {
+            background: var(--blue-dark);
+        }
+
+        .button.secondary {
+            color: var(--blue);
+            background: white;
+            border-color: #bfcee1;
+        }
+
+        .button.secondary:hover {
+            background: #edf5ff;
+            border-color: #84ace2;
+        }
+
+        .button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: grid;
+            gap: 11px;
+            margin-top: 22px;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 8px;
+            color: var(--navy);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            min-height: 49px;
+            padding: 12px 15px;
+            border: 1px solid #cedbea;
+            border-radius: 9px;
+            background: #ffffff;
+            color: var(--ink);
+            font: 16px var(--font-body);
+        }
+
+        input[type="text"]:focus {
+            outline: 3px solid #d8eaff;
+            border-color: var(--blue);
+        }
+
+        .qr-frame {
+            width: fit-content;
+            max-width: 100%;
+            padding: 17px;
+            margin: 22px auto;
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .qr-frame img {
+            display: block;
+            width: 220px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .mode-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+            margin: 19px 0;
+        }
+
+        .mode-switch .button {
+            font-size: 12px;
+            padding: 10px;
+        }
+
+        .mode-switch .selected {
+            background: #eaf3ff;
+            border-color: var(--blue);
+            color: var(--blue-dark);
+        }
+
+        .recovery-codes {
+            padding: 19px;
+            margin-top: 18px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #f6f9fd;
+            color: var(--navy);
+            text-align: center;
+            font: 600 14px/2 var(--font-body);
+            letter-spacing: .5px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            user-select: text;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 19px;
+        }
+
+        .checkbox-row input {
+            margin-top: 4px;
+            accent-color: var(--blue);
+        }
+
+        .checkbox-row label {
+            margin: 0;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .notice {
+            padding: 13px 15px;
+            margin-top: 20px;
+            border-radius: 9px;
+            border: 1px solid #b9dcca;
+            background: #eaf7f0;
+            color: var(--success);
+            font-size: 13px;
+        }
+
+        .notice.error {
+            background: #fff0f1;
+            color: var(--danger);
+            border-color: #e9c2c6;
+        }
+
+        .security-footer {
+            margin-top: 23px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 600px) {
+            .header-inner {
+                padding: 15px 18px;
+            }
+
+            .brand {
+                font-size: 19px;
+            }
+
+            .brand img {
+                width: 38px;
+                height: 38px;
+            }
+
+            .main-content {
+                padding: 32px 15px 45px;
+            }
+
+            .auth-card {
+                padding: 23px 19px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">
+        Skip to main content
+    </a>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a
+                class="brand"
+                href="/"
+                aria-label="Nairobi FloodWatch home"
+            >
+                <img
+                    src="/static/images/logo.png"
+                    alt=""
+                    width="46"
+                    height="46"
+                >
+                <span class="brand-name">
+                    Flood<span>Watch</span>
+                </span>
+            </a>
+
+            <a class="header-home" href="/">
+                Home
+            </a>
+        </div>
+    </header>
+
+    <main id="main" class="main-content">
+        <div class="page-heading">
+            <span class="eyebrow">Account Security</span>
+            <h1>Secure your FloodWatch account</h1>
+            <p>
+                Use Google Authenticator to keep your account
+                protected. Multifactor authentication is required
+                for agency officers and administrators.
+            </p>
+        </div>
+
+        <section class="auth-card" aria-label="Account verification">
+            <div id="accountInfo" class="account-info" hidden>
+                <strong id="accountName"></strong>
+                <span id="accountRole"></span>
+            </div>
+
+            <div id="loading" class="stage">
+                <h2>Checking your session</h2>
+                <p>
+                    Verifying your FloodWatch authentication status.
+                </p>
+            </div>
+
+            <div id="signin" class="stage" hidden>
+                <h2>Sign in to continue</h2>
+                <p>
+                    Sign in with your Google account before setting
+                    up or completing authenticator verification.
+                </p>
+
+                <div class="actions">
+                    <a
+                        class="button primary"
+                        href="/auth/google/login"
+                    >
+                        Continue with Google
+                    </a>
+                </div>
+            </div>
+
+            <div id="setupIntro" class="stage" hidden>
+                <h2>Set up Google Authenticator</h2>
+                <p>
+                    Add an authenticator to protect your FloodWatch
+                    account and complete the secure sign-in process.
+                </p>
+
+                <div class="info-panel">
+                    Install Google Authenticator on your phone.
+                    You'll scan a QR code and confirm a six-digit
+                    verification code to finish enrollment.
+                </div>
+
+                <button
+                    id="enrollButton"
+                    class="button primary"
+                    type="button"
+                >
+                    Set up authenticator
+                </button>
+            </div>
+
+            <div id="enrollment" class="stage" hidden>
+                <h2>Scan your QR code</h2>
+                <p>
+                    Open Google Authenticator, tap the add button,
+                    and scan the QR code below.
+                </p>
+
+                <div class="qr-frame">
+                    <img
+                        id="qrImage"
+                        alt="Google Authenticator enrollment QR code"
+                    >
+                </div>
+
+                <p>
+                    Enter the six-digit code displayed on your phone
+                    to activate MFA.
+                </p>
+
+                <form id="confirmForm">
+                    <label for="confirmCode">
+                        Verification code
+                    </label>
+
+                    <input
+                        id="confirmCode"
+                        type="text"
+                        inputmode="numeric"
+                        pattern="[0-9]{6}"
+                        maxlength="6"
+                        autocomplete="one-time-code"
+                        placeholder="000000"
+                        required
+                    >
+
+                    <div class="actions">
+                        <button class="button primary" type="submit">
+                            Verify and enable MFA
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="recovery" class="stage" hidden>
+                <h2>Save your recovery codes</h2>
+
+                <p>
+                    Your authenticator is enabled. These ten
+                    recovery codes can help you regain access
+                    if you lose your phone.
+                </p>
+
+                <div class="info-panel">
+                    Each recovery code can only be used once.
+                    Store them securely. They won't be displayed
+                    again after you leave this page.
+                </div>
+
+                <pre id="recoveryCodes" class="recovery-codes"></pre>
+
+                <div class="actions">
+                    <button
+                        id="copyCodes"
+                        type="button"
+                        class="button secondary"
+                    >
+                        Copy recovery codes
+                    </button>
+                </div>
+
+                <div class="checkbox-row">
+                    <input type="checkbox" id="savedCodes">
+
+                    <label for="savedCodes">
+                        I have securely saved my recovery codes.
+                    </label>
+                </div>
+
+                <div class="actions">
+                    <button
+                        id="finishSetup"
+                        type="button"
+                        class="button primary"
+                        disabled
+                    >
+                        Continue to dashboard
+                    </button>
+                </div>
+            </div>
+
+            <div id="challenge" class="stage" hidden>
+                <h2>Two-factor verification</h2>
+                <p>
+                    Confirm your identity using Google Authenticator
+                    or an unused recovery code.
+                </p>
+
+                <div class="mode-switch">
+                    <button
+                        id="useTotp"
+                        type="button"
+                        class="button secondary selected"
+                    >
+                        Authenticator code
+                    </button>
+
+                    <button
+                        id="useRecovery"
+                        type="button"
+                        class="button secondary"
+                    >
+                        Recovery code
+                    </button>
+                </div>
+
+                <form id="challengeForm">
+                    <div id="totpInput">
+                        <label for="challengeCode">
+                            Six-digit authenticator code
+                        </label>
+
+                        <input
+                            id="challengeCode"
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            autocomplete="one-time-code"
+                            placeholder="000000"
+                        >
+                    </div>
+
+                    <div id="recoveryInput" hidden>
+                        <label for="challengeRecovery">
+                            Single-use recovery code
+                        </label>
+
+                        <input
+                            id="challengeRecovery"
+                            type="text"
+                            autocomplete="off"
+                            spellcheck="false"
+                            placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+                        >
+                    </div>
+
+                    <div class="actions">
+                        <button class="button primary" type="submit">
+                            Verify and continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="verified" class="stage" hidden>
+                <h2>Verification successful</h2>
+
+                <p>
+                    Your FloodWatch session has completed the required
+                    security checks. You can now continue to your dashboard.
+                </p>
+
+                <div class="actions">
+                    <a
+                        id="dashboardLink"
+                        class="button primary"
+                        href="/resident"
+                    >
+                        Continue to dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div id="retry" class="stage" hidden>
+                <h2>Sign in again</h2>
+
+                <p>
+                    Your session may have expired or may need to be
+                    refreshed before authenticator verification.
+                </p>
+
+                <div class="actions">
+                    <a
+                        class="button primary"
+                        href="/auth/google/login"
+                    >
+                        Sign in with Google
+                    </a>
+                </div>
+            </div>
+
+            <div
+                id="notice"
+                class="notice"
+                role="status"
+                aria-live="polite"
+                hidden
+            ></div>
+        </section>
+
+        <p class="security-footer">
+            Nairobi FloodWatch · Secure Account Access
+        </p>
+    </main>
+
+    <script>
+        "use strict";
+
+        const $ = id => document.getElementById(id);
+
+        let currentUser = null;
+        let challengeToken = null;
+        let recoveryMode = false;
+
+        function show(stageId) {
+            document.querySelectorAll(".stage").forEach(stage => {
+                stage.hidden = stage.id !== stageId;
+            });
+        }
+
+        function notice(message, error = false) {
+            const element = $("notice");
+
+            element.textContent = message;
+            element.classList.toggle("error", error);
+            element.hidden = !message;
+        }
+
+        function dashboardDestination() {
+            if (currentUser?.role === "admin") {
+                return "/admin";
+            }
+
+            if (currentUser?.role === "agency") {
+                return "/agency";
+            }
+
+            return "/resident";
+        }
+
+        function continueToDashboard() {
+            challengeToken = null;
+            $("recoveryCodes").textContent = "";
+            $("qrImage").removeAttribute("src");
+
+            window.location.assign(dashboardDestination());
+        }
+
+        async function api(path, payload = undefined) {
+            const options = {
+                credentials: "same-origin",
+                cache: "no-store",
+                headers: {
+                    "Accept": "application/json"
+                }
+            };
+
+            if (payload !== undefined) {
+                options.method = "POST";
+                options.headers["Content-Type"] = "application/json";
+                options.body = JSON.stringify(payload);
+            }
+
+            const response = await fetch(path, options);
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const message = typeof data.detail === "string"
+                    ? data.detail
+                    : `Request failed with status ${response.status}.`;
+
+                const error = new Error(message);
+                error.status = response.status;
+                throw error;
+            }
+
+            return data;
+        }
+
+        async function runAction(button, action) {
+            button.disabled = true;
+            notice("");
+
+            try {
+                await action();
+            } catch (error) {
+                notice(error.message, true);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function beginChallenge() {
+            try {
+                const result = await api(
+                    "/auth/mfa/challenge/start",
+                    {}
+                );
+
+                if (result.status === "already_verified") {
+                    $("dashboardLink").href = dashboardDestination();
+                    show("verified");
+                    return;
+                }
+
+                if (
+                    result.status !== "challenge_required" ||
+                    !result.challenge_token
+                ) {
+                    throw new Error("An MFA challenge is unavailable.");
+                }
+
+                challengeToken = result.challenge_token;
+                setRecoveryMode(false);
+                show("challenge");
+
+            } catch (error) {
+                if (error.status === 401) {
+                    show("retry");
+                } else {
+                    show("challenge");
+                }
+
+                notice(error.message, true);
+            }
+        }
+
+        async function initialize() {
+            notice("");
+
+            try {
+                const session = await api("/auth/session");
+
+                if (!session.authenticated || !session.user) {
+                    show("signin");
+                    return;
+                }
+
+                currentUser = session.user;
+
+                $("accountName").textContent =
+                    currentUser.display_name ||
+                    currentUser.email ||
+                    "FloodWatch account";
+
+                $("accountRole").textContent =
+                    currentUser.role || "resident";
+
+                $("accountInfo").hidden = false;
+
+                const status = await api("/auth/mfa/status");
+
+                if (status.enabled) {
+                    await beginChallenge();
+                } else {
+                    show("setupIntro");
+                }
+
+            } catch (error) {
+                show("retry");
+                notice(error.message, true);
+            }
+        }
+
+        $("enrollButton").addEventListener("click", event => {
+            runAction(event.currentTarget, async () => {
+                const result = await api(
+                    "/auth/mfa/enroll",
+                    {}
+                );
+
+                if (!result.qr_code_data_url) {
+                    throw new Error(
+                        "Authenticator QR code is unavailable."
+                    );
+                }
+
+                $("qrImage").src = result.qr_code_data_url;
+                $("confirmCode").value = "";
+
+                show("enrollment");
+            });
+        });
+
+        $("confirmForm").addEventListener("submit", event => {
+            event.preventDefault();
+
+            const button = event.currentTarget.querySelector(
+                'button[type="submit"]'
+            );
+
+            runAction(button, async () => {
+                const code = $("confirmCode").value.trim();
+
+                if (!/^[0-9]{6}$/.test(code)) {
+                    throw new Error("Enter a valid six-digit code.");
+                }
+
+                const result = await api(
+                    "/auth/mfa/confirm",
+                    { code }
+                );
+
+                if (
+                    !result.enabled ||
+                    !Array.isArray(result.recovery_codes)
+                ) {
+                    throw new Error(
+                        "Authenticator enrollment was not confirmed."
+                    );
+                }
+
+                $("qrImage").removeAttribute("src");
+                $("confirmCode").value = "";
+
+                $("recoveryCodes").textContent =
+                    result.recovery_codes.join("\n");
+
+                $("savedCodes").checked = false;
+                $("finishSetup").disabled = true;
+
+                show("recovery");
+            });
+        });
+
+        $("savedCodes").addEventListener("change", event => {
+            $("finishSetup").disabled = !event.target.checked;
+        });
+
+        $("copyCodes").addEventListener("click", event => {
+            runAction(event.currentTarget, async () => {
+                if (!navigator.clipboard?.writeText) {
+                    throw new Error(
+                        "Clipboard is unavailable. Save the codes manually."
+                    );
+                }
+
+                await navigator.clipboard.writeText(
+                    $("recoveryCodes").textContent
+                );
+
+                notice("Recovery codes copied. Store them securely.");
+            });
+        });
+
+        $("finishSetup").addEventListener(
+            "click",
+            continueToDashboard
+        );
+
+        function setRecoveryMode(enabled) {
+            recoveryMode = enabled;
+
+            $("totpInput").hidden = enabled;
+            $("recoveryInput").hidden = !enabled;
+
+            $("useTotp").classList.toggle(
+                "selected", !enabled
+            );
+
+            $("useRecovery").classList.toggle(
+                "selected", enabled
+            );
+
+            $("challengeCode").value = "";
+            $("challengeRecovery").value = "";
+        }
+
+        $("useTotp").addEventListener("click", () => {
+            setRecoveryMode(false);
+            notice("");
+        });
+
+        $("useRecovery").addEventListener("click", () => {
+            setRecoveryMode(true);
+            notice("");
+        });
+
+        $("challengeForm").addEventListener("submit", event => {
+            event.preventDefault();
+
+            const button = event.currentTarget.querySelector(
+                'button[type="submit"]'
+            );
+
+            runAction(button, async () => {
+                if (!challengeToken) {
+                    throw new Error(
+                        "No active challenge. Sign in again."
+                    );
+                }
+
+                const requestBody = {
+                    challenge_token: challengeToken
+                };
+
+                if (recoveryMode) {
+                    const code = $("challengeRecovery").value.trim();
+
+                    if (!code) {
+                        throw new Error("Enter a recovery code.");
+                    }
+
+                    requestBody.recovery_code = code;
+                } else {
+                    const code = $("challengeCode").value.trim();
+
+                    if (!/^[0-9]{6}$/.test(code)) {
+                        throw new Error(
+                            "Enter a valid six-digit code."
+                        );
+                    }
+
+                    requestBody.code = code;
+                }
+
+                const result = await api(
+                    "/auth/mfa/challenge/complete",
+                    requestBody
+                );
+
+                if (result.status !== "verified") {
+                    throw new Error("MFA verification failed.");
+                }
+
+                challengeToken = null;
+                $("challengeCode").value = "";
+                $("challengeRecovery").value = "";
+
+                $("dashboardLink").href = dashboardDestination();
+
+                show("verified");
+            });
+        });
+
+        if (window.location.hash) {
+            history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+        }
+
+        initialize();
+    </script>
+</body>
+</html>
