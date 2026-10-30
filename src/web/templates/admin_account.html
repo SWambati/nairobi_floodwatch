@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Account | Nairobi FloodWatch</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/resident.css">
+    <link rel="stylesheet" href="/static/css/agency.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="stylesheet" href="/static/css/dashboard_greeting.css">
+    <link rel="stylesheet" href="/static/css/admin_account.css">
+</head>
+
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Admin navigation">
+        <div class="brand-group">
+            <a class="brand" href="/"
+               aria-label="Nairobi FloodWatch home">
+                <img src="/static/images/logo.png" alt="" width="46" height="46">
+                <span>Flood<span>Watch</span></span>
+            </a>
+            <p class="brand-subtitle">Nairobi FloodWatch</p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="/">Home</a>
+            <a href="/admin">Admin Dashboard</a>
+            <a href="/admin/approvals">Agency Approvals</a>
+            <a href="/admin/account" class="current" aria-current="page">My Account</a>
+        </nav>
+
+        <div class="sidebar-foot">
+            <p>Restricted system administration.</p>
+        </div>
+    </aside>
+
+    <div class="content-shell">
+        <main id="main" class="main-content agency-main admin-main">
+            <header class="page-heading">
+                <div>
+                    <h1>My Account</h1>
+                    <p class="subtext">View your administrator account and manage your session security.</p>
+                </div>
+            </header>
+
+            <div id="accountNotice" class="admin-account-notice" role="status" aria-live="polite">Loading account information…</div>
+
+            <section class="admin-account-card" aria-labelledby="profileTitle">
+                <div class="admin-account-card-header">
+                    <div>
+                        <h2 id="profileTitle">Account Information</h2>
+                        <p>Your registered Nairobi FloodWatch administrator profile.</p>
+                    </div>
+                    <span class="admin-account-role">ADMINISTRATOR</span>
+                </div>
+
+                <div class="admin-account-grid">
+                    <div class="admin-account-field">
+                        <span>Full Name</span>
+                        <strong id="accountName">—</strong>
+                    </div>
+
+                    <div class="admin-account-field">
+                        <span>Email Address</span>
+                        <strong id="accountEmail">—</strong>
+                    </div>
+
+                    <div class="admin-account-field">
+                        <span>Account Role</span>
+                        <strong id="accountRole">—</strong>
+                    </div>
+
+                    <div class="admin-account-field">
+                        <span>Email Verification</span>
+                        <strong id="accountVerification">—</strong>
+                    </div>
+
+                    <div class="admin-account-field">
+                        <span>Account Status</span>
+                        <strong id="accountStatus">—</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-account-card" aria-labelledby="securityTitle">
+                <div class="admin-account-card-header">
+                    <div>
+                        <h2 id="securityTitle">Account Security</h2>
+                        <p>Administrator access is protected by server-side authorization and multi-factor authentication.</p>
+                    </div>
+                </div>
+
+                <div class="admin-account-security">
+                    <div>
+                        <strong>Session Management</strong>
+                        <p>Sign out when you have finished using the administrative system.</p>
+                    </div>
+                    <button id="adminLogout" class="button primary" type="button">Sign Out</button>
+                </div>
+                <p id="logoutNotice" class="admin-account-feedback" role="status" aria-live="polite"></p>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/static/js/dashboard_greeting.js" defer></script>
+<script src="/static/js/admin_account.js" defer></script>
+</body>
+</html>
