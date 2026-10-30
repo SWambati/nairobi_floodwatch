@@ -1,0 +1,263 @@
+.agency-account-page {
+    color: #0b3158;
+}
+
+.agency-account-heading {
+    margin-bottom: 26px;
+}
+
+.agency-account-heading h1 {
+    margin: 0 0 10px;
+    color: #0b3158;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+}
+
+.agency-account-heading p {
+    margin: 0;
+    color: #60748e;
+    font-size: 0.96rem;
+    line-height: 1.7;
+}
+
+.agency-account-notice {
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    background: #edf4ff;
+    border: 1px solid #d7e3f3;
+    border-radius: 10px;
+    color: #24558f;
+    font-size: 0.9rem;
+}
+
+.agency-account-notice.error {
+    background: #fff1f2;
+    border-color: #f1c6cc;
+    color: #aa3040;
+}
+
+.agency-account-notice[hidden], #agencyAccountContent[hidden] {
+    display: none !important;
+}
+
+.agency-account-card {
+    margin-bottom: 23px;
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid #d7e3f3;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(9, 44, 86, 0.035);
+}
+
+.agency-account-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.agency-account-card-header h2 {
+    margin: 0 0 8px;
+    color: #0b3158;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.agency-account-card-header p {
+    margin: 0;
+    color: #60748e;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+.agency-account-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 13px;
+    background: #edf4ff;
+    border-radius: 999px;
+    color: #1e56b7;
+    font-size: 0.73rem;
+    font-weight: 800;
+    letter-spacing: 0.025em;
+}
+
+.agency-account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.agency-account-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 16px 18px;
+    background: #f7f9fd;
+    border: 1px solid #e4ebf4;
+    border-radius: 10px;
+}
+
+.agency-account-field > span {
+    color: #60748e;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.agency-account-field > strong {
+    color: #0b3158;
+    font-size: 0.96rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.agency-account-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #edf1f6;
+    color: #55667d;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.agency-account-badge.approved {
+    background: #e5f5eb;
+    color: #176d43;
+}
+
+.agency-account-badge.pending {
+    background: #fff4d6;
+    color: #896006;
+}
+
+.agency-account-badge.rejected {
+    background: #fce9eb;
+    color: #a72b3a;
+}
+
+.agency-account-help {
+    margin: 20px 0 0;
+    padding: 13px 16px;
+    background: #edf4ff;
+    border: 1px solid #d7e3f3;
+    border-radius: 9px;
+    color: #355f90;
+    font-size: 0.83rem;
+    line-height: 1.7;
+}
+
+.agency-security-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid #e4ebf4;
+}
+
+.agency-security-row:first-of-type {
+    padding-top: 0;
+}
+
+.agency-security-row:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.agency-security-row strong {
+    color: #0b3158;
+    font-size: 0.95rem;
+}
+
+.agency-security-row p {
+    margin: 7px 0 0;
+    color: #60748e;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.agency-security-indicator {
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #edf4ff;
+    color: #1e56b7;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.agency-account-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 0.83rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.agency-account-button.primary {
+    border: 1px solid #1e56b7;
+    background: #1e56b7;
+    color: #ffffff;
+}
+
+.agency-account-button.primary:hover {
+    background: #174895;
+}
+
+.agency-account-button.secondary {
+    border: 1px solid #b9cce6;
+    background: #ffffff;
+    color: #1e56b7;
+}
+
+.agency-account-button.secondary:hover {
+    background: #edf4ff;
+}
+
+.agency-account-button:focus-visible {
+    outline: 2px solid #1e56b7;
+    outline-offset: 3px;
+}
+
+.agency-account-footer {
+    margin: 30px 0;
+    color: #60748e;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 700px) {
+    .agency-account-card {
+        padding: 18px;
+    }
+
+    .agency-account-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agency-security-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .agency-account-button {
+        width: 100%;
+    }
+
+    .agency-security-row form {
+        width: 100%;
+    }
+}

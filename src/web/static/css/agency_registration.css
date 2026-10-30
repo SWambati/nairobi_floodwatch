@@ -1,0 +1,332 @@
+:root {
+    --navy: #0b3158;
+    --blue: #1e56b7;
+    --muted: #60748e;
+    --background: #f3f6fc;
+    --border: #d7e3f3;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--navy);
+    font-family: "Manrope", "Segoe UI", sans-serif;
+}
+.auth-shell {
+    width: min(900px, calc(100% - 32px));
+    margin: 38px auto 65px;
+}
+.auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 28px;
+    color: var(--navy);
+    font-size: 1.7rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+.auth-brand img {
+    width: 44px;
+    height: 44px;
+}
+.auth-brand > span > span {
+    color: var(--blue);
+}
+.auth-panel {
+    padding: clamp(24px, 4vw, 42px);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+}
+.auth-intro {
+    margin-bottom: 28px;
+}
+.eyebrow {
+    color: var(--blue);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+.auth-intro h1 {
+    margin: 10px 0 12px;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    line-height: 1.2;
+}
+.auth-intro p, .account-choice p {
+    color: var(--muted);
+    line-height: 1.7;
+}
+.account-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+.account-choice {
+    display: block;
+    padding: 28px;
+    color: var(--navy);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: border-color .2s, transform .2s;
+}
+.account-choice:hover {
+    border-color: var(--blue);
+    transform: translateY(-2px);
+}
+.choice-symbol {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    background: #edf4ff;
+    border-radius: 12px;
+    color: var(--blue);
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+.account-choice h2 {
+    margin: 18px 0 8px;
+    font-size: 1.25rem;
+}
+.choice-action {
+    display: inline-block;
+    margin-top: 14px;
+    color: var(--blue);
+    font-size: .9rem;
+    font-weight: 800;
+}
+.registration-info {
+    margin-bottom: 30px;
+    padding: 16px 18px;
+    background: #edf4ff;
+    border: 1px solid #d1e2fc;
+    border-radius: 10px;
+    color: #234f88;
+    line-height: 1.6;
+    font-size: .9rem;
+}
+
+.form-section-title {
+    margin: 28px 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.field input, .field textarea {
+    width: 100%;
+    padding: 14px;
+    background: #f8faff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--navy);
+    font: inherit;
+    font-weight: 400;
+}
+
+.field input:focus-visible, .field textarea:focus-visible, .account-choice:focus-visible, .submit-button:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+}
+
+.field textarea {
+    resize: vertical;
+}
+
+.field small, .password-help {
+    color: var(--muted);
+    font-size: .8rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.submit-button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--blue);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.submit-button:hover:not(:disabled) {
+    background: #16499f;
+}
+
+.submit-button:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+.form-message {
+    padding: 15px;
+    margin-top: 18px;
+    border-radius: 10px;
+    line-height: 1.6;
+}
+
+.form-message[hidden] {
+    display: none;
+}
+
+.form-message.is-success {
+    background: #eaf8f0;
+    color: #176445;
+}
+
+.form-message.is-error {
+    background: #fff0f0;
+    color: #ad303b;
+}
+
+.auth-footnote {
+    margin: 24px 0 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+.auth-footnote a {
+    color: var(--blue);
+    font-weight: 700;
+}
+
+/* Agency password visibility */
+
+.agency-password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.agency-password-wrapper input {
+    width: 100%;
+    padding-right: 54px;
+}
+
+.agency-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+
+    display: grid;
+    place-items: center;
+
+    width: 36px;
+    height: 36px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--blue);
+
+    cursor: pointer;
+}
+
+.agency-password-toggle:hover {
+    background: #eaf2fd;
+}
+
+.agency-password-toggle:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+}
+
+.agency-password-toggle svg {
+    width: 21px;
+    height: 21px;
+}
+
+.agency-eye-off {
+    display: none;
+}
+
+.agency-password-toggle[aria-pressed="true"] .agency-eye {
+    display: none;
+}
+
+.agency-password-toggle[aria-pressed="true"] .agency-eye-off {
+    display: block;
+}
+
+/* FloodWatch brand and subtitle */
+
+.auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+
+.auth-brand img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.auth-brand-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.auth-brand-copy strong {
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--navy);
+}
+
+.auth-brand-copy strong span {
+    color: var(--blue);
+}
+
+.auth-brand-copy small {
+    color: #4e8fd1;
+    font-size: 0.77rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+
+@media (max-width: 650px) {
+    .auth-shell {
+        margin-top: 20px;
+    }
+
+    .account-choices,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .account-choice {
+        padding: 22px;
+    }
+}

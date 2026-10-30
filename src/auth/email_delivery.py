@@ -176,3 +176,50 @@ def send_resident_verification_otp(recipient, code):
 
     return _send_email(recipient, "Your Nairobi FloodWatch verification code", body)
 
+def send_agency_decision_email(recipient, applicant_name, organization_name, decision):
+    #Notify an applicant of an agency access decision.
+    #Uses the existing FloodWatch SMTP infrastructure.
+    #Never includes passwords or session tokens.
+   
+    if decision not in {"approved", "rejected"}:
+        raise ValueError("Invalid agency application decision.")
+
+    name = " ".join(str(applicant_name or "").split())[:120]
+    organization = " ".join(str(organization_name or "").split())[:200]
+    name = name or "Applicant"
+    organization = organization or "your organization"
+    base_url = get_auth_settings().base_url.rstrip("/")
+
+    if decision == "approved":
+        subject = "Nairobi FloodWatch - Agency Access Approved"
+        body = (
+            f"Hello {name},\n\n"
+            "Your request for agency access to Nairobi FloodWatch "
+            "has been approved.\n\n"
+            f"Organization: {organization}\n\n"
+            "You can now sign in using your existing account. "
+            "Additional security verification may be required "
+            "before accessing the Agency Dashboard.\n\n"
+            f"Sign in: {base_url}/agency/entry\n\n"
+            "You do not need to create another account.\n\n"
+            "Nairobi FloodWatch"
+        )
+
+    else:
+        subject = "Nairobi FloodWatch - Agency Access Request Update"
+        body = (
+            f"Hello {name},\n\n"
+            "Your request for agency access to Nairobi FloodWatch "
+            "has been reviewed and was not approved.\n\n"
+            f"Organization: {organization}\n\n"
+            "Your existing account remains subject to its "
+            "current permissions. No agency privileges "
+            "have been granted.\n\n"
+            "If you believe this decision was made in error, "
+            "please contact the FloodWatch administrator "
+            "through the application's official contact channel.\n\n"
+            "Nairobi FloodWatch"
+        )
+
+    return _send_email(recipient, subject, body)
+

@@ -10,15 +10,19 @@ from src.dashboard.routes.places import router as places_router
 from src.dashboard.routes.admin import router as admin_router
 from src.dashboard.routes.agency import router as agency_router
 from src.dashboard.routes.admin_approvals import (router as admin_approvals_router)
+from src.dashboard.routes.agency_account import (router as agency_account_router)
+
 from src.auth.config import get_auth_settings
 from src.auth.google_oauth import (router as google_oauth_router, get_signed_in_user, SESSION_COOKIE, _post_login_destination)
 from src.auth.local_routes import (router as local_auth_router, ensure_local_api_schema)
 from src.auth.mfa_routes import router as mfa_router
 from src.auth.mfa_challenge_routes import router as mfa_challenge_router
 from src.auth.resident_account_routes import (router as resident_account_router)
-from src.auth.authorization import (require_agency_page, require_admin_page, require_resident_account)
+from src.auth.authorization import (require_agency_page, require_admin_page, require_resident_account, require_page_roles)
 from src.auth.resident_verification import (ensure_resident_verification_schema)
 from src.auth.resident_otp_service import (ensure_resident_otp_schema)
+from src.auth.agency_registration_routes import (router as agency_registration_router)
+
 from src.operational.persistence import create_database_engine
 
 #PATH CONFIGURATION
@@ -87,6 +91,8 @@ app.include_router(local_auth_router)
 app.include_router(mfa_router)
 app.include_router(mfa_challenge_router)
 app.include_router(resident_account_router)
+app.include_router(agency_account_router)
+app.include_router(agency_registration_router)
 
 #PUBLIC HOMEPAGE
 @app.get("/", include_in_schema=False)
@@ -141,6 +147,12 @@ def password_reset_page():
             "Referrer-Policy": "no-referrer",
         },)
 
+#EMAIL VERIFICATION PAGE
+@app.get("/auth/verify-email", include_in_schema=False)
+def email_verification_page():
+    return FileResponse(STATIC_DIR / "auth" / "verify-email.html",
+        headers={"Cache-Control": "no-store", "Pragma": "no-cache", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff"})
+
 # AGENCY DASHBOARD
 @app.get("/agency", include_in_schema=False, dependencies=[Depends(require_agency_page)])
 def agency_dashboard():
@@ -168,6 +180,11 @@ def agency_dashboard_entry(request: Request):
     response.headers["Cache-Control"] = "no-store"
 
     return response
+
+# AGENCY OFFICER ACCOUNT MANAGEMENT
+@app.get("/agency/account", include_in_schema=False, dependencies=[Depends(require_page_roles("agency"))])
+def agency_account_page():
+    return FileResponse(TEMPLATE_DIR / "agency_account.html", headers={"Cache-Control": "no-store"})
 
 #ADMINISTRATOR DASHBOARD
 @app.get("/admin", include_in_schema=False, dependencies=[Depends(require_admin_page)])

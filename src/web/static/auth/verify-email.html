@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>Verify Email | Nairobi FloodWatch</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #163a70;
+            --navy-deep: #102f57;
+            --blue: #245ca8;
+            --blue-hover: #1d4d8e;
+            --sky: #4e8fd1;
+            --background: #f4f7fb;
+            --white: #ffffff;
+            --muted: #627a96;
+            --border: #d7e2ee;
+            --input-bg: #eef4fb;
+            --success: #17644d;
+            --error: #b33a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--navy);
+            font-family: "Manrope", sans-serif;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .verification-layout {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(300px, 0.9fr) minmax(380px, 1.1fr);
+        }
+
+        .brand-panel {
+            display: flex;
+            flex-direction: column;
+            padding: 42px clamp(28px, 5vw, 82px);
+            background: var(--navy-deep);
+            color: var(--white);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            align-self: flex-start;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+        }
+
+        .brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand-name {
+            color: var(--white);
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .brand-name span {
+            color: var(--sky);
+        }
+
+        .brand-subtitle {
+            color: var(--sky);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .brand-content {
+            max-width: 440px;
+            margin-top: 72px;
+        }
+
+        .brand-content h1 {
+            margin: 0 0 20px;
+            font-size: clamp(35px, 3.6vw, 50px);
+            line-height: 1.2;
+            letter-spacing: -2px;
+        }
+
+        .brand-content p {
+            color: #c8d9eb;
+            line-height: 1.9;
+            font-size: 14px;
+        }
+
+        .brand-footer {
+            margin-top: auto;
+            padding-top: 48px;
+            color: #abc2d9;
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        .verification-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 25px;
+        }
+
+        .verification-card {
+            width: 100%;
+            max-width: 470px;
+            padding: 35px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(16, 47, 87, 0.04);
+        }
+
+        .eyebrow {
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+        }
+
+        .verification-card h2 {
+            margin: 12px 0 12px;
+            font-size: 27px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .description {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .status {
+            margin: 24px 0;
+            padding: 17px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: #f7faff;
+        }
+
+        .status strong {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+        }
+
+        .status p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .status.success {
+            background: #effaf6;
+            border-color: #c5e9db;
+        }
+
+        .status.success strong {
+            color: var(--success);
+        }
+
+        .status.error {
+            background: #fff1f2;
+            border-color: #f2c9ce;
+        }
+
+        .status.error strong {
+            color: var(--error);
+        }
+
+        .primary-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 48px;
+            padding: 13px;
+            border: 1px solid var(--blue);
+            border-radius: 9px;
+            background: var(--blue);
+            color: var(--white);
+            text-decoration: none;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .primary-button:hover:not(:disabled) {
+            background: var(--blue-hover);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .resend-section {
+            margin-top: 25px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border);
+        }
+
+        .resend-section h3 {
+            margin: 0 0 9px;
+            font-size: 16px;
+        }
+
+        .resend-section p {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 17px 0;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .field input {
+            width: 100%;
+            min-height: 47px;
+            padding: 0 14px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--input-bg);
+            color: var(--navy);
+            font: inherit;
+            font-size: 13px;
+        }
+
+        .field input:focus-visible, .primary-button:focus-visible, a:focus-visible {
+            outline: 2px solid var(--blue);
+            outline-offset: 3px;
+        }
+
+        .resend-feedback {
+            margin-top: 15px;
+            font-size: 12px;
+            line-height: 1.7;
+            color: var(--muted);
+        }
+
+        .resend-feedback.error {
+            color: var(--error);
+        }
+
+        .footer-link {
+            margin-top: 22px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .footer-link a {
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        @media (max-width: 850px) {
+            .verification-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-panel {
+                padding: 24px;
+            }
+
+            .brand-content, .brand-footer {
+                display: none;
+            }
+
+            .verification-section {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .verification-card {
+                padding: 23px;
+            }
+
+            .verification-card h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="verification-layout">
+    <aside class="brand-panel">
+        <a href="/" class="brand" aria-label="Nairobi FloodWatch home">
+            <img src="/static/images/logo.png" class="brand-logo" alt="">
+            <span class="brand-copy">
+                <span class="brand-name">
+                    Flood<span>Watch</span>
+                </span>
+                <span class="brand-subtitle">
+                    Nairobi FloodWatch
+                </span>
+            </span>
+        </a>
+
+        <div class="brand-content">
+            <h1>
+                Secure access.<br>
+                Trusted information.
+            </h1>
+
+            <p>Email verification helps protect your FloodWatch account and ensures that important account notifications reach the right person.</p>
+        </div>
+
+        <div class="brand-footer">Nairobi FloodWatch · Academic research prototype</div>
+    </aside>
+
+    <section class="verification-section">
+        <div class="verification-card">
+            <span class="eyebrow">ACCOUNT VERIFICATION</span>
+            <h2>Verify your email</h2>
+            <p class="description">Confirming your email address is part of the Nairobi FloodWatch account security process.</p>
+            <div id="verificationStatus" class="status" role="status" aria-live="polite">
+                <strong id="statusTitle">Checking your verification link…</strong>
+                <p id="statusMessage">Please keep this page open while we verify your account.</p>
+            </div>
+            <a id="loginButton" class="primary-button" href="/static/auth/login.html" hidden>Continue to Sign In</a>
+            <section id="resendSection" class="resend-section" aria-labelledby="resendTitle" hidden>
+                <h3 id="resendTitle">Need a new verification link?</h3>
+                <p>Enter the email address used when registering your FloodWatch account. If the account is eligible, we'll send a new verification link.</p>
+
+                <form id="resendForm">
+                    <div class="field">
+                        <label for="resendEmail">Registered Email Address</label>
+                        <input id="resendEmail" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+                    </div>
+
+                    <button id="resendButton" class="primary-button" type="submit">Resend Verification Email</button>
+
+                </form>
+                <p id="resendFeedback" class="resend-feedback" role="status" aria-live="polite" hidden></p>
+            </section>
+
+            <p class="footer-link">
+                <a href="/">Return to FloodWatch Home</a>
+            </p>
+        </div>
+    </section>
+</main>
+
+<noscript>
+    JavaScript is required to complete email verification.
+</noscript>
+
+<script>
+"use strict";
+(() => {
+    const $ = (id) => document.getElementById(id);
+    const statusBox = $("verificationStatus");
+    const resendSection = $("resendSection");
+    const loginButton = $("loginButton");
+    const parameters = new URLSearchParams(window.location.hash.slice(1));
+    let token = parameters.get("token");
+
+    window.history.replaceState(window.history.state, "", window.location.pathname);
+
+    function setStatus(type, title, message) {
+        statusBox.className = "status";
+
+        if (type === "success" || type === "error") {
+            statusBox.classList.add(type);
+        }
+        $("statusTitle").textContent = title;
+        $("statusMessage").textContent = message;
+    }
+
+    function showRecovery(title, message) {
+        setStatus("error", title, message);
+        resendSection.hidden = false;
+    }
+
+    async function verifyEmail() {
+        const validToken = typeof token === "string" && token.length >= 32 && token.length <= 256 && /^[A-Za-z0-9_-]+$/.test(token);
+
+        if (!validToken) {
+            token = null;
+            showRecovery("Verification link missing or invalid", "Please open the verification link from your email, or request a new one below.");
+            return;
+        }
+
+        setStatus("pending", "Verifying your email…", "Your verification request is being processed securely.");
+
+        const requestBody = JSON.stringify({ token });
+        token = null;
+
+        try {
+            const response = await fetch(
+                "/auth/local/verify-email",
+                {
+                    method: "POST",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                    headers: {"Content-Type": "application/json", "Accept": "application/json"},
+                    body: requestBody
+                }
+            );
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    throw new Error("This verification link is invalid, expired or has already been used.");
+                }
+
+                throw new Error("Your email could not be verified right now.");
+            }
+
+            setStatus("success", "Email verified successfully!", "Your email address has been confirmed. You can now sign in. If you applied for Agency access, your application still requires administrator approval.");
+            resendSection.hidden = true;
+            loginButton.hidden = false;
+        } catch (error) {
+            showRecovery("Email verification was unsuccessful", error.message);
+        }
+    }
+
+    $("resendForm").addEventListener(
+        "submit",
+        async (event) => {
+            event.preventDefault();
+            const email = $("resendEmail").value.trim();
+            const button = $("resendButton");
+            const feedback = $("resendFeedback");
+
+            if (!email) {
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "Sending…";
+            feedback.hidden = true;
+            feedback.className = "resend-feedback";
+
+            try {
+
+                const response = await fetch(
+                    "/auth/local/resend-verification",
+                    {
+                        method: "POST",
+                        credentials: "same-origin",
+                        cache: "no-store",
+                        headers: {"Content-Type": "application/json", "Accept": "application/json"},
+                        body: JSON.stringify({ email })
+                    }
+                );
+
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        throw new Error("Too many verification requests. Please try again later.");
+                    }
+
+                    throw new Error("The verification request could not be completed.");
+                }
+
+                feedback.textContent = "Request received. If your account is eligible, " + "a new verification link will be sent. " + "Please check your inbox and spam folder.";
+                feedback.hidden = false;
+
+                $("resendForm").reset();
+            } catch (error) {
+                feedback.textContent = error.message;
+                feedback.className = "resend-feedback error";
+                feedback.hidden = false;
+            } finally {
+                button.disabled = false;
+                button.textContent = "Resend Verification Email";
+            }
+        }
+    );
+    verifyEmail();
+
+})();
+</script>
+</body>
+</html>
