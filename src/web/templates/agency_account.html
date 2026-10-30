@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Account | Nairobi FloodWatch</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/resident.css">
+    <link rel="stylesheet" href="/static/css/agency.css">
+    <link rel="stylesheet" href="/static/css/agency_account.css">
+</head>
+
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Agency navigation">
+        <div class="brand-group">
+            <a class="brand" href="/" aria-label="Nairobi FloodWatch home">
+                <img src="/static/images/logo.png" width="46" height="46" alt="">
+                <span>Flood<span>Watch</span></span>
+            </a>
+            <p class="brand-subtitle">Nairobi FloodWatch</p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="/">Home</a>
+            <a href="/agency">Agency Dashboard</a>
+            <a href="/agency/account" class="current" aria-current="page">My Account</a>
+        </nav>
+        <div class="sidebar-foot">
+            <p>Agency monitoring and reporting access.</p>
+        </div>
+    </aside>
+
+    <div class="content-shell">
+        <main id="main" class="main-content agency-main agency-account-page">
+            <header class="agency-account-heading">
+                <div>
+                    <h1>My Account</h1>
+                    <p>View your FloodWatch profile, institutional affiliation and account security information.</p>
+                </div>
+            </header>
+
+            <div id="agencyAccountNotice" class="agency-account-notice" role="status" aria-live="polite">Loading account information…</div>
+            <div id="agencyAccountContent" hidden>
+                <section class="agency-account-card" aria-labelledby="profileTitle">
+                    <div class="agency-account-card-header">
+                        <div>
+                            <h2 id="profileTitle">Profile Information</h2>
+                            <p>Your registered Nairobi FloodWatch account details.</p>
+                        </div>
+                        <span class="agency-account-role">AGENCY OFFICER</span>
+                    </div>
+
+                    <div class="agency-account-grid">
+                        <div class="agency-account-field">
+                            <span>Full Name</span>
+                            <strong id="accountName">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Email Address</span>
+                            <strong id="accountEmail">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Account Role</span>
+                            <strong id="accountRole">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Email Verification</span>
+                            <strong id="accountVerification">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Account Status</span>
+                            <strong id="accountStatus">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Account Created</span>
+                            <strong id="accountCreated">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="agency-account-card" aria-labelledby="organizationTitle">
+                    <div class="agency-account-card-header">
+                        <div>
+                            <h2 id="organizationTitle">Organization Information</h2>
+                            <p>Institutional details associated with your approved agency application.</p>
+                        </div>
+                        <span id="agencyApprovalBadge" class="agency-account-badge">—</span>
+                    </div>
+
+                    <div class="agency-account-grid">
+                        <div class="agency-account-field">
+                            <span>Agency / Organization</span>
+                            <strong id="organizationName">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Position / Job Title</span>
+                            <strong id="organizationPosition">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Institutional Contact Email</span>
+                            <strong id="organizationEmail">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Application Status</span>
+                            <strong id="organizationStatus">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Application Submitted</span>
+                            <strong id="organizationApplied">—</strong>
+                        </div>
+
+                        <div class="agency-account-field">
+                            <span>Approval Date</span>
+                            <strong id="organizationApproved">—</strong>
+                        </div>
+
+                    </div>
+
+                    <p class="agency-account-help">Institutional information and agency permissions are managed by FloodWatch administrators. Contact an administrator if your organization details need correction.</p>
+                </section>
+
+                <section class="agency-account-card" aria-labelledby="securityTitle">
+                    <div class="agency-account-card-header">
+                        <div>
+                            <h2 id="securityTitle">Account Security</h2>
+                            <p>Manage your sign-in session and review the security requirements for agency access.</p>
+                        </div>
+                    </div>
+
+                    <div class="agency-security-row">
+                        <div>
+                            <strong>Multi-Factor Authentication</strong>
+                            <p id="agencyMfaStatus">Required for Agency Dashboard access.</p>
+                        </div>
+                        <span class="agency-security-indicator">Required</span>
+                    </div>
+
+                    <div class="agency-security-row">
+                        <div>
+                            <strong>Password Recovery</strong>
+                            <p>For local password accounts, use the existing password recovery process if you need to reset your password.</p>
+                        </div>
+                        <a class="agency-account-button secondary" href="/static/auth/login.html?mode=recover">Reset Password</a>
+                    </div>
+
+                    <div class="agency-security-row">
+                        <div>
+                            <strong>Sign Out</strong>
+                            <p>End your current FloodWatch session when you have finished using the system.</p>
+                        </div>
+                        <form method="post" action="/auth/logout">
+                            <button class="agency-account-button primary" type="submit">Sign Out</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+            <footer class="agency-account-footer">Nairobi FloodWatch · Agency Account Management</footer>
+        </main>
+    </div>
+</div>
+<script src="/static/js/agency_account.js" defer></script>
+</body>
+</html>
