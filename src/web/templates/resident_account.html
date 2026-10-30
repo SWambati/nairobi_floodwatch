@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Account | Nairobi FloodWatch</title>
+    <link rel="icon" href="/static/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/resident.css">
+
+    <style>
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .account-page {
+            max-width: 1160px;
+        }
+
+        .account-heading {
+            margin-bottom: 28px;
+        }
+
+        .account-heading h1 {
+            color: #102F57;
+            font-size: clamp(29px, 2.5vw, 38px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0 0 9px;
+        }
+
+        .account-heading p {
+            color: #627A96;
+            font-size: 15px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .account-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .account-card {
+            background: #FFFFFF;
+            border: 1px solid #D7E2EE;
+            border-radius: 15px;
+            padding: 27px;
+            min-width: 0;
+        }
+
+        .account-card h2 {
+            color: #102F57;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 0 8px;
+        }
+
+        .account-card-description {
+            color: #627A96;
+            font-size: 13px;
+            line-height: 1.7;
+            margin: 0 0 24px;
+        }
+
+        .account-details {
+            margin: 0;
+        }
+
+        .account-detail {
+            padding: 15px 0;
+            border-bottom: 1px solid #E5EDF6;
+        }
+
+        .account-detail:last-child {
+            border-bottom: 0;
+        }
+
+        .account-detail dt {
+            color: #627A96;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .account-detail dd {
+            color: #163A70;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .account-status {
+            display: inline-flex;
+            align-items: center;
+            background: #EAF2FC;
+            color: #245CA8;
+            border: 1px solid #CADCF1;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .account-status.verified {
+            background: #EAF8F1;
+            color: #17644D;
+            border-color: #BFE5D0;
+        }
+
+        .verification-description {
+            margin: 17px 0 22px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #536C89;
+        }
+
+        .account-field {
+            margin: 0 0 16px;
+        }
+
+        .account-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 800;
+            color: #163A70;
+            margin-bottom: 9px;
+        }
+
+        .account-field input {
+            width: 100%;
+            min-height: 48px;
+            border: 1px solid #D7E2EE;
+            background: #EEF4FB;
+            color: #163A70;
+            border-radius: 9px;
+            padding: 12px 15px;
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+
+        .account-field input:focus {
+            outline: none;
+            border-color: #245CA8;
+            box-shadow: 0 0 0 3px rgba(36,92,168,.13);
+        }
+
+        .account-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 11px;
+        }
+
+        .account-button {
+            min-height: 46px;
+            border: 1px solid #245CA8;
+            border-radius: 9px;
+            padding: 11px 18px;
+            background: #245CA8;
+            color: #FFFFFF;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .account-button:hover:not(:disabled) {
+            background: #1D4D8E;
+        }
+
+        .account-button.secondary {
+            background: #FFFFFF;
+            color: #245CA8;
+            border-color: #CADCF1;
+        }
+
+        .account-button.secondary:hover:not(:disabled) {
+            background: #EEF4FB;
+        }
+
+        .account-button:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .account-feedback {
+            margin: 18px 0 0;
+            border-radius: 9px;
+            padding: 13px 15px;
+            background: #EEF4FB;
+            color: #163A70;
+            line-height: 1.7;
+            font-size: 13px;
+        }
+
+        .account-feedback.error {
+            color: #A32D3B;
+            background: #FFF0F2;
+        }
+
+        .account-feedback.success {
+            color: #17644D;
+            background: #EAF8F1;
+        }
+
+        .account-security {
+            margin-top: 22px;
+        }
+
+        .account-security-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .account-security-row p {
+            font-size: 13px;
+            color: #627A96;
+            margin: 7px 0 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .account-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .account-card {
+                padding: 20px;
+            }
+
+            .account-actions .account-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Application navigation">
+        <div>
+            <a
+                class="brand"
+                href="/"
+                aria-label="Nairobi FloodWatch home"
+            >
+                <img
+                    src="/static/images/logo.png"
+                    alt=""
+                    width="46"
+                    height="46"
+                >
+                <span>Flood<span>Watch</span></span>
+            </a>
+
+            <p class="brand-subtitle">
+                Nairobi FloodWatch
+            </p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="/">Home</a>
+            <a href="/resident">My Dashboard</a>
+            <a
+                href="/resident/account"
+                class="current"
+                aria-current="page"
+            >
+                My Account
+            </a>
+        </nav>
+
+        <div class="sidebar-foot">
+            <p>
+                Model-derived assessments are not official
+                emergency warnings.
+            </p>
+        </div>
+
+    </aside>
+
+    <div class="content-shell">
+
+        <main id="main" class="main-content account-page">
+
+            <div class="account-heading">
+                <h1>My Account</h1>
+                <p>
+                    Manage your FloodWatch account,
+                    email verification and security.
+                </p>
+            </div>
+
+            <div
+                id="pageFeedback"
+                class="account-feedback"
+                role="status"
+                aria-live="polite"
+                hidden
+            ></div>
+
+            <div class="account-grid">
+
+                <!-- Account profile -->
+                <section class="account-card">
+
+                    <h2>Account information</h2>
+
+                    <p class="account-card-description">
+                        Your registered FloodWatch account details.
+                    </p>
+
+                    <dl class="account-details">
+
+                        <div class="account-detail">
+                            <dt>Full name</dt>
+                            <dd id="accountName">Loading...</dd>
+                        </div>
+
+                        <div class="account-detail">
+                            <dt>Email address</dt>
+                            <dd id="accountEmail">Loading...</dd>
+                        </div>
+
+                        <div class="account-detail">
+                            <dt>Account role</dt>
+                            <dd id="accountRole">Resident</dd>
+                        </div>
+
+                        <div class="account-detail">
+                            <dt>Email verification</dt>
+                            <dd>
+                                <span
+                                    id="accountStatus"
+                                    class="account-status"
+                                >
+                                    Checking...
+                                </span>
+                            </dd>
+                        </div>
+
+                    </dl>
+
+                </section>
+
+                <!-- Email verification -->
+                <section class="account-card">
+
+                    <h2>Email verification</h2>
+
+                    <p class="account-card-description">
+                        Verify your email once to unlock
+                        official CSV downloads.
+                    </p>
+
+                    <p
+                        id="verificationDescription"
+                        class="verification-description"
+                    >
+                        Checking your verification status...
+                    </p>
+
+                    <div id="otpSection" hidden>
+
+                        <div class="account-actions">
+                            <button
+                                id="sendOtp"
+                                type="button"
+                                class="account-button"
+                            >
+                                Send verification code
+                            </button>
+                        </div>
+
+                        <form id="otpForm" hidden>
+
+                            <div class="account-field"
+                                 style="margin-top:22px">
+
+                                <label for="otpCode">
+                                    Six-digit verification code
+                                </label>
+
+                                <input
+                                    id="otpCode"
+                                    type="text"
+                                    inputmode="numeric"
+                                    autocomplete="one-time-code"
+                                    pattern="[0-9]{6}"
+                                    maxlength="6"
+                                    placeholder="000000"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="account-actions">
+                                <button
+                                    type="submit"
+                                    class="account-button"
+                                >
+                                    Verify email
+                                </button>
+                            </div>
+
+                        </form>
+
+                        <p
+                            id="otpFeedback"
+                            class="account-feedback"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+            <!-- Security -->
+            <section class="account-card account-security">
+
+                <h2>Security and account access</h2>
+
+                <p class="account-card-description">
+                    Manage your login credentials and active session.
+                </p>
+
+                <div class="account-security-row">
+
+                    <div>
+                        <strong>Password recovery</strong>
+                        <p>
+                            Request a password reset using your
+                            registered email address.
+                        </p>
+                    </div>
+
+                    <a
+                        class="account-button secondary"
+                        href="/static/auth/login.html?mode=recover"
+                    >
+                        Reset password
+                    </a>
+
+                </div>
+
+                <hr style="border:0;border-top:1px solid #E5EDF6;margin:24px 0">
+
+                <div class="account-security-row">
+
+                    <div>
+                        <strong>Sign out</strong>
+                        <p>
+                            End your current FloodWatch session.
+                        </p>
+                    </div>
+
+                    <form method="post" action="/auth/logout">
+                        <button
+                            class="account-button secondary"
+                            type="submit"
+                        >
+                            Log out
+                        </button>
+                    </form>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+</div>
+
+<script>
+"use strict";
+
+const element = id => document.getElementById(id);
+
+let verificationStatus = null;
+
+
+function showFeedback(id, message, type = "") {
+    const target = element(id);
+
+    target.textContent = message;
+    target.className = `account-feedback ${type}`;
+    target.hidden = false;
+}
+
+
+function describeVerification() {
+    if (!verificationStatus) return;
+
+    const status = verificationStatus;
+
+    if (status.email_verified) {
+        element("verificationDescription").textContent =
+            "Your email has been verified. Your Resident " +
+            "account has access to official CSV downloads.";
+
+        element("accountStatus").textContent = "Verified";
+        element("accountStatus").classList.add("verified");
+        element("otpSection").hidden = true;
+        return;
+    }
+
+    element("accountStatus").textContent = "Not verified";
+    element("accountStatus").classList.remove("verified");
+    element("otpSection").hidden = false;
+
+    if (!status.grace_expires_at) {
+        element("verificationDescription").textContent =
+            "Email verification is required to unlock CSV downloads.";
+        return;
+    }
+
+    const milliseconds = Math.max(
+        0,
+        new Date(status.grace_expires_at).getTime() - Date.now()
+    );
+
+    if (milliseconds <= 0) {
+        element("verificationDescription").textContent =
+            "Your 48-hour verification window has ended. " +
+            "Public monitoring remains available. " +
+            "Verify your email to unlock restricted features.";
+        return;
+    }
+
+    const minutesLeft = Math.ceil(milliseconds / 60000);
+    const hours = Math.floor(minutesLeft / 60);
+    const minutes = minutesLeft % 60;
+
+    element("verificationDescription").textContent =
+        `You have ${hours}h ${minutes}m remaining in your ` +
+        "verification window. You can continue viewing " +
+        "flood information while verification is pending.";
+}
+
+
+async function loadAccount() {
+    try {
+        const response = await fetch(
+            "/api/resident/account/verification",
+            {
+                credentials: "same-origin",
+                cache: "no-store"
+            }
+        );
+
+        if (response.status === 401) {
+            window.location.replace(
+                "/static/auth/login.html"
+            );
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load account information."
+            );
+        }
+
+        verificationStatus = await response.json();
+
+        element("accountName").textContent =
+            verificationStatus.display_name || "Not provided";
+
+        element("accountEmail").textContent =
+            verificationStatus.email || "Unavailable";
+
+        element("accountRole").textContent = "Resident";
+
+        describeVerification();
+
+    } catch (error) {
+        showFeedback(
+            "pageFeedback",
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+async function postAccount(path, payload) {
+    const response = await fetch(path, {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            typeof data.detail === "string"
+                ? data.detail
+                : "Unable to complete the request."
+        );
+    }
+
+    return data;
+}
+
+
+element("sendOtp").addEventListener("click", async () => {
+    const button = element("sendOtp");
+
+    button.disabled = true;
+
+    try {
+        const result = await postAccount(
+            "/api/resident/account/send-verification-otp",
+            {}
+        );
+
+        showFeedback(
+            "otpFeedback",
+            result.message ||
+            "Verification email requested.",
+            "success"
+        );
+
+        if (!result.email_verified) {
+            element("otpForm").hidden = false;
+        } else {
+            await loadAccount();
+        }
+
+    } catch (error) {
+        showFeedback(
+            "otpFeedback",
+            error.message,
+            "error"
+        );
+
+    } finally {
+        button.disabled = false;
+    }
+});
+
+
+element("otpForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const code = element("otpCode").value.trim();
+
+    if (!/^[0-9]{6}$/.test(code)) {
+        showFeedback(
+            "otpFeedback",
+            "Enter a valid six-digit code.",
+            "error"
+        );
+        return;
+    }
+
+    const button = element("otpForm").querySelector(
+        'button[type="submit"]'
+    );
+
+    button.disabled = true;
+
+    try {
+        const result = await postAccount(
+            "/api/resident/account/verify-otp",
+            {code}
+        );
+
+        showFeedback(
+            "pageFeedback",
+            result.message || "Email verified.",
+            "success"
+        );
+
+        element("otpCode").value = "";
+
+        await loadAccount();
+
+    } catch (error) {
+        showFeedback(
+            "otpFeedback",
+            error.message,
+            "error"
+        );
+
+    } finally {
+        button.disabled = false;
+    }
+});
+
+
+loadAccount();
+
+window.setInterval(() => {
+    if (verificationStatus) {
+        describeVerification();
+    }
+}, 60000);
+</script>
+
+</body>
+</html>

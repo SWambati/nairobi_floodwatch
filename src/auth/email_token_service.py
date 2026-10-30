@@ -126,8 +126,11 @@ def issue_password_reset(conn, email):
         FROM floodwatch_users
         WHERE LOWER(BTRIM(email)) = :email
           AND password_hash IS NOT NULL
-          AND email_verified = TRUE
           AND account_status = 'active'
+          AND (
+            role = 'resident'
+            OR email_verified = TRUE
+          )
         FOR UPDATE
     """), {
         "email": address,
@@ -235,7 +238,7 @@ def redeem_password_reset(conn, token, new_password):
 
     user, digest = candidate
 
-    if (user["account_status"] != "active" or not user["email_verified"] or user["password_hash"] is None):
+    if (user["account_status"] != "active" or user["password_hash"] is None or user["role"] not in {"resident", "agency", "admin"} or (user["role"] in {"agency", "admin"} and not user["email_verified"])):
         return False
 
     validate_password(new_password, user["email"])

@@ -8,6 +8,182 @@ const state = {
     riskChart: null, weatherChart: null, selectionSerial: 0, history: null,
 };
 
+
+// =========================================================
+// RESIDENT ACCOUNT VERIFICATION
+// =========================================================
+
+let residentVerification = null;
+
+
+// ---------------------------------------------------------
+// Display account verification information
+// ---------------------------------------------------------
+
+function showResidentVerificationMessage(message, showLogin = false) {
+    const notice = document.getElementById(
+        "residentVerificationNotice"
+    );
+
+    const messageElement = document.getElementById(
+        "residentVerificationMessage"
+    );
+
+    const loginLink = document.getElementById(
+        "residentVerificationLogin"
+    );
+
+    if (!notice || !messageElement || !loginLink) {
+        return;
+    }
+
+    notice.hidden = false;
+    messageElement.textContent = message;
+    loginLink.hidden = !showLogin;
+}
+
+
+// ---------------------------------------------------------
+// Update CSV button permissions
+// ---------------------------------------------------------
+
+function updateResidentDownloadPermission() {
+    const button = document.getElementById("downloadHistory");
+
+    if (!button) {
+        return;
+    }
+
+    const history = state.history;
+
+    const hasHistory = Boolean(
+        (history?.predictions?.length || 0) +
+        (history?.weather_readings?.length || 0)
+    );
+
+    const canDownload = (
+        residentVerification?.can_download_csv === true
+    );
+
+    button.disabled = (
+        !state.selected ||
+        !hasHistory ||
+        !canDownload
+    );
+
+    button.title = canDownload
+        ? "Download recorded monitoring history as CSV."
+        : "CSV downloads require a verified Resident account.";
+}
+
+// Render the verification notice
+function renderResidentVerification() {
+    if (!residentVerification) {
+        return;
+    }
+
+    const notice = document.getElementById("residentVerificationNotice");
+
+    if (!notice) {
+        return;
+    }
+
+    // Verified accounts do not require a reminder.
+    if (residentVerification.email_verified === true) {
+        notice.hidden = true;
+        return;
+    }
+
+    const deadline = residentVerification.grace_expires_at;
+    const remainingMilliseconds = deadline ? Math.max(0, new Date(deadline).getTime() - Date.now()) : 0;
+    const remainingMinutes = Math.ceil(remainingMilliseconds / 60000);
+    const hours = Math.floor(remainingMinutes / 60);
+    const minutes = remainingMinutes % 60;
+    const status = residentVerification.verification_status;
+
+    if (
+        status === "grace_expired_not_enforced" ||
+        remainingMilliseconds <= 0
+    ) {
+        showResidentVerificationMessage(
+            "Your 48-hour email verification window has ended. " +
+            "You can continue viewing public monitoring information " +
+            "while email verification is being configured. " +
+            "CSV downloads remain unavailable until your email " +
+            "is verified."
+        );
+
+        return;
+    }
+
+    showResidentVerificationMessage(
+        `Your email address has not been verified. ` +
+        `Verification window: ${hours}h ${minutes}m remaining. ` +
+        `You can continue viewing flood assessments and advisories, ` +
+        `but CSV downloads require email verification.`
+    );
+}
+// Retrieve verification status from FastAPI
+async function loadResidentVerification() {
+    try {
+        const response = await fetch(
+            "/api/resident/account/verification",
+            {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store",
+                headers: {"Accept": "application/json"}
+            }
+        );
+
+        // Public visitors may browse monitoring information
+        // but do not receive verified-account CSV privileges.
+        if (response.status === 401) {
+            residentVerification = null;
+
+            showResidentVerificationMessage(
+                "You can explore flood monitoring information " +
+                "without signing in. To access verified-account " +
+                "features such as CSV downloads, please sign in.",
+                true
+            );
+
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                `Verification status unavailable (${response.status}).`
+            );
+        }
+
+        residentVerification = await response.json();
+
+        if (residentVerification.can_access_dashboard == false){
+            window.location.replace("/resident/account");
+            return;
+        }
+        renderResidentVerification();
+
+    } catch (error) {
+        console.error(
+            "Unable to load Resident verification status:",
+            error
+        );
+
+        residentVerification = null;
+
+        showResidentVerificationMessage(
+            "Your account verification status is temporarily " +
+            "unavailable. Flood monitoring remains accessible, " +
+            "but CSV downloads are disabled."
+        );
+
+    } finally {
+        updateResidentDownloadPermission();
+    }
+}
+
 const colors = {
     LOW: "#16855B", MODERATE: "#D99A1B",
     HIGH: "#C63B44", NO_DATA: "#8B9BAE",
@@ -293,7 +469,8 @@ async function loadHistory(locationId, serial) {
         const predictions = history.predictions || [];
         const readings = history.weather_readings || [];
         state.history = history;
-        $("downloadHistory").disabled = !predictions.length && !readings.length;
+        updateResidentDownloadPermission();
+
         state.riskChart = drawChart("riskHistoryChart", predictions, "risk_score", "Model score", "#1755BA", 1);
         state.weatherChart = drawChart("weatherHistoryChart", readings, "rainfall", "Recorded precipitation (mm)", "#087EAC");
         write("riskHistoryFallback", predictions.length
@@ -440,40 +617,96 @@ function locateMe() {
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
 }
 
-// Export the data behind the charts. This is not a daily rainfall total.
-function downloadHistoryCSV() {
-    if (!state.history || !state.selected) return;
-    const daily = new Map();
-    for (const row of state.history.predictions || []) {
-        daily.set(row.local_date, {score: row.risk_score, risk: row.risk_level});
+
+// =========================================================
+// VERIFIED RESIDENT CSV EXPORT
+// =========================================================
+
+async function downloadHistoryCSV() {
+    if (!state.selected || !state.history) {
+        return;
     }
-    for (const row of state.history.weather_readings || []) {
-        const record = daily.get(row.local_date) || {};
-        record.rain = row.rainfall;
-        record.temp = row.temperature;
-        daily.set(row.local_date, record);
+
+    // Frontend permission check for user experience.
+    // FastAPI independently verifies authorization.
+    if (residentVerification?.can_download_csv !== true) {
+        showResidentVerificationMessage(
+            "Please verify your email address before " +
+            "downloading monitoring history CSV files."
+        );
+
+        return;
     }
-    const records = [["date", "model_score", "risk_level", "precipitation_snapshot_mm", "temperature_snapshot_c"]];
-    for (const [date, row] of [...daily.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-        records.push([date, row.score, row.risk, row.rain, row.temp]);
+
+    const locationId = Number(
+        state.selected.location_id
+    );
+
+    if (!Number.isSafeInteger(locationId) || locationId <= 0) {
+        console.error("Invalid monitoring location ID.");
+        return;
     }
-    const cell = (value) => {
-        if (value === null || value === undefined) return "";
-        let text = String(value);
-        // Avoid spreadsheet formula injection when users open exported CSV files.
-        if (/^[=+@\t\r]/.test(text)) text = `'${text}`;
-        return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
-    };
-    const csv = records.map((row) => row.map(cell).join(",")).join("\r\n");
-    const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `floodwatch_location_${state.selected.location_id}_history.csv`;
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    const button = document.getElementById(
+        "downloadHistory"
+    );
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(
+            `/api/resident/locations/${locationId}/history.csv?days=30`,
+            {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store",
+                headers: {"Accept": "text/csv"}
+            }
+        );
+
+        if (!response.ok) {
+            let message = "Unable to download monitoring history.";
+
+            try {
+                const result = await response.json();
+
+                if (typeof result.detail === "string") {
+                    message = result.detail;
+                }
+            } catch {
+                // Preserve the generic error message.
+            }
+
+            // A session may expire or account permissions may change.
+            if (response.status === 401 || response.status === 403) {
+                await loadResidentVerification();
+            }
+
+            throw new Error(message);
+        }
+
+        // Only use CSV returned by the authorized backend.
+        const file = await response.blob();
+        const objectUrl = URL.createObjectURL(file);
+        const link = document.createElement("a");
+
+        link.href = objectUrl;
+        link.download = (`floodwatch_location_${locationId}_history.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+    } catch (error) {
+        console.error("Resident CSV download failed:", error);
+        showResidentVerificationMessage(error.message || "Unable to download monitoring history.");
+
+    } finally {
+        updateResidentDownloadPermission();
+    }
 }
+
 
 async function loadDashboard() {
     try {
@@ -503,6 +736,12 @@ async function loadDashboard() {
 // Leave place_search.js responsible for geographic fallback and its debounce.
 document.addEventListener("DOMContentLoaded", () => {
     initializeMap();
+    loadResidentVerification();
+    window.setInterval(() => {
+        if (residentVerification) {
+            renderResidentVerification();
+        }
+    }, 60000);
     $("areaSearch").addEventListener("input", renderMap);
     $("riskFilter").addEventListener("change", renderMap);
     $("chooseArea").addEventListener("click", () => $("areaSearch").focus());

@@ -1,4 +1,5 @@
 # Google OpenID Connect authentication for Nairobi FloodWatch.
+import logging
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -18,6 +19,8 @@ from src.operational.persistence import create_database_engine
 
 
 router = APIRouter(include_in_schema=False)
+logger = logging.getLogger("floodwatch.auth.google")
+
 SESSION_COOKIE = "floodwatch_user_session"
 GOOGLE_DISCOVERY_URL = ("https://accounts.google.com/.well-known/openid-configuration")
 
@@ -34,10 +37,7 @@ def _google_client():
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
         server_metadata_url=GOOGLE_DISCOVERY_URL,
-        client_kwargs={
-            "scope": "openid email profile",
-            "code_challenge_method": "S256",
-        },
+        client_kwargs={"scope": "openid email profile", "code_challenge_method": "S256"},
     )
 
     return oauth.google
@@ -154,7 +154,13 @@ def _create_user_session(identity, lifetime):
 
     return token
 
+
 def _find_session_user(token):
+    #Find the authenticated user associated with a valid session.
+    #Resident accounts must be active and email verification is optional.
+    #Agency and Admin accounts must be active and must have a verified email address.
+    #MFA authorization remains enforced separately.
+
     if not token or len(token) > 256:
         return None
 
@@ -165,15 +171,32 @@ def _find_session_user(token):
                 u.email,
                 u.display_name,
                 u.role,
-                u.account_status
+                u.account_status,
+                u.email_verified
+
             FROM floodwatch_user_sessions s
+
             JOIN floodwatch_users u
                 ON u.id = s.user_id
+
             WHERE s.token_hash = :token_hash
+
               AND s.expires_at > NOW()
+
               AND s.revoked_at IS NULL
+
               AND u.account_status = 'active'
-              AND u.email_verified = TRUE
+
+              AND (
+                    u.role = 'resident'
+
+                    OR (
+                        u.role IN ('agency', 'admin')
+                        AND u.email_verified = TRUE
+                    )
+              )
+
+            LIMIT 1
         """), {
             "token_hash": _token_hash(token),
         }).mappings().first()
@@ -187,11 +210,16 @@ def _find_session_user(token):
         "display_name": row["display_name"],
         "role": row["role"],
         "account_status": row["account_status"],
+        "email_verified": bool(row["email_verified"]),
     }
 
-def _post_login_destination(session_token: str) -> str:
-    """Choose the correct landing page using the database account."""
 
+def _post_login_destination(session_token: str) -> str:
+    #Determine the correct post-login destination.
+    #Residents can access the Resident dashboard without email verification and must complete MFA if already enrolled.
+    #Agency and Admin require an active account, require verified email ownership, must pass through MFA.
+    #The account's database role determines its access.
+    
     session_hash = _token_hash(session_token)
 
     with _engine().connect() as conn:
@@ -211,7 +239,9 @@ def _post_login_destination(session_token: str) -> str:
                 ON f.user_id = u.id
 
             WHERE s.token_hash = :session_hash
+
               AND s.revoked_at IS NULL
+
               AND s.expires_at > NOW()
 
             LIMIT 1
@@ -220,32 +250,41 @@ def _post_login_destination(session_token: str) -> str:
         }).mappings().first()
 
     if account is None:
-        raise RuntimeError(
-            "Cannot determine the destination for an invalid session."
-        )
+        raise RuntimeError("Cannot determine the destination for an invalid session.")
 
-    if (
-        account["account_status"] != "active"
-        or not account["email_verified"]
-    ):
-        raise RuntimeError(
-            "Only active, verified accounts may complete sign-in."
-        )
+    # No inactive or suspended account may sign in.
+    if account["account_status"] != "active":
+        raise RuntimeError("Only active accounts may complete sign-in.")
 
     role = account["role"]
-    mfa_enabled = account["mfa_status"] == "active"
+    email_verified = bool(account["email_verified"])
+    mfa_enabled = (account["mfa_status"] == "active")
 
-    if role in {"admin", "agency"} or mfa_enabled:
-        return "/static/auth/mfa.html"
-
+    # Resident accounts
     if role == "resident":
+
+        # Respect MFA when the Resident has enabled it.
+        if mfa_enabled:
+            return "/static/auth/mfa.html"
+
+        # Email verification is not required for basic Resident dashboard access.
         return "/resident"
+
+    # Agency and Admin accounts
+    if role in {"agency", "admin"}:
+
+        if not email_verified:
+            raise RuntimeError("Privileged accounts require verified email ownership.")
+
+        # Privileged roles must complete MFA.
+        return "/static/auth/mfa.html"
 
     raise RuntimeError("Unsupported FloodWatch account role.")
 
 def get_signed_in_user(request: Request):
-    # Read a valid, active user session.
+    #Read a valid, active user session.
     token = request.cookies.get(SESSION_COOKIE)
+
     return _find_session_user(token)
 
 def require_signed_in_user(request: Request):
@@ -297,35 +336,70 @@ async def google_login(request: Request):
 
     return await _google_client().authorize_redirect(request, settings.google_redirect_uri)
 
+
 @router.get("/auth/google/callback")
 async def google_callback(request: Request):
     settings = get_auth_settings().require_google_configuration()
 
+    # Capture safe diagnostic indicators BEFORE Authlib consumes or clears the stored OAuth state.
+    # Never log actual state values, authorization codes, session cookies, access tokens or ID tokens.
+    
+    callback_state_present = bool(request.query_params.get("state"))
+    oauth_cookie_present = ("floodwatch_oauth_flow" in request.cookies)
+    saved_oauth_state_present = any(isinstance(key, str) and key.startswith("_state_google_") for key in request.session)
+
+    # GOOGLE TOKEN EXCHANGE AND OIDC VERIFICATION
     try:
         token = await _google_client().authorize_access_token(request)
 
     except (OAuthError, JoseError, ValueError) as exc:
+        error_code = getattr(exc, "error", None)
+
+        if error_code not in {"mismatching_state", "access_denied", "invalid_request", "invalid_grant", "invalid_client"}:
+            error_code = "other"
+
+        logger.warning(
+            "Google OAuth callback failed: "
+            "exception=%s, "
+            "error_code=%s, "
+            "callback_state_present=%s, "
+            "flow_cookie_present=%s, "
+            "saved_oauth_state_present=%s",
+            type(exc).__name__,
+            error_code,
+            callback_state_present,
+            oauth_cookie_present,
+            saved_oauth_state_present,
+        )
         request.session.clear()
         raise HTTPException(status_code=401, detail="Google authentication could not be verified.") from exc
 
     except httpx.HTTPError as exc:
+        logger.warning("Google OAuth HTTP error: exception=%s", type(exc).__name__)
         request.session.clear()
         raise HTTPException(status_code=502, detail="Unable to communicate with Google authentication.") from exc
 
+    # Google OAuth state is no longer required.
     request.session.clear()
 
+    # REQUIRE VERIFIED GOOGLE IDENTITY
     if not token.get("id_token") or not token.get("userinfo"):
         raise HTTPException(status_code=401, detail="Google did not return a verified identity token.")
-
+    
+    # DATABASE IDENTITY AND SESSION
     try:
         identity = _validate_google_identity(token["userinfo"], settings.google_client_id)
-        session_token = await run_in_threadpool(_create_user_session, identity, settings.user_session_max_age)
+        session_token = await run_in_threadpool( _create_user_session, identity, settings.user_session_max_age)
 
     except (ValueError, PermissionError) as exc:
         raise HTTPException(status_code=403, detail="This Google account cannot sign in to FloodWatch.") from exc
-
-    response = RedirectResponse(url=_post_login_destination(session_token), status_code=303)
-    response.set_cookie( key=SESSION_COOKIE, value=session_token, max_age=settings.user_session_max_age, path="/", secure=settings.secure_cookies, httponly=True, samesite=settings.cookie_samesite)
+    
+    # ROLE-AWARE REDIRECTION
+    # The database determines whether this account is Resident, Agency or Admin.
+    # Agency/Admin must still complete MFA.
+    destination = _post_login_destination(session_token)
+    response = RedirectResponse(url=destination, status_code=303)
+    response.set_cookie(key=SESSION_COOKIE, value=session_token, max_age=settings.user_session_max_age, path="/", secure=settings.secure_cookies, httponly=True, samesite=settings.cookie_samesite)
     response.headers["Cache-Control"] = "no-store"
 
     return response

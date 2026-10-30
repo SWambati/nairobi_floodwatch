@@ -1592,8 +1592,8 @@ const initialMode = new URLSearchParams(
 ).get("mode");
 
 setMode(
-    initialMode === "register"
-        ? "register"
+    ["login", "register", "recover"].includes(initialMode)
+        ? initialMode
         : "login"
 );
 

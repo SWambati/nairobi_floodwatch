@@ -298,6 +298,81 @@ h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: -.035em; }
     line-height: 1.7;
 }
 
+/* ==========================================
+   RESIDENT ACCOUNT VERIFICATION
+   ========================================== */
+
+.resident-verification-notice {
+    margin: 18px 0 24px;
+    padding: 18px 20px;
+
+    border: 1px solid #C9DCF3;
+    border-left: 4px solid #245CA8;
+    border-radius: 10px;
+
+    background: #EEF5FD;
+    color: #163A70;
+}
+
+.resident-verification-notice[hidden] {
+    display: none !important;
+}
+
+.resident-verification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.resident-verification-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.resident-verification-icon {
+    width: 25px;
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #D9E9FB;
+    color: #245CA8;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+#residentVerificationMessage {
+    margin: 0;
+    color: #536C89;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.resident-verification-link {
+    align-self: flex-start;
+    color: #245CA8;
+
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.resident-verification-link:hover {
+    color: #1D4D8E;
+}
+
+@media (max-width: 600px) {
+    .resident-verification-notice {
+        padding: 15px;
+    }
+}
+
 @media (max-width: 720px) {
     .road-exposure-heading h3 {
         font-size: 18px;

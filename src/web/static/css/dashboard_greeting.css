@@ -1,0 +1,74 @@
+
+/*
+ * Nairobi FloodWatch
+ * Shared personalized dashboard greeting
+ */
+
+.dashboard-welcome {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 24px;
+    padding: 20px 26px;
+
+    background: #ffffff;
+    border: 1px solid #d7e3f3;
+    border-left: 4px solid #1e56b7;
+    border-radius: 14px;
+
+    box-shadow: 0 2px 10px rgba(9, 44, 86, 0.035);
+}
+
+.dashboard-welcome__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    margin-bottom: 10px;
+}
+
+.dashboard-welcome__label {
+    color: #527096;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+}
+
+.dashboard-welcome__timezone {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 11px;
+    border-radius: 999px;
+
+    background: #edf4ff;
+    color: #1e56b7;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+}
+
+.dashboard-welcome__heading {
+    margin: 0;
+    padding: 0;
+
+    color: #0b3158;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 750;
+    line-height: 1.35;
+    letter-spacing: -0.025em;
+}
+
+@media (max-width: 640px) {
+    .dashboard-welcome {
+        padding: 17px 19px;
+        margin-bottom: 18px;
+        border-radius: 12px;
+    }
+
+    .dashboard-welcome__heading {
+        font-size: 1.35rem;
+    }
+}

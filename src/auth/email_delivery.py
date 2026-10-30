@@ -147,3 +147,32 @@ def send_password_change_notice(recipient):
     )
 
     return _send_email( recipient, "Your Nairobi FloodWatch password was changed", body)
+
+
+# RESIDENT EMAIL OTP DELIVERY
+def send_resident_verification_otp(recipient, code):
+
+    #Deliver a single-use, six-digit email OTP.
+    #This code confirms email ownership only.
+    #It does not satisfy Agency/Admin MFA.
+
+    if (not isinstance(code, str) or not re.fullmatch(r"[0-9]{6}", code)):
+        raise ValueError("Invalid verification code.")
+
+    body = (
+        "Nairobi FloodWatch - Email Verification\n\n"
+        "Thank you for registering with Nairobi FloodWatch.\n\n"
+        "Your email verification code is:\n\n"
+        f"{code}\n\n"
+        "This code expires in 10 minutes and can only "
+        "be used once.\n\n"
+        "You can continue viewing public flood monitoring "
+        "information while verification is pending.\n\n"
+        "If you did not create this account, "
+        "you can ignore this message.\n\n"
+        "Nairobi FloodWatch\n"
+        "Academic Flood Monitoring Prototype"
+    )
+
+    return _send_email(recipient, "Your Nairobi FloodWatch verification code", body)
+
