@@ -9,6 +9,7 @@ from src.dashboard.routes.resident import router as resident_router
 from src.dashboard.routes.places import router as places_router
 from src.dashboard.routes.admin import router as admin_router
 from src.dashboard.routes.agency import router as agency_router
+from src.dashboard.routes.admin_approvals import (router as admin_approvals_router)
 from src.auth.config import get_auth_settings
 from src.auth.google_oauth import (router as google_oauth_router, get_signed_in_user, SESSION_COOKIE, _post_login_destination)
 from src.auth.local_routes import (router as local_auth_router, ensure_local_api_schema)
@@ -79,6 +80,7 @@ app.include_router(public_router)
 app.include_router(resident_router)
 app.include_router(places_router)
 app.include_router(admin_router)
+app.include_router(admin_approvals_router)
 app.include_router(agency_router)
 app.include_router(google_oauth_router)
 app.include_router(local_auth_router)
@@ -173,6 +175,18 @@ def admin_dashboard():
     #Serve the Administrator Dashboard.
     #Access is restricted through the existing administrator authorization and MFA controls.
     return FileResponse(TEMPLATE_DIR / "admin.html", headers={"Cache-Control": "no-store"})
+
+#ADMINISTRATOR APPROVALS PAGE FOR AGENCIES
+@app.get("/admin/approvals", include_in_schema=False, dependencies=[Depends(require_admin_page)])
+def admin_approvals_page():
+    return FileResponse(TEMPLATE_DIR / "admin_approvals.html", headers={"Cache-Control": "no-store"})
+
+# ADMINISTRATOR ACCOUNT MANAGEMENT
+@app.get("/admin/account", include_in_schema=False, dependencies=[Depends(require_admin_page)])
+def admin_account_page():
+    #Serve the authenticated Administrator account page.
+    #Existing administrator authorization and MFA requirements are enforced before serving the page.
+    return FileResponse(TEMPLATE_DIR / "admin_account.html", headers={"Cache-Control": "no-store"})
 
 #LEGACY ADMIN LOGIN REDIRECT
 @app.get("/admin/login", include_in_schema=False)

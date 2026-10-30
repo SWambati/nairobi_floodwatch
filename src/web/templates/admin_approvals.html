@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agency Approvals | Nairobi FloodWatch</title>
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
+    <link rel="stylesheet" href="/static/css/resident.css">
+    <link rel="stylesheet" href="/static/css/agency.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="stylesheet" href="/static/css/dashboard_greeting.css">
+    <link rel="stylesheet" href="/static/css/admin_approvals.css">
+</head>
+
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Admin navigation">
+        <div class="brand-group">
+            <a href="/" class="brand">
+                <img src="/static/images/logo.png" alt="" width="46" height="46">
+                <span>Flood<span>Watch</span></span>
+            </a>
+            <p class="brand-subtitle">Nairobi FloodWatch</p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="/">Home</a>
+            <a href="/admin#system">System Monitoring</a>
+            <a href="/admin#flood">Flood Monitoring</a>
+            <a href="/admin/approvals" class="current" aria-current="page">Agency Approvals</a>
+            <a href="/admin/account">My Account</a>
+        </nav>
+
+        <div class="sidebar-foot">
+            <p>
+                Restricted system administration.
+                Agency requests require institutional verification.
+            </p>
+        </div>
+    </aside>
+
+    <div class="content-shell">
+        <main id="main" class="main-content agency-main admin-main">
+            <header class="page-heading">
+                <div>
+                    <h1>Agency Approvals</h1>
+                    <p class="subtext">Review account applications submitted by agency officers and institutional representatives.
+                    </p>
+                </div>
+            </header>
+
+            <section class="approvals-panel">
+                <div class="approvals-heading">
+                    <div>
+                        <h2>Agency Access Requests</h2>
+                        <p class="subtle-text">Review pending and previously processed applications.</p>
+                    </div>
+                    <button id="approvalsRefresh" class="button secondary" type="button">Refresh</button>
+                </div>
+
+                <div class="approvals-toolbar">
+                    <label class="approvals-filter">
+                        <span>Application Status</span>
+                        <select id="approvalsStatus">
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="withdrawn">Withdrawn</option>
+                            <option value="all">All Requests</option>
+                        </select>
+                    </label>
+
+                    <label class="approvals-filter approvals-search">
+                        <span>Search Current Page</span>
+                        <input id="approvalsSearch" type="search" placeholder="Name, email or organization">
+                    </label>
+                </div>
+
+                <p id="approvalsMessage" class="approvals-message" role="status" aria-live="polite">Loading applications…</p>
+                <div class="approvals-table-scroll">
+                    <table class="agency-table approvals-table">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Organization</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="approvalsRows">
+                            <tr>
+                                <td colspan="5">Loading applications…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="approvals-pagination">
+                    <button id="approvalsPrevious" class="button secondary" type="button"disabled>Previous</button>
+                    <span id="approvalsPageStatus">Page 1</span>
+                    <button id="approvalsNext" class="button secondary" type="button" disabled>Next</button>
+                </div>
+            </section>
+
+            <section id="approvalDetailsPanel" class="approvals-panel" hidden>
+                <div class="approvals-heading">
+                    <div>
+                        <h2 id="applicationTitle">Application Details</h2>
+                        <p class="subtle-text">Review the applicant and verify their institutional affiliation.</p>
+                    </div>
+                    <span id="detailStatus" class="approvals-status"></span>
+                </div>
+
+                <dl class="approvals-details">
+                    <div>
+                        <dt>Applicant Name</dt>
+                        <dd id="detailName">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Registered Email</dt>
+                        <dd id="detailEmail">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Email Verification</dt>
+                        <dd id="detailEmailVerified">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Account Status</dt>
+                        <dd id="detailAccountStatus">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Organization</dt>
+                        <dd id="detailOrganization">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Institutional Email</dt>
+                        <dd id="detailOrganizationEmail">—</dd>
+                    </div>
+
+                    <div class="wide">
+                        <dt>Reason for Request</dt>
+                        <dd id="detailJustification">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Submission Date</dt>
+                        <dd id="detailCreated">—</dd>
+                    </div>
+
+                    <div>
+                        <dt>Reviewed By</dt>
+                        <dd id="detailReviewedBy">—</dd>
+                    </div>
+
+                    <div class="wide">
+                        <dt>Review Notes</dt>
+                        <dd id="detailNotes">—</dd>
+                    </div>
+                </dl>
+
+                <p class="approvals-warning">Approving an application grants Agency Dashboard privileges. Independently verify the applicant's institutional affiliation before approving.</p>
+
+                <div id="approvalActions" class="approvals-actions" hidden>
+                    <button id="approveButton" class="button primary" type="button">Approve Request</button>
+                    <button id="rejectButton" class="button secondary" type="button">Reject Request</button>
+                </div>
+            </section>
+
+            <footer class="admin-footer">
+                Nairobi FloodWatch · System Administration
+            </footer>
+        </main>
+    </div>
+</div>
+
+<dialog id="approvalDialog" class="approvals-dialog">
+    <form id="approvalForm">
+        <h2 id="approvalDialogTitle">Confirm Decision</h2>
+        <p id="approvalDialogText"></p>
+        <label for="approvalNotes">
+            Review Notes
+            <span id="notesRequired"></span>
+        </label>
+        <textarea id="approvalNotes" rows="4" maxlength="2000" placeholder="Explain the basis for your decision"></textarea>
+        <label class="approvals-confirmation" id="affiliationLabel" hidden>
+            <input id="affiliationConfirmed" type="checkbox">
+            <span>I have independently verified the applicant's institutional affiliation.</span>
+        </label>
+
+        <p id="approvalDialogError" class="approvals-dialog-error" role="alert" aria-live="assertive"></p>
+        <div class="approvals-actions">
+            <button id="approvalCancel" class="button secondary" type="button">Cancel</button>
+            <button id="approvalConfirm" class="button primary" type="submit">Confirm Decision</button>
+        </div>
+    </form>
+</dialog>
+<script src="/static/js/dashboard_greeting.js" defer></script>
+<script src="/static/js/admin_approvals.js" defer></script>
+</body>
+</html>
