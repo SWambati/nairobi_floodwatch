@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
+
 from src.dashboard.routes.public import router as public_router
 from src.dashboard.routes.resident import router as resident_router
 from src.dashboard.routes.places import router as places_router
@@ -22,6 +23,7 @@ from src.auth.authorization import (require_agency_page, require_admin_page, req
 from src.auth.resident_verification import (ensure_resident_verification_schema)
 from src.auth.resident_otp_service import (ensure_resident_otp_schema)
 from src.auth.agency_registration_routes import (router as agency_registration_router)
+from src.auth.agency_decision_notifications import (ensure_agency_email_outbox_schema)
 
 from src.operational.persistence import create_database_engine
 
@@ -45,6 +47,7 @@ async def lifespan(application: FastAPI):
         ensure_local_api_schema(engine)
         ensure_resident_verification_schema(engine)
         ensure_resident_otp_schema(engine)
+        ensure_agency_email_outbox_schema(engine)
 
     finally:
         engine.dispose()
