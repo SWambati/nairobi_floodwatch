@@ -248,7 +248,16 @@
         </div>
         <div class="history-grid">
           <div class="chart-card"><h3>Model score history</h3><p>Latest assessment on each recorded date</p><div class="chart-frame"><canvas id="riskHistoryChart" role="img" aria-label="Historical model risk scores"></canvas></div><p id="riskHistoryFallback" class="chart-fallback">Select a location to view recorded history.</p></div>
-          <div class="chart-card"><h3>Historical Rainfall Records</h3><p>Latest stored precipitation reading per recorded day, not daily rainfall totals</p><div class="chart-frame"><canvas id="weatherHistoryChart" role="img" aria-label="Historical precipitation readings"></canvas></div><p id="weatherHistoryFallback" class="chart-fallback">Select a location to view recorded precipitation.</p></div>
+          <div class="chart-card">
+            <h3>Recorded 24-Hour Rainfall Accumulation</h3>
+            <p>Estimated precipitation accumulated during the preceding day for each recorded assessment.
+              Source: Open-Meteo. Missing dates are not estimated.
+            </p>
+            <div class="chart-frame">
+              <canvas id="weatherHistoryChart" role="img" aria-label="Recorded 24-hour rainfall accumulations in millimetres"></canvas>
+            </div>
+            <p id="weatherHistoryFallback" class="chart-fallback">Select a monitoring location to view recorded rainfall.</p>
+          </div>
         </div>
       </section>
 

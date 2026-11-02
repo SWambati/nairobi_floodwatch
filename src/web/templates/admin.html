@@ -735,6 +735,24 @@
                             </div>
                             <p id="areaTrendStatus" class="chart-fallback" role="status"> Awaiting historical analytics. </p>
                         </article>
+                        <!-- RECORDED RAINFALL ACCUMULATION -->
+                         <article class="chart-card rainfall-history-card" aria-labelledby="rainfallHistoryTitle">
+                            <h3 id="rainfallHistoryTitle">Recorded Rainfall Accumulation</h3>
+                            <p>Historical antecedent rainfall estimates recorded with each model assessment. Source: Open-Meteo.
+                                Select an accumulation period below.</p>
+                                
+                                <div class="rainfall-window-controls" role="group" aria-label="Rainfall accumulation period">
+                                    <button type="button" class="button secondary" data-rainfall-window="rain_1d" aria-pressed="true">24 hours</button>
+                                    <button type="button" class="button secondary" data-rainfall-window="rain_3d" aria-pressed="false">72 hours</button>
+                                    <button type="button" class="button secondary" data-rainfall-window="rain_7d" aria-pressed="false">168 hours</button>
+                                </div>
+                                <div class="chart-frame">
+                                    <canvas id="rainfallHistoryChart" role="img" aria-label="Historical recorded rainfall accumulation"></canvas>
+                                </div>
+                                <p id="rainfallHistoryStatus" class="chart-fallback" role="status">Select a monitoring point to view recorded rainfall.</p>
+                                <p class="map-note">Values represent accumulated weather-model precipitation estimates associated with recorded predictions, not direct rain-gauge observations.</p>
+                            </article>
+
                     </div>
                 </section>
 

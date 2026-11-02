@@ -51,6 +51,18 @@ const agencyState = {
     reportPageSize: 12,
 };
 
+
+const agencyRainfallState = {
+    chart: null,
+    rows: [],
+    windowKey: "rain_1d",
+};
+
+const AGENCY_RAINFALL_WINDOWS = {
+    rain_1d: {hours: 24, label: "24-hour accumulated rainfall"},
+    rain_3d: {hours: 72, label: "72-hour accumulated rainfall"},
+    rain_7d: {hours: 168, label: "168-hour accumulated rainfall"}
+};
 const $ = (id) => document.getElementById(id);
 const write = (id, value) => { $(id).textContent = String(value); };
 
@@ -854,62 +866,385 @@ function selectPoint(point, scroll = false) {
     loadPointHistory(point.location_id, agencyState.selectionSerial);
 }
 
+
 function destroyPointChart() {
-    if (agencyState.pointChart) agencyState.pointChart.destroy();
-    agencyState.pointChart = null;
+    if (agencyState.pointChart) {
+        agencyState.pointChart.destroy();
+        agencyState.pointChart = null;
+    }
+
+    if (agencyRainfallState.chart) {
+        agencyRainfallState.chart.destroy();
+        agencyRainfallState.chart = null;
+    }
+
+    agencyRainfallState.rows = [];
+
+    const status = document.getElementById("rainfallHistoryStatus");
+
+    if (status) {
+        status.textContent = "Select a monitoring point to view recorded rainfall.";
+    }
 }
+
+function expandAgencyAssessmentDates(rows) {
+    const byDate = new Map();
+
+    for (const row of rows) {
+        const date = String(row.local_date || "");
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            byDate.set(date, row);
+        }
+    }
+
+    const dates = [...byDate.keys()].sort();
+
+    if (!dates.length) {
+        return [];
+    }
+
+    const first = Date.parse(`${dates[0]}T00:00:00Z`);
+    const last = Date.parse(`${dates[dates.length - 1]}T00:00:00Z`);
+    const expanded = [];
+
+    for (let time = first; time <= last; time += 86400000) {
+        const date = new Date(time).toISOString().slice(0, 10);
+        expanded.push(byDate.get(date) || {local_date: date});
+    }
+    return expanded;
+}
+
+//Update rainfall window controls
+function updateAgencyRainfallControls() {
+    const buttons = document.querySelectorAll("[data-rainfall-window]");
+
+    for (const button of buttons) {
+        const active = (button.dataset.rainfallWindow === agencyRainfallState.windowKey);
+
+        button.setAttribute("aria-pressed", String(active));
+        button.classList.toggle("is-active", active);
+    }
+}
+
+//Render the selected rainfall accumulation window
+function renderAgencyRainfallChart() {
+    const canvas = document.getElementById("rainfallHistoryChart");
+    const status = document.getElementById("rainfallHistoryStatus");
+
+    if (!canvas || !status) {
+        return;
+    }
+
+    // Destroy the previous window's chart.
+    if (agencyRainfallState.chart) {
+        agencyRainfallState.chart.destroy();
+        agencyRainfallState.chart = null;
+    }
+
+    updateAgencyRainfallControls();
+
+    const selectedWindow = AGENCY_RAINFALL_WINDOWS[agencyRainfallState.windowKey];
+    const rows = agencyRainfallState.rows;
+
+    if (!rows.length) {
+        status.textContent = agencyState.selected ? "No recorded rainfall assessments for this point." : "Select a monitoring point to view recorded rainfall.";
+        return;
+    }
+
+    const chartRows = expandAgencyAssessmentDates(rows);
+    const values = chartRows.map(row => {
+        const value = row[agencyRainfallState.windowKey];
+
+        if (value === null || value === undefined || value === "") {
+            return null;
+        }
+
+        const numeric = Number(value);
+
+        return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+    });
+
+    const recordedCount = values.filter(value => value !== null).length;
+
+    if (recordedCount === 0) {
+        status.textContent =`No recorded ${selectedWindow.hours}-hour ` + "rainfall accumulations for this point.";
+        return;
+    }
+
+    if (typeof Chart === "undefined") {
+        status.textContent = "Chart library unavailable.";
+        return;
+    }
+
+    agencyRainfallState.chart = new Chart(
+        canvas,
+        {
+            type: "line",
+            data: {
+                labels: chartRows.map(row => row.local_date),
+                datasets: [{
+                    label: selectedWindow.label,
+                    data: values,
+                    borderColor: "#087EAC",
+                    backgroundColor: "#087EAC1C",
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+
+                    // Connect recorded observations without inventing values for missing dates.
+                    spanGaps: true,
+                    segment: {
+                        borderDash: context => {
+                            const gap = (context.p1DataIndex - context.p0DataIndex);
+                            return gap > 1
+                                ? [6, 5]
+                                : [];
+                        },
+                    },
+                }],
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: "nearest",
+                    intersect: false,
+                },
+
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        callbacks: {
+                            label(context) {
+                                return (`${selectedWindow.label}: ` + `${context.parsed.y.toFixed(2)} mm`);
+                            },
+                        },
+                    },
+                },
+
+                scales: {
+                    x: {
+                        ticks: {maxTicksLimit: 8},
+                        title: {
+                            display: true,
+                            text: "Assessment date",
+                        },
+                    },
+
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Accumulated precipitation (mm)",
+                        },
+                        ticks: {precision: 2},
+                    },
+                },
+            },
+        }
+    );
+
+    status.textContent =
+        `${recordedCount} recorded ${selectedWindow.hours}-hour ` +
+        "rainfall accumulations. Dashed connections indicate " +
+        "missing assessment dates; no values were estimated.";
+}
+
+
+// ---------------------------------------------------------
+// Change rainfall accumulation window
+// ---------------------------------------------------------
+
+function setAgencyRainfallWindow(windowKey) {
+    if (
+        !Object.prototype.hasOwnProperty.call(
+            AGENCY_RAINFALL_WINDOWS,
+            windowKey
+        )
+    ) {
+        return;
+    }
+
+    agencyRainfallState.windowKey = windowKey;
+
+    // Reuse previously fetched PostgreSQL history.
+    renderAgencyRainfallChart();
+}
+
+
 
 async function loadPointHistory(locationId, serial) {
     destroyPointChart();
-    write("historyStatus", "Loading recorded model scores…");
+
+    write(
+        "historyStatus",
+        "Loading recorded model scores…"
+    );
+
+    write(
+        "rainfallHistoryStatus",
+        "Loading stored rainfall accumulations…"
+    );
 
     try {
-        const history = await getJSON(AGENCY_API.history(locationId));
-        if (serial !== agencyState.selectionSerial) return;
+        const history = await getJSON(
+            AGENCY_API.history(locationId)
+        );
 
-        const rows = Array.isArray(history.predictions) ? history.predictions : [];
+        // Discard results from a previous selection.
+        if (serial !== agencyState.selectionSerial) {
+            return;
+        }
+
+        const rows = Array.isArray(history.predictions)
+            ? history.predictions
+            : [];
+
+        // FIX: renderAgencyRainfallChart reads .rows,
+        // not .history.
+        agencyRainfallState.rows = rows;
+
+        // Both charts reuse the same PostgreSQL response.
+        renderAgencyRainfallChart();
 
         if (!rows.length) {
-            write("historyStatus", "No recorded model-score history for this monitoring point.");
+            write(
+                "historyStatus",
+                "No recorded model-score history for this monitoring point."
+            );
             return;
         }
 
         if (typeof Chart === "undefined") {
-            write("historyStatus", "Chart library unavailable.");
+            write(
+                "historyStatus",
+                "Chart library unavailable."
+            );
             return;
         }
 
-        agencyState.pointChart = new Chart($("pointHistoryChart"), {
-            type: "line",
-            data: {
-                labels: rows.map((r) => String(r.local_date)),
-                datasets: [{
-                    label: "Model score",
-                    data: rows.map((r) => r.risk_score),
-                    borderColor: "#1755BA",
-                    backgroundColor: "#1755BA16",
-                    fill: true,
-                    tension: 0.22,
-                    pointRadius: 4,
-                    spanGaps: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {legend: {display: false}},
-                scales: {
-                    x: {ticks: {maxTicksLimit: 6}},
-                    y: {beginAtZero: true, max: 1},
-                },
-            },
+        const chartRows = expandAgencyAssessmentDates(rows);
+
+        const scores = chartRows.map(row => {
+            const value = row.risk_score;
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return null;
+            }
+
+            const numeric = Number(value);
+
+            return Number.isFinite(numeric)
+                ? numeric
+                : null;
         });
 
-        write("historyStatus", `${rows.length} recorded daily assessments; missing dates are not estimated.`);
+        agencyState.pointChart = new Chart(
+            $("pointHistoryChart"),
+            {
+                type: "line",
+
+                data: {
+                    labels: chartRows.map(
+                        row => row.local_date
+                    ),
+
+                    datasets: [{
+                        label: "Model score",
+                        data: scores,
+
+                        borderColor: "#1755BA",
+                        backgroundColor: "#1755BA16",
+
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+
+                        spanGaps: true,
+
+                        // Dashed lines across dates without
+                        // recorded assessments.
+                        segment: {
+                            borderDash: context => {
+                                const gap =
+                                    context.p1DataIndex -
+                                    context.p0DataIndex;
+
+                                return gap > 1
+                                    ? [6, 5]
+                                    : [];
+                            },
+                        },
+                    }],
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
+
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 6,
+                            },
+                        },
+
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                        },
+                    },
+                },
+            }
+        );
+
+        write(
+            "historyStatus",
+            `${rows.length} recorded daily assessments. ` +
+            "Dashed connections identify missing dates; " +
+            "no intermediate scores were estimated."
+        );
+
     } catch (error) {
-        if (serial !== agencyState.selectionSerial) return;
-        console.error("Point history unavailable:", error);
-        write("historyStatus", "Unable to load recorded model history.");
+        if (serial !== agencyState.selectionSerial) {
+            return;
+        }
+
+        console.error(
+            "Point history unavailable:",
+            error
+        );
+
+        write(
+            "historyStatus",
+            "Unable to load recorded model history."
+        );
+
+        write(
+            "rainfallHistoryStatus",
+            "Unable to load rainfall history. " +
+            (
+                error.status
+                    ? `History API returned HTTP ${error.status}.`
+                    : "Check the browser console."
+            )
+        );
     }
 }
 
@@ -1499,100 +1834,182 @@ async function loadDashboard() {
     }
 }
 
+
 function startAgency() {
     initializeMap();
 
-    $("refreshData").addEventListener("click", loadDashboard);
-    $("searchPoints").addEventListener("input", renderFiltered);
-    $("riskFilter").addEventListener("change", renderFiltered);
+    // ================================================
+    // RECORDED RAINFALL WINDOW SELECTORS
+    // ================================================
 
-    $("subcountyFilter").addEventListener("change", () => {
-        updateWardOptions();
-        renderFiltered();
-        loadAreaTrends();
+    document.querySelectorAll(
+        "[data-rainfall-window]"
+    ).forEach(button => {
+        button.addEventListener("click", () => {
+            setAgencyRainfallWindow(
+                button.dataset.rainfallWindow
+            );
+        });
     });
 
-    $("wardFilter").addEventListener("change", () => {
-        renderFiltered();
-        loadAreaTrends();
-    });
+    updateAgencyRainfallControls();
 
-    $("compareBy").addEventListener("change", renderComparisons);
-    $("showPoints").addEventListener("change", renderMap);
-    $("showWards").addEventListener("change", toggleBoundaries);
-    $("showSubcounties").addEventListener("change", toggleBoundaries);
-    $("showRoadExposure").addEventListener("change", toggleRoadExposure);
-    $("downloadCSV").addEventListener("click", downloadCSV);
+    // ================================================
+    // REFRESH MONITORING DATA
+    // ================================================
 
-    loadDashboard();
-}function startAgency() {
-    initializeMap();
+    $("refreshData").addEventListener(
+        "click",
+        loadDashboard
+    );
 
-    $("refreshData").addEventListener("click", loadDashboard);
+    // ================================================
+    // INDEPENDENT MAP SEARCH
+    // ================================================
 
-    $("searchPoints").addEventListener("input", () =>
-        resetGeoSearch("map"));
+    $("searchPoints").addEventListener(
+        "input",
+        () => resetGeoSearch("map")
+    );
 
-    $("findMapPlace").addEventListener("click", () =>
-        findNairobiPlace("map"));
+    $("findMapPlace").addEventListener(
+        "click",
+        () => findNairobiPlace("map")
+    );
 
-    $("searchPoints").addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            findNairobiPlace("map");
+    $("searchPoints").addEventListener(
+        "keydown",
+        event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                findNairobiPlace("map");
+            }
         }
-    });
+    );
 
-    $("reportSearch").addEventListener("input", () =>
-        resetGeoSearch("report"));
+    // ================================================
+    // INDEPENDENT REPORT SEARCH
+    // ================================================
 
-    $("findReportPlace").addEventListener("click", () =>
-        findNairobiPlace("report"));
+    $("reportSearch").addEventListener(
+        "input",
+        () => resetGeoSearch("report")
+    );
 
-    $("reportSearch").addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            findNairobiPlace("report");
+    $("findReportPlace").addEventListener(
+        "click",
+        () => findNairobiPlace("report")
+    );
+
+    $("reportSearch").addEventListener(
+        "keydown",
+        event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                findNairobiPlace("report");
+            }
         }
-    });
+    );
 
-    $("prevReportPage").addEventListener("click", () => {
-        agencyState.reportPage--;
-        renderRecords();
-    });
+    // ================================================
+    // REPORT PAGINATION
+    // ================================================
 
-    $("nextReportPage").addEventListener("click", () => {
-        agencyState.reportPage++;
-        renderRecords();
-    });
+    $("prevReportPage").addEventListener(
+        "click",
+        () => {
+            agencyState.reportPage--;
+            renderRecords();
+        }
+    );
 
-    $("riskFilter").addEventListener("change", renderFiltered);
+    $("nextReportPage").addEventListener(
+        "click",
+        () => {
+            agencyState.reportPage++;
+            renderRecords();
+        }
+    );
 
-    $("subcountyFilter").addEventListener("change", () => {
-        updateWardOptions();
-        renderFiltered();
-        loadAreaTrends();
-    });
+    // ================================================
+    // RISK AND ADMINISTRATIVE FILTERS
+    // ================================================
 
-    $("wardFilter").addEventListener("change", () => {
-        renderFiltered();
-        loadAreaTrends();
-    });
+    $("riskFilter").addEventListener(
+        "change",
+        renderFiltered
+    );
 
-    $("compareBy").addEventListener("change", renderComparisons);
+    $("subcountyFilter").addEventListener(
+        "change",
+        () => {
+            updateWardOptions();
+            renderFiltered();
+            loadAreaTrends();
+        }
+    );
 
-    $("showPoints").addEventListener("change", renderMap);
-    $("showWards").addEventListener("change", toggleBoundaries);
-    $("showSubcounties").addEventListener("change", toggleBoundaries);
-    $("showRoadExposure").addEventListener("change", toggleRoadExposure);
+    $("wardFilter").addEventListener(
+        "change",
+        () => {
+            renderFiltered();
+            loadAreaTrends();
+        }
+    );
 
-    $("downloadCSV").addEventListener("click", downloadCSV);
-    $("downloadPDF").addEventListener("click", downloadPDF);
+    $("compareBy").addEventListener(
+        "change",
+        renderComparisons
+    );
+
+    // ================================================
+    // GIS LAYER CONTROLS
+    // ================================================
+
+    $("showPoints").addEventListener(
+        "change",
+        renderMap
+    );
+
+    $("showWards").addEventListener(
+        "change",
+        toggleBoundaries
+    );
+
+    $("showSubcounties").addEventListener(
+        "change",
+        toggleBoundaries
+    );
+
+    $("showRoadExposure").addEventListener(
+        "change",
+        toggleRoadExposure
+    );
+
+    // ================================================
+    // REPORT EXPORT
+    // ================================================
+
+    $("downloadCSV").addEventListener(
+        "click",
+        downloadCSV
+    );
+
+    $("downloadPDF").addEventListener(
+        "click",
+        downloadPDF
+    );
+
+    // ================================================
+    // INITIAL DASHBOARD LOAD
+    // ================================================
 
     renderRecords();
     renderMapSearchStatus();
+
     loadDashboard();
 }
+
 
 if (typeof document !== "undefined") {
     document.addEventListener("DOMContentLoaded", startAgency);

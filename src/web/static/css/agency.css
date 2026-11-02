@@ -669,6 +669,62 @@ h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: -.035em; }
     white-space: nowrap;
 }
 
+/* =====================================================
+   RECORDED RAINFALL ACCUMULATION
+   AGENCY AND ADMIN DASHBOARDS
+   ===================================================== */
+
+.rainfall-history-card {
+    grid-column: 1 / -1;
+}
+
+.rainfall-window-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.rainfall-window-controls .button {
+    min-width: 105px;
+    min-height: 40px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+.rainfall-window-controls .button[aria-pressed="true"] {
+    background: #1456b8;
+    border-color: #1456b8;
+    color: #ffffff;
+}
+
+.rainfall-window-controls .button:focus-visible {
+    outline: 3px solid #69a9ff;
+    outline-offset: 3px;
+}
+
+.rainfall-history-card .chart-frame {
+    height: 320px;
+    min-height: 260px;
+}
+
+@media (max-width: 720px) {
+    .rainfall-window-controls {
+        gap: 8px;
+    }
+
+    .rainfall-window-controls .button {
+        flex: 1 1 auto;
+        min-width: 88px;
+    }
+
+    .rainfall-history-card .chart-frame {
+        height: 270px;
+    }
+}
+
+
 @media (max-width: 900px) {
     .agency-summary-header {
         flex-direction: column;
