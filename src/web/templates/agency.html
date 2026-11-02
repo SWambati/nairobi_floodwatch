@@ -488,53 +488,45 @@
                         </p>
                     </div>
                 </div>
-
+                
                 <div class="history-grid">
-                    <div class="chart-card">
-                        <h3>
-                            Historical Flood Risk Assessments
-                        </h3>
-
-                        <p>
-                            Latest recorded model score per
-                            day for the selected monitoring point.
-                        </p>
-
+                    <!-- HISTORICAL MODEL RISK ASSESSMENTS -->
+                     <article class="chart-card">
+                        <h3>Historical Flood Risk Assessments</h3>
+                        <p>Latest recorded model score per day for the selected monitoring point.</p>
                         <div class="chart-frame">
-                            <canvas id="pointHistoryChart" role="img" aria-label="Historical flood risk model scores for selected monitoring point">
-                            </canvas>
+                            <canvas id="pointHistoryChart" role="img" aria-label="Historical flood risk model scores for selected monitoring point"></canvas>
                         </div>
-
-                        <p id="historyStatus" class="chart-fallback" role="status" aria-live="polite">
-                            Select a monitoring point to
-                            view recorded model history.
-                        </p>
-                    </div>
-
-                    <div class="chart-card">
-                        <h3>
-                            Historical Monitoring Trends
-                        </h3>
-
-                        <p>
-                            Recorded changes in monitoring
-                            classifications across Nairobi
-                            over time.
-                        </p>
-
+                        <p id="historyStatus" class="chart-fallback" role="status" aria-live="polite">Select a monitoring point to view recorded model history.</p>
+                    </article>
+                    
+                    <!-- COUNTY HISTORICAL MONITORING TRENDS -->
+                     <article class="chart-card">
+                        <h3>Historical Monitoring Trends</h3>
+                        <p>Recorded changes in monitoring classifications across Nairobi over time.</p>
                         <div class="chart-frame">
-                            <canvas id="areaTrendChart" role="img" aria-label="Historical monitoring classification trends">
-                            </canvas>
+                            <canvas id="areaTrendChart" role="img" aria-label="Historical monitoring classification trends"></canvas>
                         </div>
-
-
-                        <p id="areaTrendStatus" class="chart-fallback" role="status" aria-live="polite">
-                            Area-level historical analytics
-                            will be connected to the
-                            agency reporting API.
-                        </p>
-                    </div>
+                        <p id="areaTrendStatus" class="chart-fallback" role="status" aria-live="polite">Awaiting historical agency analytics.</p>
+                    </article>
+                    <!-- RECORDED RAINFALL ACCUMULATION -->
+                     <article class="chart-card rainfall-history-card" aria-labelledby="rainfallHistoryTitle">
+                        <h3 id="rainfallHistoryTitle">Recorded Rainfall Accumulation</h3>
+                        <p>Historical antecedent rainfall estimates stored with each model assessment. 
+                            Source: Open-Meteo. Choose an accumulation period.</p>
+                            <div class="rainfall-window-controls" role="group" aria-label="Rainfall accumulation period">
+                                <button type="button" class="button secondary" data-rainfall-window="rain_1d" aria-pressed="true">24 hours</button>
+                                <button type="button" class="button secondary" data-rainfall-window="rain_3d" aria-pressed="false">72 hours</button>
+                                <button type="button" class="button secondary" data-rainfall-window="rain_7d" aria-pressed="false">168 hours</button>
+                            </div>
+                            <div class="chart-frame">
+                                <canvas id="rainfallHistoryChart" role="img" aria-label="Historical recorded rainfall accumulations in millimetres"></canvas>
+                            </div>
+                            <p id="rainfallHistoryStatus" class="chart-fallback" role="status" aria-live="polite">Select a monitoring point to view recorded rainfall.</p>
+                            <p class="map-note">Values are weather-model precipitation estimates, not direct rain-gauge observations. Dashed connections identify dates without recorded assessments.</p>
+                        </article>
                 </div>
+             
             </section>
 
             <section id="agencyReports" class="agency-panel agency-records" aria-labelledby="agencyReportsTitle">
