@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 import requests
 from config.paths import PROCESSED_DIR
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 
 
 #Configuration
@@ -17,6 +19,7 @@ FORECAST_DAYS = 1
 MAX_ATTEMPTS = 4
 REQUEST_TIMEOUT_SECONDS = 30
 RETRY_BASE_SECONDS = 2
+MAX_RETRY_AFTER_SECONDS = 30
 
 GENERIC_HOURLY_VARIABLES = ["precipitation"]
 GENERIC_CURRENT_VARIABLES = ["temperature_2m", "relative_humidity_2m", "precipitation", "surface_pressure"]
@@ -33,27 +36,62 @@ class OpenMeteoClient:
         self.timeout_seconds = timeout_seconds
         self.session = requests.Session()
 
+   
+    @staticmethod
+    def _retry_after_delay(value):
+        if not value:
+            return None
+
+        try:
+            return max(0, int(value))
+        except (TypeError, ValueError):
+            try:
+                target = parsedate_to_datetime(value)
+                return max(0, (target - datetime.now(timezone.utc)).total_seconds())
+            except (TypeError, ValueError, OverflowError):
+                return None
+
     def _request(self, url: str, params: dict):
         last_error = None
 
         for attempt in range(1, self.max_attempts + 1):
             try:
                 response = self.session.get(url, params=params, timeout=self.timeout_seconds)
-                response.raise_for_status()
-                payload = response.json()
 
-                if isinstance(payload, dict) and payload.get("error"):
-                    raise RuntimeError(f"Open-Meteo returned an error: {payload.get('reason')}")
+            except (requests.Timeout, requests.ConnectionError) as exc:
+                last_error = type(exc).__name__
 
-                return payload
+            else:
+                status = response.status_code
 
-            except (requests.RequestException, RuntimeError, ValueError) as error:
-                last_error = error
+                if status == 429:
+                    delay = self._retry_after_delay(response.headers.get("Retry-After"))
 
-                if attempt == self.max_attempts:
-                    break
+                    if delay is None or delay > MAX_RETRY_AFTER_SECONDS or attempt == self.max_attempts:
+                        raise RuntimeError("Open-Meteo rate limited requests (HTTP 429). Acquisition deferred.")
 
-                delay = RETRY_BASE_SECONDS * (2 ** (attempt - 1))
+                    time.sleep(delay)
+                    continue
+
+                if 400 <= status < 500:
+                    raise RuntimeError(f"Open-Meteo rejected request: HTTP {status}")
+
+                if status >= 500:
+                    last_error = f"HTTP {status}"
+
+                else:
+                    try:
+                        payload = response.json()
+                    except ValueError as exc:
+                        raise RuntimeError("Open-Meteo returned invalid JSON.") from exc
+
+                    if isinstance(payload, dict) and payload.get("error"):
+                        raise RuntimeError(f"Open-Meteo API error: {payload.get('reason', 'unknown')}")
+
+                    return payload
+
+            if attempt < self.max_attempts:
+                delay = min(RETRY_BASE_SECONDS * (2 ** (attempt - 1)), 30)
                 time.sleep(delay)
 
         raise RuntimeError(f"Open-Meteo request failed after {self.max_attempts} attempts: {last_error}")
