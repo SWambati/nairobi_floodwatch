@@ -1,0 +1,45 @@
+name: FloodWatch Operational Pipeline
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: floodwatch-operational
+  cancel-in-progress: false
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+      APP_ENV: production
+      FLOODWATCH_ENV: production
+      APP_TIMEZONE: Africa/Nairobi
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip check
+
+      - name: Verify release model
+        run: |
+          python -c "from src.model.inference import FloodInferenceEngine; m = FloodInferenceEngine(); print(m.model_info())"
+
+      - name: Execute FloodWatch pipeline
+        run: python -m scripts.run_operational_prediction
