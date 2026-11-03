@@ -6,6 +6,7 @@ import ssl
 from dataclasses import dataclass
 from email.message import EmailMessage
 from urllib.parse import quote
+import requests
 
 from src.auth.config import get_auth_settings
 from src.auth.password_service import normalize_email
@@ -73,10 +74,58 @@ def _build_link(path, token):
     # Fragment tokens are not sent in the initial HTTP GET request.
     return f"{base_url}{path}#token={quote(token, safe='')}"
 
-def _send_email(recipient, subject, body):
-    settings = EmailSettings.from_environment()
-    recipient = normalize_email(recipient)
 
+def _send_email(recipient, subject, body):
+    recipient = normalize_email(recipient)
+    api_key = os.getenv("FLOODWATCH_BREVO_API_KEY", "").strip()
+
+    if api_key:
+        sender = os.getenv("FLOODWATCH_MAIL_FROM", "").strip()
+
+        try:
+            sender = normalize_email(sender)
+        except ValueError as exc:
+            raise EmailConfigurationError(
+                "A valid FLOODWATCH_MAIL_FROM is required."
+            ) from exc
+
+        try:
+            response = requests.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={
+                    "api-key": api_key,
+                    "accept": "application/json",
+                    "content-type": "application/json",
+                },
+                json={
+                    "sender": {
+                        "name": "Nairobi FloodWatch",
+                        "email": sender,
+                    },
+                    "to": [{"email": recipient}],
+                    "subject": subject,
+                    "textContent": body,
+                },
+                timeout=(5, 15),
+            )
+        except requests.RequestException:
+            raise EmailDeliveryError(
+                "FloodWatch could not deliver the email."
+            ) from None
+
+        if response.status_code != 201:
+            raise EmailDeliveryError(
+                f"Email provider rejected the message (HTTP {response.status_code})."
+            )
+
+        return True
+
+    if get_auth_settings().environment == "production":
+        raise EmailConfigurationError(
+            "Production email API is not configured."
+        )
+
+    settings = EmailSettings.from_environment()
     message = EmailMessage()
     message["From"] = f"Nairobi FloodWatch <{settings.sender}>"
     message["To"] = recipient
@@ -87,22 +136,29 @@ def _send_email(recipient, subject, body):
 
     try:
         if settings.security == "ssl":
-            with smtplib.SMTP_SSL(settings.host, settings.port, timeout=15, context=context) as smtp:
+            with smtplib.SMTP_SSL(
+                settings.host, settings.port,
+                timeout=15, context=context
+            ) as smtp:
                 smtp.login(settings.username, settings.password)
                 smtp.send_message(message)
-
         else:
-            with smtplib.SMTP(settings.host, settings.port, timeout=15) as smtp:
+            with smtplib.SMTP(
+                settings.host, settings.port, timeout=15
+            ) as smtp:
                 smtp.ehlo()
                 smtp.starttls(context=context)
                 smtp.ehlo()
                 smtp.login(settings.username, settings.password)
                 smtp.send_message(message)
 
-    except (smtplib.SMTPException, OSError) as exc:
-        raise EmailDeliveryError("FloodWatch could not deliver the email.") from None
+    except (smtplib.SMTPException, OSError):
+        raise EmailDeliveryError(
+            "FloodWatch could not deliver the email."
+        ) from None
 
     return True
+
 
 def send_verification_email(recipient, token):
     link = _build_link("/auth/verify-email", token)
