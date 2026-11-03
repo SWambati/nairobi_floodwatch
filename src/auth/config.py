@@ -24,7 +24,8 @@ class AuthSettings:
         if environment not in {"development", "production"}:
             raise ValueError("FLOODWATCH_ENV must be 'development' or 'production'.")
 
-        base_url = os.getenv("FLOODWATCH_BASE_URL", "http://127.0.0.1:8010").strip().rstrip("/")
+        base_url = (os.getenv("FLOODWATCH_BASE_URL") or os.getenv("RENDER_EXTERNAL_URL") or "http://127.0.0.1:8010").strip().rstrip("/")
+
         parsed = urlsplit(base_url)
 
         if parsed.scheme not in {"http", "https"}:
