@@ -1,0 +1,28 @@
+{
+  "classification_type": "model_score_risk_bands",
+  "source": "Tuned Random Forest validation predictions",
+  "validation_rows": 224,
+  "low_risk": {
+    "rule": "score < moderate_threshold"
+  },
+  "moderate_risk": {
+    "rule": "moderate_threshold <= score < high_threshold",
+    "threshold": 0.0998962172466691,
+    "selection_method": "maximum F2 score",
+    "beta": 2.0,
+    "validation_precision": 0.5913978494623656,
+    "validation_recall": 0.9821428571428571,
+    "validation_f2": 0.8675078864353313
+  },
+  "high_risk": {
+    "rule": "score >= high_threshold",
+    "threshold": 0.6862412817257402,
+    "selection_method": "maximum F0.5 score",
+    "beta": 0.5,
+    "validation_precision": 0.8314606741573034,
+    "validation_recall": 0.6607142857142857,
+    "validation_f0_5": 0.7905982905982906
+  },
+  "interpretation_note": "Risk bands are derived from Random Forest model scores and should not be interpreted as calibrated real-world flood probabilities.",
+  "test_set_used_for_threshold_selection": false
+}
