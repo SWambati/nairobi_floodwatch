@@ -1,0 +1,12 @@
+{
+  "source": "OpenStreetMap",
+  "source_url": "https://www.openstreetmap.org/",
+  "license": "Open Database License (ODbL)",
+  "acquired_at_utc": "2026-10-20T10:40:25.553489+00:00",
+  "network_type": "drive",
+  "boundary_source": "C:\\Users\\swamb\\OneDrive\\Desktop\\School_Stuff\\Year 4\\ICS Project 2\\is_project_implementation\\flood_monitoring\\data\\spatial\\administrative\\nairobi_county_adm1.geojson",
+  "road_segments": 46256,
+  "total_road_length_km": 5087.42,
+  "crs": "EPSG:4326",
+  "output_file": "C:\\Users\\swamb\\OneDrive\\Desktop\\School_Stuff\\Year 4\\ICS Project 2\\is_project_implementation\\flood_monitoring\\data\\spatial\\roads\\nairobi_drive_roads.gpkg"
+}

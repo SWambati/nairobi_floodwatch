@@ -18,6 +18,7 @@ from src.operational.persistence import (
     persist_predictions,
 )
 from src.operational.runtime_features import assemble_model_features, build_weather_features
+from src.operational.run_lock import operational_run_lock
 
 NAIROBI_TIMEZONE = "Africa/Nairobi"
 API_BATCH_SIZE = 40
@@ -250,5 +251,14 @@ def main():
         print("Operational prediction pipeline: OK")
 
 
+def run_scheduled():
+    with operational_run_lock() as acquired:
+        if not acquired:
+            print("Operational prediction SKIPPED: another execution is running.")
+            return False
+
+        main()
+        return True
+
 if __name__ == "__main__":
-    main()
+    run_scheduled()
