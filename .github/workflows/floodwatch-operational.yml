@@ -37,9 +37,17 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip check
 
-      - name: Verify release model
+      
+      - name: Verify production artifacts
         run: |
+          test -f outputs/project_outputs/models/final/random_forest_final.joblib
+          test -f outputs/project_outputs/models/final/final_model_metadata.json
+          test -f outputs/project_outputs/processed/modeling/risk_classification/risk_thresholds.json
+
           python -c "from src.model.inference import FloodInferenceEngine; m = FloodInferenceEngine(); print(m.model_info())"
+
+          python -c "from src.model.risk_classification import FloodRiskClassifier; FloodRiskClassifier(); print('Risk thresholds: OK')"
+
 
       - name: Execute FloodWatch pipeline
         run: python -m scripts.run_operational_prediction
