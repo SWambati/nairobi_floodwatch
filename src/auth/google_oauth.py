@@ -11,9 +11,10 @@ from authlib.jose.errors import JoseError
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from starlette.concurrency import run_in_threadpool
 
-from src.auth.account_service import upsert_verified_google_user
+from src.auth.account_service import upsert_verified_google_user, link_verified_google_user
 from src.auth.config import get_auth_settings
 from src.operational.persistence import create_database_engine
 
@@ -329,6 +330,64 @@ def _revoke_user_session(token):
                 "user_id": str(user_id),
             })
 
+def _verified_link_user(request: Request):
+    from src.auth.mfa_session import evaluate_session_mfa
+
+    user = get_signed_in_user(request)
+    session_token = request.cookies.get(SESSION_COOKIE)
+
+    if not user or not session_token:
+        raise PermissionError("Authentication is required.")
+
+    if user["role"] not in {"agency", "admin"}:
+        raise PermissionError("Privileged account required.")
+
+    with _engine().connect() as conn:
+        mfa = evaluate_session_mfa(
+            conn,
+            user_id=user["id"],
+            session_token=session_token,
+        )
+
+    if not mfa.allowed or not mfa.mfa_required:
+        raise PermissionError("MFA verification is required.")
+
+    return user, _token_hash(session_token)
+
+
+def _link_google_identity(user_id, identity):
+    with _engine().begin() as conn:
+        return link_verified_google_user(
+            conn,
+            user_id=user_id,
+            google_sub=identity["google_sub"],
+            email=identity["email"],
+            email_verified=identity["email_verified"],
+        )
+
+
+@router.get("/auth/google/link")
+async def google_link(request: Request):
+    settings = get_auth_settings().require_google_configuration()
+
+    try:
+        user, session_hash = _verified_link_user(request)
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=403,
+            detail="Sign in and complete MFA before connecting Google.",
+        ) from exc
+
+    request.session.clear()
+    request.session["google_link_user_id"] = str(user["id"])
+    request.session["google_link_session_hash"] = session_hash
+
+    return await _google_client().authorize_redirect(
+        request,
+        settings.google_redirect_uri,
+        prompt="select_account",
+    )
+
 @router.get("/auth/google/login")
 async def google_login(request: Request):
     settings = get_auth_settings().require_google_configuration()
@@ -340,6 +399,18 @@ async def google_login(request: Request):
 @router.get("/auth/google/callback")
 async def google_callback(request: Request):
     settings = get_auth_settings().require_google_configuration()
+
+    
+    link_user_id = request.session.get("google_link_user_id")
+    link_session_hash = request.session.get("google_link_session_hash")
+
+    if bool(link_user_id) != bool(link_session_hash):
+        request.session.clear()
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Google linking session.",
+        )
+
 
     # Capture safe diagnostic indicators BEFORE Authlib consumes or clears the stored OAuth state.
     # Never log actual state values, authorization codes, session cookies, access tokens or ID tokens.
@@ -386,13 +457,69 @@ async def google_callback(request: Request):
     if not token.get("id_token") or not token.get("userinfo"):
         raise HTTPException(status_code=401, detail="Google did not return a verified identity token.")
     
-    # DATABASE IDENTITY AND SESSION
+    
+    # DATABASE IDENTITY, LINKING AND SESSION
     try:
-        identity = _validate_google_identity(token["userinfo"], settings.google_client_id)
-        session_token = await run_in_threadpool( _create_user_session, identity, settings.user_session_max_age)
+        identity = _validate_google_identity(
+            token["userinfo"],
+            settings.google_client_id,
+        )
+
+        if link_user_id is not None:
+            user, current_session_hash = _verified_link_user(request)
+
+            if (
+                str(user["id"]) != str(link_user_id)
+                or not isinstance(link_session_hash, str)
+                or not secrets.compare_digest(
+                    current_session_hash,
+                    link_session_hash,
+                )
+            ):
+                raise PermissionError(
+                    "The original authenticated session is required."
+                )
+
+            linked = await run_in_threadpool(
+                _link_google_identity,
+                str(user["id"]),
+                identity,
+            )
+
+            destination = (
+                "/admin"
+                if linked["role"] == "admin"
+                else "/agency"
+            )
+
+            response = RedirectResponse(
+                url=destination,
+                status_code=303,
+            )
+            response.headers["Cache-Control"] = "no-store"
+            return response
+
+        session_token = await run_in_threadpool(
+            _create_user_session,
+            identity,
+            settings.user_session_max_age,
+        )
 
     except (ValueError, PermissionError) as exc:
-        raise HTTPException(status_code=403, detail="This Google account cannot sign in to FloodWatch.") from exc
+        raise HTTPException(
+            status_code=403,
+            detail="This Google identity cannot access this account.",
+        ) from exc
+
+    except IntegrityError as exc:
+        logger.warning(
+            "Google account linking encountered an identity conflict."
+        )
+        raise HTTPException(
+            status_code=409,
+            detail="Google account linking could not be completed.",
+        ) from exc
+
     
     # ROLE-AWARE REDIRECTION
     # The database determines whether this account is Resident, Agency or Admin.
