@@ -63,6 +63,23 @@ class EmailSettings:
 
         return cls(host=host, port=port, security=security, username=username, password=password, sender=sender)
 
+def ensure_email_configured():
+    api_key = os.getenv("FLOODWATCH_BREVO_API_KEY", "").strip()
+
+    if api_key:
+        sender = os.getenv("FLOODWATCH_MAIL_FROM", "").strip()
+
+        try:
+            normalize_email(sender)
+        except ValueError as exc:
+            raise EmailConfigurationError("A valid FloodWatch sender email is required.") from exc
+        return True
+
+    if get_auth_settings().environment == "production":
+        raise EmailConfigurationError("Production transactional email is not configured.")
+    EmailSettings.from_environment()
+    return True
+
 def _build_link(path, token):
     #Build recovery links from the trusted configured application URL.
 

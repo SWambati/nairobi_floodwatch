@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from src.auth.authorization import (require_resident_account, _resident_verification_status)
 from src.auth.config import get_auth_settings
-from src.auth.email_delivery import (EmailSettings, EmailConfigurationError, EmailDeliveryError, send_resident_verification_otp)
+from src.auth.email_delivery import (EmailConfigurationError, EmailDeliveryError, send_resident_verification_otp, ensure_email_configured)
 from src.auth.resident_otp_service import (OTPRequestLimited, issue_resident_email_otp, verify_resident_email_otp)
 from src.operational.persistence import create_database_engine
 
@@ -69,7 +69,7 @@ def send_verification_otp(request: Request, user=Depends(require_resident_accoun
 
     # Never issue OTPs if email delivery is unavailable.
     try:
-        EmailSettings.from_environment()
+        ensure_email_configured()
 
     except EmailConfigurationError as exc:
         raise HTTPException(status_code=503, detail="Email service is not configured.") from exc
