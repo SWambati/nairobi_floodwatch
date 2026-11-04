@@ -66,6 +66,20 @@ def upsert_verified_google_user(conn, *, google_sub, email, email_verified, disp
     if existing and existing["account_status"] != "active":
         raise PermissionError("This account is suspended.")
 
+    
+    email_owner = conn.execute(text("""
+        SELECT id, google_sub
+        FROM floodwatch_users
+        WHERE LOWER(BTRIM(email)) = LOWER(BTRIM(:email))
+        FOR UPDATE
+    """), {"email": email}).mappings().first()
+
+    if email_owner and email_owner["google_sub"] != google_sub:
+        raise PermissionError(
+            "An existing account must be authenticated before Google linking."
+        )
+
+
     if not existing:
         user_id = str(uuid4())
 
@@ -79,7 +93,7 @@ def upsert_verified_google_user(conn, *, google_sub, email, email_verified, disp
                 CAST(:id AS UUID), :sub, :email, TRUE,
                 :name, :avatar, 'resident', 'active', NOW()
             )
-            ON CONFLICT (google_sub) DO NOTHING
+            ON CONFLICT DO NOTHING
             RETURNING id
         """), {
             "id": user_id,
@@ -115,6 +129,102 @@ def upsert_verified_google_user(conn, *, google_sub, email, email_verified, disp
         raise PermissionError("Account access is unavailable.")
 
     return get_user_by_google_sub(conn, google_sub)
+
+
+def link_verified_google_user(
+    conn,
+    *,
+    user_id,
+    google_sub,
+    email,
+    email_verified,
+):
+    google_sub = str(google_sub or "").strip()
+    email = str(email or "").strip().lower()
+
+    if not google_sub or not email_verified:
+        raise PermissionError("A verified Google identity is required.")
+
+    if not email or len(email) > 254:
+        raise ValueError("Invalid Google email.")
+
+    user = conn.execute(text("""
+        SELECT id, email, email_verified, google_sub,
+               role, account_status
+        FROM floodwatch_users
+        WHERE id = CAST(:user_id AS UUID)
+        FOR UPDATE
+    """), {
+        "user_id": str(user_id),
+    }).mappings().first()
+
+    if not user:
+        raise PermissionError("Account not found.")
+
+    if user["account_status"] != "active":
+        raise PermissionError("Account is inactive.")
+
+    if user["role"] not in {"agency", "admin"}:
+        raise PermissionError("Privileged account required.")
+
+    if not user["email_verified"]:
+        raise PermissionError("Account email is not verified.")
+
+    if user["email"].strip().lower() != email:
+        raise PermissionError(
+            "Google email does not match the existing account."
+        )
+
+    if user["google_sub"] not in (None, google_sub):
+        raise PermissionError(
+            "This account is already linked to another Google identity."
+        )
+
+    other_owner = conn.execute(text("""
+        SELECT id
+        FROM floodwatch_users
+        WHERE google_sub = :google_sub
+          AND id <> CAST(:user_id AS UUID)
+        LIMIT 1
+    """), {
+        "google_sub": google_sub,
+        "user_id": str(user_id),
+    }).scalar_one_or_none()
+
+    if other_owner is not None:
+        raise PermissionError(
+            "This Google identity belongs to another FloodWatch account."
+        )
+
+    if user["google_sub"] is None:
+        updated = conn.execute(text("""
+            UPDATE floodwatch_users
+            SET google_sub = :google_sub,
+                updated_at = NOW()
+            WHERE id = CAST(:user_id AS UUID)
+              AND google_sub IS NULL
+              AND account_status = 'active'
+            RETURNING id
+        """), {
+            "google_sub": google_sub,
+            "user_id": str(user_id),
+        }).scalar_one_or_none()
+
+        if updated is None:
+            raise PermissionError("Account linking was not completed.")
+
+        _audit(
+            conn,
+            action="google_account_linked",
+            actor_id=user["id"],
+            target_id=user["id"],
+            details={"provider": "google"},
+        )
+
+    return {
+        "id": str(user["id"]),
+        "role": user["role"],
+    }
 
 
 def submit_agency_request(conn, *, user_id, organization_name, justification, organization_email=None,):
