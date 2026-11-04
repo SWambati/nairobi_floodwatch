@@ -1,0 +1,22 @@
+name: FloodWatch Schedule Probe
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Confirm scheduled execution
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "UTC execution time:"
+          date -u
+          echo "SCHEDULER PROBE COMPLETED"
