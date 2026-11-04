@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from src.auth.config import get_auth_settings
 from src.auth.password_service import (normalize_email, register_local_user, validate_password, verify_password_first_factor,)
 from src.auth.email_token_service import (issue_email_verification, redeem_email_verification, issue_password_reset, redeem_password_reset)
-from src.auth.email_delivery import (EmailSettings, EmailConfigurationError, EmailDeliveryError, send_verification_email, send_password_reset_email, send_password_change_notice)
+from src.auth.email_delivery import (EmailConfigurationError, EmailDeliveryError, send_verification_email, send_password_reset_email, send_password_change_notice, ensure_email_configured)
 from src.auth.google_oauth import (SESSION_COOKIE, _post_login_destination)
 from src.operational.persistence import create_database_engine
 from src.auth.resident_verification import ensure_resident_verification_schema, start_resident_grace_period
@@ -107,7 +107,7 @@ def _valid_email(email):
 def _email_delivery_available():
     #Return whether transactional email is configured.
     try:
-        EmailSettings.from_environment()
+        ensure_email_configured()
         return True
 
     except EmailConfigurationError:
