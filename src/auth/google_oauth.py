@@ -404,6 +404,18 @@ async def google_callback(request: Request):
     link_user_id = request.session.get("google_link_user_id")
     link_session_hash = request.session.get("google_link_session_hash")
 
+    
+    logger.warning(
+        "Google callback context: "
+        "link_intent_present=%s, "
+        "link_session_hash_present=%s, "
+        "user_session_cookie_present=%s",
+        bool(link_user_id),
+        bool(link_session_hash),
+        SESSION_COOKIE in request.cookies,
+    )
+
+
     if bool(link_user_id) != bool(link_session_hash):
         request.session.clear()
         raise HTTPException(
@@ -505,7 +517,13 @@ async def google_callback(request: Request):
             settings.user_session_max_age,
         )
 
-    except (ValueError, PermissionError) as exc:
+    except (ValueError, PermissionError) as exc:   
+        logger.warning(
+            "Google identity rejected: flow=%s, reason=%s",
+            "link" if link_user_id else "normal_login",
+            str(exc),
+        )
+
         raise HTTPException(
             status_code=403,
             detail="This Google identity cannot access this account.",
