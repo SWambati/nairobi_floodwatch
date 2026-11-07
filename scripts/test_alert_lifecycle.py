@@ -68,6 +68,19 @@ def main():
     print("=" * 50)
 
     engine = create_database_engine()
+    
+    # TC-013 safety: lifecycle simulations must use local PostgreSQL.
+    # The test creates and updates records within a rollback transaction.
+    database_host = (engine.url.host or "").lower()
+    allowed_hosts = {"localhost", "127.0.0.1", "::1"}
+
+    if database_host not in allowed_hosts:
+        engine.dispose()
+        raise RuntimeError(f"TC-013 lifecycle test must run against local PostgreSQL. Detected database host: {database_host}. Production Neon testing is not permitted.")
+
+    print("Database environment: LOCAL PostgreSQL")
+    print("Transaction policy: ROLLBACK ONLY")
+
 
     try:
         with engine.connect() as connection:
@@ -97,7 +110,9 @@ def main():
                 ).scalar_one()
 
                 # Use controlled historical timestamps to simulate several days without waiting for real time to pass.
-                t0 = datetime.now(timezone.utc) - timedelta(days=10)
+                # Start at 23:00 Nairobi time (20:00 UTC).
+                #This allows the HIGH assessment two hours later to fall on the next Nairobi calendar day.
+                t0 = (datetime.now(timezone.utc) - timedelta(days=10)).replace(hour=20, minute=0, second=0, microsecond=0)
                 test_engine = TransactionBoundEngine(connection)
 
                 # Test 1: First MODERATE assessment creates an ACTIVE ADVISORY.
@@ -132,10 +147,10 @@ def main():
                 print("PASS: Falling to LOW resolves an existing warning")
 
                 # Test 5: A 24-hour-old alert expires when a subsequent run occurs.
-                third_time = t0 + timedelta(hours=4)
+                third_time = t0 + timedelta(hours=28)
                 third_id = insert_test_prediction(connection, test_location_id, model_id, third_time, "MODERATE", 0.44)
                 persist_alerts(test_engine, prediction_frame(test_location_id, "MODERATE", 0.44), [third_id], issued_at=third_time)
-                low_time = t0 + timedelta(hours=29)
+                low_time = t0 + timedelta(hours=55)
                 low_id = insert_test_prediction(connection, test_location_id, model_id, low_time, "LOW", 0.03)
                 result = persist_alerts(test_engine, prediction_frame(test_location_id, "LOW", 0.03), [low_id], issued_at=low_time)
                 assert result["expired"] >= 1
