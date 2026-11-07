@@ -1,6 +1,7 @@
 
 from datetime import datetime, timedelta, timezone
 
+import math
 import pandas as pd
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -14,13 +15,24 @@ VALID_RISK_LEVELS = {"LOW", "MODERATE", "HIGH"}
 # Alert content
 def build_alert_content(location_name: str, risk_level: str, risk_score: float) -> dict:
     # Convert model-derived risk classifications into user-facing advisories.
-    # LOW does not create an active alert, MODERATE creates an advisory,
-    # while HIGH creates a stronger warning.
+    # LOW does not create an active alert, MODERATE creates an advisory, while HIGH creates a stronger warning.
 
     risk_level = str(risk_level).upper()
 
     if risk_level not in VALID_RISK_LEVELS:
         raise ValueError(f"Unsupported flood-risk level: {risk_level}")
+
+    # Validate the numeric risk score before creating an advisory.
+    try:
+        risk_score = float(risk_score)
+    except (TypeError, ValueError):
+        raise ValueError("Flood-risk score must be numeric.") from None
+    
+    if not math.isfinite(risk_score):
+        raise ValueError("Flood-risk score must be finite.")
+    
+    if not 0.0 <= risk_score <= 1.0:
+        raise ValueError("Flood-risk score must be between 0 and 1.")
 
     if risk_level == "LOW":
         return {

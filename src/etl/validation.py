@@ -94,7 +94,10 @@ def validate_labels(labels: pd.DataFrame) -> str:
     if labels["label_record_id"].isna().any():
         raise ValueError("Missing flood label IDs detected")
 
-    if not set(labels["flood_label"].dropna().unique()).issubset({1}):
+    if labels["flood_label"].isna().any():
+        raise ValueError("Missing flood-label values detected")
+    
+    if not set(labels["flood_label"].unique()).issubset({1}):
         raise ValueError("Unexpected flood-label values detected")
 
     valid_statuses = {"candidate", "near_match", "corroborated"}
@@ -339,6 +342,12 @@ def validate_era5_hourly(hourly: pd.DataFrame, labels: pd.DataFrame) -> str:
 
     if hourly[required_values].isna().any().any():
         raise ValueError("Missing ERA5 hourly values detected")
+
+    # Ensure all meteorological measurements are finite.
+    numeric_values = hourly[required_values].to_numpy(dtype=float)
+    
+    if not np.isfinite(numeric_values).all():
+        raise ValueError("Non-finite ERA5 hourly values detected")
 
     counts = (hourly.groupby("label_record_id").size())
 
