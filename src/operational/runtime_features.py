@@ -20,6 +20,15 @@ def _prepare_hourly(dataframe: pd.DataFrame, required_columns: list[str], datase
 
     frame = dataframe.copy()
     frame["local_time"] = pd.to_datetime(frame["local_time"], errors="raise")
+    
+    # Reject missing location identifiers or timestamps.
+    if frame[["location_id", "local_time"]].isna().any().any():
+        raise ValueError(f"{dataset_name} contains missing location IDs or timestamps.")
+    
+    # Each location must have unique hourly timestamps.
+    if frame.duplicated(subset=["location_id", "local_time"]).any():
+        raise ValueError(f"{dataset_name} contains duplicate hourly timestamps.")
+    
     frame["local_date"] = frame["local_time"].dt.date
 
     for column in required_columns:
