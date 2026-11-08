@@ -1,0 +1,134 @@
+==================================================
+NAIROBI FLOODWATCH - TC-015A
+PRODUCTION API PERFORMANCE
+==================================================
+Target: https://nairobi-floodwatch.onrender.com
+Requests per endpoint: 12
+Concurrency: NONE
+Mode: READ-ONLY
+
+--- FIRST OBSERVED REQUEST ---
+Overview: 3274.26 ms
+Status: 200
+
+--- PREFLIGHT ---
+Monitoring locations: 237
+History sample location ID: 127
+
+--- ENDPOINT MEASUREMENTS ---
+
+Homepage
+--------------------------------------------------
+  01. [PASS] 220.37 ms | HTTP 200
+  02. [PASS] 175.34 ms | HTTP 200
+  03. [PASS] 222.97 ms | HTTP 200
+  04. [PASS] 170.87 ms | HTTP 200
+  05. [PASS] 178.11 ms | HTTP 200
+  06. [PASS] 172.53 ms | HTTP 200
+  07. [PASS] 172.44 ms | HTTP 200
+  08. [PASS] 171.18 ms | HTTP 200
+  09. [PASS] 167.84 ms | HTTP 200
+  10. [PASS] 172.66 ms | HTTP 200
+  11. [PASS] 179.69 ms | HTTP 200
+  12. [PASS] 170.11 ms | HTTP 200
+
+Mean: 181.18 ms
+Median: 172.59 ms
+P95: 222.97 ms
+Maximum: 222.97 ms
+Successful: 12 / 12
+
+Resident dashboard
+--------------------------------------------------
+  01. [PASS] 167.31 ms | HTTP 200
+  02. [PASS] 214.82 ms | HTTP 200
+  03. [PASS] 215.38 ms | HTTP 200
+  04. [PASS] 171.71 ms | HTTP 200
+  05. [PASS] 180.89 ms | HTTP 200
+  06. [PASS] 163.80 ms | HTTP 200
+  07. [PASS] 172.22 ms | HTTP 200
+  08. [PASS] 169.54 ms | HTTP 200
+  09. [PASS] 167.65 ms | HTTP 200
+  10. [PASS] 169.83 ms | HTTP 200
+  11. [PASS] 173.83 ms | HTTP 200
+  12. [PASS] 577.77 ms | HTTP 200
+
+Mean: 212.06 ms
+Median: 171.97 ms
+P95: 577.77 ms
+Maximum: 577.77 ms
+Successful: 12 / 12
+
+Monitoring overview
+--------------------------------------------------
+  01. [PASS] 217.04 ms | HTTP 200
+  02. [PASS] 219.35 ms | HTTP 200
+  03. [PASS] 218.34 ms | HTTP 200
+  04. [PASS] 224.82 ms | HTTP 200
+  05. [PASS] 219.79 ms | HTTP 200
+  06. [PASS] 216.41 ms | HTTP 200
+  07. [PASS] 218.91 ms | HTTP 200
+  08. [PASS] 390.03 ms | HTTP 200
+  09. [PASS] 220.29 ms | HTTP 200
+  10. [PASS] 230.35 ms | HTTP 200
+  11. [PASS] 216.59 ms | HTTP 200
+  12. [PASS] 247.82 ms | HTTP 200
+
+Mean: 236.64 ms
+Median: 219.57 ms
+P95: 390.03 ms
+Maximum: 390.03 ms
+Successful: 12 / 12
+
+Monitoring locations
+--------------------------------------------------
+  01. [PASS] 397.45 ms | HTTP 200
+  02. [PASS] 423.63 ms | HTTP 200
+  03. [PASS] 391.40 ms | HTTP 200
+  04. [PASS] 382.93 ms | HTTP 200
+  05. [PASS] 438.85 ms | HTTP 200
+  06. [PASS] 449.08 ms | HTTP 200
+  07. [PASS] 405.52 ms | HTTP 200
+  08. [PASS] 391.20 ms | HTTP 200
+  09. [PASS] 406.00 ms | HTTP 200
+  10. [PASS] 387.98 ms | HTTP 200
+  11. [PASS] 410.55 ms | HTTP 200
+  12. [PASS] 384.07 ms | HTTP 200
+
+Mean: 405.72 ms
+Median: 401.49 ms
+P95: 449.08 ms
+Maximum: 449.08 ms
+Successful: 12 / 12
+
+Location history
+--------------------------------------------------
+  01. [PASS] 347.13 ms | HTTP 200
+  02. [PASS] 332.10 ms | HTTP 200
+  03. [PASS] 330.45 ms | HTTP 200
+  04. [PASS] 332.91 ms | HTTP 200
+  05. [PASS] 329.08 ms | HTTP 200
+  06. [PASS] 331.16 ms | HTTP 200
+  07. [PASS] 329.46 ms | HTTP 200
+  08. [PASS] 374.26 ms | HTTP 200
+  09. [PASS] 342.09 ms | HTTP 200
+  10. [PASS] 372.87 ms | HTTP 200
+  11. [PASS] 335.36 ms | HTTP 200
+  12. [PASS] 336.31 ms | HTTP 200
+
+Mean: 341.1 ms
+Median: 334.13 ms
+P95: 374.26 ms
+Maximum: 374.26 ms
+Successful: 12 / 12
+
+==================================================
+TC-015A PERFORMANCE SUMMARY
+==================================================
+First observed request: 3274.26 ms
+Measured endpoint requests: 60
+Failed measured requests: 0
+Evidence: outputs\testing\tc015_api_performance.json
+RESULT: REQUEST RELIABILITY PASS
+Latency acceptance requires comparison against documented performance requirements.
+P95 is indicative only because each endpoint has a small sample of 12 requests.

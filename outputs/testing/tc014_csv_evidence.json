@@ -1,0 +1,68 @@
+{
+  "test_id": "TC-014",
+  "scope": "CSV export",
+  "checked_at_utc": "2026-11-07T15:48:37.540832+00:00",
+  "production_target": "https://nairobi-floodwatch.onrender.com",
+  "results": [
+    {
+      "test": "CSV export returns a valid download",
+      "status": "PASS",
+      "detail": "HTTP 200, text/csv"
+    },
+    {
+      "test": "CSV filename and download headers",
+      "status": "PASS",
+      "detail": "Filename and security headers valid"
+    },
+    {
+      "test": "CSV encoding and structure",
+      "status": "PASS",
+      "detail": "UTF-8 BOM, 5 columns, 3 data rows"
+    },
+    {
+      "test": "CSV records ordered by date",
+      "status": "PASS",
+      "detail": "Dates sorted chronologically"
+    },
+    {
+      "test": "CSV values correctly combined",
+      "status": "PASS",
+      "detail": "Prediction and weather values match"
+    },
+    {
+      "test": "CSV does not invent missing values",
+      "status": "PASS",
+      "detail": "Missing assessments remain blank"
+    },
+    {
+      "test": "CSV spreadsheet-injection protection",
+      "status": "PASS",
+      "detail": "Formula-like text neutralized"
+    },
+    {
+      "test": "CSV date-range validation",
+      "status": "PASS",
+      "detail": "1, 30, 90 accepted; 0, 91 rejected"
+    },
+    {
+      "test": "CSV unavailable when no history exists",
+      "status": "PASS",
+      "detail": "HTTP 404 for empty history"
+    },
+    {
+      "test": "CSV rejects unknown monitoring locations",
+      "status": "PASS",
+      "detail": "HTTP 404 for unknown location"
+    },
+    {
+      "test": "Production CSV requires authentication",
+      "status": "PASS",
+      "detail": "Anonymous request: HTTP 401"
+    },
+    {
+      "test": "Production public history remains accessible",
+      "status": "PASS",
+      "detail": "10 prediction history records"
+    }
+  ]
+}

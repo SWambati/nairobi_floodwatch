@@ -1,0 +1,122 @@
+{
+  "test": "TC-012A",
+  "target": "https://nairobi-floodwatch.onrender.com",
+  "checked_at_utc": "2026-11-07T14:28:29.903135+00:00",
+  "results": [
+    {
+      "status": "PASS",
+      "name": "Production homepage available",
+      "detail": "HTTP 200, HTML received"
+    },
+    {
+      "status": "PASS",
+      "name": "Resident dashboard HTML delivered",
+      "detail": "HTTP 200"
+    },
+    {
+      "status": "PASS",
+      "name": "Resident interactive HTML elements preserved",
+      "detail": "25 required IDs present"
+    },
+    {
+      "status": "PASS",
+      "name": "Resident HTML contains no duplicate IDs",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Resident skip-navigation link preserved",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Static resource available: /static/css/resident.css",
+      "detail": "HTTP 200, 25353 bytes"
+    },
+    {
+      "status": "PASS",
+      "name": "Static resource available: /static/js/resident.js",
+      "detail": "HTTP 200, 30837 bytes"
+    },
+    {
+      "status": "PASS",
+      "name": "Static resource available: /static/js/place_search.js",
+      "detail": "HTTP 200, 13815 bytes"
+    },
+    {
+      "status": "PASS",
+      "name": "Static resource available: /static/images/logo.png",
+      "detail": "HTTP 200, 42723 bytes"
+    },
+    {
+      "status": "PASS",
+      "name": "Resident accessibility CSS rules present",
+      "detail": "Keyboard focus and reduced-motion rules found"
+    },
+    {
+      "status": "PASS",
+      "name": "Production overview API available",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Production monitoring locations API available",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Overview contains correct monitoring totals",
+      "detail": "237 monitored and assessed locations"
+    },
+    {
+      "status": "PASS",
+      "name": "All 237 monitoring locations returned uniquely",
+      "detail": "237 records, 237 unique location IDs"
+    },
+    {
+      "status": "PASS",
+      "name": "Location predictions have valid values",
+      "detail": "237 valid risk scores, categories and timestamps"
+    },
+    {
+      "status": "PASS",
+      "name": "Overview agrees with all location records",
+      "detail": "Risk totals and timestamps agree; measured assessment age: 4.55h"
+    },
+    {
+      "status": "PASS",
+      "name": "Wards GeoJSON accessible and valid",
+      "detail": "85 GIS features loaded"
+    },
+    {
+      "status": "PASS",
+      "name": "Subcounties GeoJSON accessible and valid",
+      "detail": "17 GIS features loaded"
+    },
+    {
+      "status": "PASS",
+      "name": "Short geographic search rejected",
+      "detail": "HTTP 422"
+    },
+    {
+      "status": "PASS",
+      "name": "Excessively long search rejected",
+      "detail": "HTTP 422"
+    },
+    {
+      "status": "PASS",
+      "name": "History for location 1",
+      "detail": "10 records"
+    },
+    {
+      "status": "PASS",
+      "name": "History for location 119",
+      "detail": "10 records"
+    },
+    {
+      "status": "PASS",
+      "name": "History for location 237",
+      "detail": "10 records"
+    }
+  ]
+}

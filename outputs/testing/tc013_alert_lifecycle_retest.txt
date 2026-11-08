@@ -1,0 +1,12 @@
+Nairobi FloodWatch Alert Lifecycle Tests
+==================================================
+Database environment: LOCAL PostgreSQL
+Transaction policy: ROLLBACK ONLY
+PASS: MODERATE creates one active ADVISORY
+PASS: Same-prediction rerun updates without duplication
+PASS: New HIGH warning supersedes previous advisory
+PASS: Falling to LOW resolves an existing warning
+PASS: Expiration after 24 hours; LOW creates no active alert
+PASS: All test database changes rolled back
+
+Alert lifecycle tests: ALL PASSED

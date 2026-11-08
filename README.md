@@ -164,10 +164,6 @@ nairobi_floodwatch/
 
 |-- migrations/             # Alembic database migrations
 
-|-- models/                 # Model-related directory
-
-|-- notebooks/              # Experimental notebooks
-
 |
 
 |-- outputs/

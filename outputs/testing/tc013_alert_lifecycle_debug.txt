@@ -1,0 +1,61 @@
+Traceback (most recent call last):
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "uq_prediction_location_model_nairobi_day"
+DETAIL:  Key (location_id, model_id, ((prediction_time AT TIME ZONE 'Africa/Nairobi'::text)::date))=(242, 1, 2026-10-28) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\scripts\test_alert_lifecycle.py", line 188, in <module>
+    main()
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\scripts\test_alert_lifecycle.py", line 133, in main
+    high_id = insert_test_prediction(connection, test_location_id, model_id, high_time, "HIGH", 0.82)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\scripts\test_alert_lifecycle.py", line 33, in insert_test_prediction
+    return connection.execute(
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "uq_prediction_location_model_nairobi_day"
+DETAIL:  Key (location_id, model_id, ((prediction_time AT TIME ZONE 'Africa/Nairobi'::text)::date))=(242, 1, 2026-10-28) already exists.
+
+[SQL: 
+            INSERT INTO flood_risk_prediction (location_id, model_id, prediction_time, risk_level, risk_score, created_at)
+            VALUES (
+                %(location_id)s, %(model_id)s, %(prediction_time)s, %(risk_level)s,
+                %(risk_score)s, NOW()
+            )
+            RETURNING prediction_id
+        ]
+[parameters: {'location_id': 242, 'model_id': 1, 'prediction_time': datetime.datetime(2026, 10, 28, 16, 55, 31, 566462, tzinfo=datetime.timezone.utc), 'risk_level': 'HIGH', 'risk_score': 0.82}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Nairobi FloodWatch Alert Lifecycle Tests
+==================================================
+Database environment: LOCAL PostgreSQL
+Transaction policy: ROLLBACK ONLY
+PASS: MODERATE creates one active ADVISORY
+PASS: Same-prediction rerun updates without duplication

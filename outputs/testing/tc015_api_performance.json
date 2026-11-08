@@ -1,0 +1,553 @@
+{
+  "test_id": "TC-015A",
+  "target": "https://nairobi-floodwatch.onrender.com",
+  "executed_at_utc": "2026-11-07T16:29:51.148531+00:00",
+  "method": "sequential_http_requests",
+  "samples_per_endpoint": 12,
+  "pause_seconds": 0.5,
+  "first_observed_request": {
+    "elapsed_ms": 3274.26,
+    "status_code": 200,
+    "response_bytes": 163,
+    "success": true,
+    "error": null
+  },
+  "history_sample_location_id": 127,
+  "endpoints": {
+    "Homepage": {
+      "path": "/",
+      "warmup": {
+        "elapsed_ms": 186.94,
+        "status_code": 200,
+        "response_bytes": 31019,
+        "success": true,
+        "error": null
+      },
+      "samples": [
+        {
+          "elapsed_ms": 220.37,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 175.34,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 222.97,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 170.87,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 178.11,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 172.53,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 172.44,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 171.18,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 167.84,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 172.66,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 179.69,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 170.11,
+          "status_code": 200,
+          "response_bytes": 31019,
+          "success": true,
+          "error": null
+        }
+      ],
+      "summary": {
+        "requests": 12,
+        "successful": 12,
+        "failed": 0,
+        "success_rate_percent": 100.0,
+        "mean_ms": 181.18,
+        "median_ms": 172.59,
+        "p95_ms": 222.97,
+        "minimum_ms": 167.84,
+        "maximum_ms": 222.97
+      }
+    },
+    "Resident dashboard": {
+      "path": "/resident",
+      "warmup": {
+        "elapsed_ms": 182.05,
+        "status_code": 200,
+        "response_bytes": 17075,
+        "success": true,
+        "error": null
+      },
+      "samples": [
+        {
+          "elapsed_ms": 167.31,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 214.82,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 215.38,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 171.71,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 180.89,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 163.8,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 172.22,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 169.54,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 167.65,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 169.83,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 173.83,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 577.77,
+          "status_code": 200,
+          "response_bytes": 17075,
+          "success": true,
+          "error": null
+        }
+      ],
+      "summary": {
+        "requests": 12,
+        "successful": 12,
+        "failed": 0,
+        "success_rate_percent": 100.0,
+        "mean_ms": 212.06,
+        "median_ms": 171.97,
+        "p95_ms": 577.77,
+        "minimum_ms": 163.8,
+        "maximum_ms": 577.77
+      }
+    },
+    "Monitoring overview": {
+      "path": "/api/overview",
+      "warmup": {
+        "elapsed_ms": 224.35,
+        "status_code": 200,
+        "response_bytes": 163,
+        "success": true,
+        "error": null
+      },
+      "samples": [
+        {
+          "elapsed_ms": 217.04,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 219.35,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 218.34,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 224.82,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 219.79,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 216.41,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 218.91,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 390.03,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 220.29,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 230.35,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 216.59,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 247.82,
+          "status_code": 200,
+          "response_bytes": 163,
+          "success": true,
+          "error": null
+        }
+      ],
+      "summary": {
+        "requests": 12,
+        "successful": 12,
+        "failed": 0,
+        "success_rate_percent": 100.0,
+        "mean_ms": 236.64,
+        "median_ms": 219.57,
+        "p95_ms": 390.03,
+        "minimum_ms": 216.41,
+        "maximum_ms": 390.03
+      }
+    },
+    "Monitoring locations": {
+      "path": "/api/locations",
+      "warmup": {
+        "elapsed_ms": 357.83,
+        "status_code": 200,
+        "response_bytes": 202284,
+        "success": true,
+        "error": null
+      },
+      "samples": [
+        {
+          "elapsed_ms": 397.45,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 423.63,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 391.4,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 382.93,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 438.85,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 449.08,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 405.52,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 391.2,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 406.0,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 387.98,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 410.55,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 384.07,
+          "status_code": 200,
+          "response_bytes": 202284,
+          "success": true,
+          "error": null
+        }
+      ],
+      "summary": {
+        "requests": 12,
+        "successful": 12,
+        "failed": 0,
+        "success_rate_percent": 100.0,
+        "mean_ms": 405.72,
+        "median_ms": 401.49,
+        "p95_ms": 449.08,
+        "minimum_ms": 382.93,
+        "maximum_ms": 449.08
+      }
+    },
+    "Location history": {
+      "path": "/api/resident/locations/127/history?days=30",
+      "warmup": {
+        "elapsed_ms": 467.26,
+        "status_code": 200,
+        "response_bytes": 3088,
+        "success": true,
+        "error": null
+      },
+      "samples": [
+        {
+          "elapsed_ms": 347.13,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 332.1,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 330.45,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 332.91,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 329.08,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 331.16,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 329.46,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 374.26,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 342.09,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 372.87,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 335.36,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        },
+        {
+          "elapsed_ms": 336.31,
+          "status_code": 200,
+          "response_bytes": 3088,
+          "success": true,
+          "error": null
+        }
+      ],
+      "summary": {
+        "requests": 12,
+        "successful": 12,
+        "failed": 0,
+        "success_rate_percent": 100.0,
+        "mean_ms": 341.1,
+        "median_ms": 334.13,
+        "p95_ms": 374.26,
+        "minimum_ms": 329.08,
+        "maximum_ms": 374.26
+      }
+    }
+  }
+}
