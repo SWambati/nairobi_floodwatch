@@ -1,0 +1,37 @@
+C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\.venv\Lib\site-packages\authlib\integrations\httpx_client\assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+C:\Users\swamb\OneDrive\Desktop\School_Stuff\Year 4\ICS Project 2\is_project_implementation\flood_monitoring\src\auth\google_oauth.py:10: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose.errors import JoseError
+==================================================
+NAIROBI FLOODWATCH - TC-014
+CSV EXPORT TESTING
+==================================================
+Mode: READ-ONLY
+Production target: https://nairobi-floodwatch.onrender.com
+
+[PASS] CSV export returns a valid download | HTTP 200, text/csv
+[PASS] CSV filename and download headers | Filename and security headers valid
+[PASS] CSV encoding and structure | UTF-8 BOM, 5 columns, 3 data rows
+[PASS] CSV records ordered by date | Dates sorted chronologically
+[PASS] CSV values correctly combined | Prediction and weather values match
+[PASS] CSV does not invent missing values | Missing assessments remain blank
+[PASS] CSV spreadsheet-injection protection | Formula-like text neutralized
+[PASS] CSV date-range validation | 1, 30, 90 accepted; 0, 91 rejected
+[PASS] CSV unavailable when no history exists | HTTP 404 for empty history
+[PASS] CSV rejects unknown monitoring locations | HTTP 404 for unknown location
+
+--- PRODUCTION SECURITY ---
+[PASS] Production CSV requires authentication | Anonymous request: HTTP 401
+[PASS] Production public history remains accessible | 10 prediction history records
+
+==================================================
+TC-014 CSV RESULTS
+Passed: 12
+Failed: 0
+Evidence: outputs\testing\tc014_csv_evidence.json
+RESULT: PASS
+NOTE: Authenticated production CSV downloads and PDF exports require separate testing.
+==================================================
