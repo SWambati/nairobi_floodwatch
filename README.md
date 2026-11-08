@@ -133,12 +133,12 @@ Generated advisories represent model-based assessments and do not replace offici
 - Programming languages: Python 3.11, JavaScript, HTML, CSS
 - Data processing: Pandas, Numpy, PyArrow
 - Machine learning: Scikit-learn, joblib
-- Geospatial processing: GeoPandas, Rasterio, PyOrgio
+- Geospatial processing: GeoPandas, Rasterio, PyOgrio
 - Backend: FastAPI, Uvicorn
 - Database: PostgreSQL, SQLAlchemy
 - Database migrations: Alembic
 - Frontend visualization: Leaflet, Chart.js
-- Reporting: CSv, jsPDF, jsPDF AutoTable
+- Reporting: CSV, jsPDF, jsPDF AutoTable
 - Authentication: Google OAuth, Authlib, MFA, local account authentication
 - Operational scheduling: GitHub Actions
 - Containerization: Docker, Docker Compose
