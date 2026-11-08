@@ -18,36 +18,67 @@ The project addressed these challenges by developing a centralized data pipeline
 
 ## System Architecture
 External Weather Data Services
+
              |
+
              v
+
       Data Acquisition
+
              |
+
              v
+
    Validation and Processing
+
              |
+
              v
+
      Feature Engineering
+
              |
+
              v
+
  Random Forest Risk Prediction
+
              |
+
              v
+
       Risk Classification
+
              |
+
              v
+
       PostgreSQL Database
+
              |
+
        +-----+------+
+
        |            |
+
        v            v
+
   Flood Alerts   FastAPI Backend
+
                     |
+
                     v
+
               Web Dashboards
+
                     |
+
         +-----------+-----------+
+
         |           |           |
+
         v           v           v
+
      Resident     Agency      Admin
 
 
@@ -116,48 +147,90 @@ Generated advisories represent model-based assessments and do not replace offici
 - Version control: Git and GitHub
 ## Project Structure
 nairobi_floodwatch/
+
 |
+
 |-- .github/
+
 |   |-- workflows/         # Operational scheduling
+
 |
+
 |-- config/                 # Application settings and paths
+
 |-- data/                   # Data documentation and spatial resources
+
 |-- docs/                   # Documentation directory
+
 |-- migrations/             # Alembic database migrations
+
 |-- models/                 # Model-related directory
+
 |-- notebooks/              # Experimental notebooks
+
 |
+
 |-- outputs/
+
 |   |-- project_outputs/
+
 |       |-- models/         # Production model artifacts
+
 |       |-- processed/      # Selected operational artifacts
+
 |
 |-- scripts/                # Pipeline, preparation and test scripts
+
 |
+
 |-- src/
+
 |   |-- acquisition/        # External data acquisition
+
 |   |-- alerts/             # Alert-related modules
+
 |   |-- auth/               # Authentication and authorization
+
 |   |-- dashboard/          # Monitoring queries and API routes
+
 |   |-- database/           # Database models and access
+
 |   |-- etl/                # Validation and preprocessing
+
 |   |-- features/           # Feature engineering
+
 |   |-- gis/                # Geographic processing
+
 |   |-- model/              # Model inference and risk classification
+
 |   |-- operational/        # Operational prediction workflow
+
 |   |-- web/
+
 |       |-- static/         # CSS, JavaScript, GIS and assets
+
 |       |-- templates/      # HTML interfaces
+
 |
+
 |-- tests/                  # Automated unit tests
+
 |
+
 |-- .env.example            # Example environment configuration
+
 |-- .gitignore
+
 |-- alembic.ini
+
 |-- app.py                  # FastAPI application entry point
+
 |-- docker-compose.yml
+
 |-- Dockerfile
+
 |-- requirements.txt
+
 |-- README.md
 
 Some research datasets and generated files are stored outside Git version control because of their size, provenance or access requirements. Their absence from a fresh clone should not be interpreted as an empty production database.
@@ -199,21 +272,31 @@ Update .env with the appropriate local settings.
 The following values illustrate a Docker-based development configuration:
 
 DATABASE_HOST=127.0.0.1
+
 DATABASE_PORT=5433
+
 DATABASE_NAME=flood_monitoring
+
 DATABASE_USER=flood_app
+
 DATABASE_PASSWORD=REPLACE_WITH_LOCAL_PASSWORD
 
 DATABASE_URL=postgresql+psycopg2://flood_app:REPLACE_WITH_LOCAL_PASSWORD@127.0.0.1:5433/flood_monitoring
 
 APP_NAME=Nairobi FloodWatch
+
 APP_ENV=development
+
 APP_TIMEZONE=Africa/Nairobi
+
 LOG_LEVEL=INFO
 
 FLOODWATCH_ENV=development
+
 FLOODWATCH_BASE_URL=http://127.0.0.1:8010
+
 FLOODWATCH_OAUTH_SESSION_SECRET=REPLACE_WITH_A_RANDOM_SECRET_OF_AT_LEAST_32_CHARACTERS
+
 
 The application requires FLOODWATCH_OAUTH_SESSION_SECRET at startup.
 
@@ -229,17 +312,13 @@ Passwords, secrets, API Keys, OAuth clients, .env variables and other confidenti
 
 5. Start PostgreSQL
 
-Using Docker Compose:
-
-docker compose up -d postgres
+Using Docker Compose: docker compose up -d postgres
 
 Wait until the database container is healthy.
 
 6. Apply database migrations
 
-For a newly provisioned local database:
-
-python -m alembic upgrade head
+For a newly provisioned local database: python -m alembic upgrade head
 
 The application also initializes required authentication-related database structures during startup.
 
@@ -276,11 +355,10 @@ The publicly accessible application is deployed at: https://nairobi-floodwatch.o
 
 The production FastAPI service runs on Render, uses Neon PostgreSQL for persistent storage, and relies on GitHub Actions for scheduled operational processing.
 
-The scheduled workflow is defined in:
-
-.github/workflows/floodwatch-operational.yml
+The scheduled workflow is defined in: .github/workflows/floodwatch-operational.yml
 
 It is configured for two daily execution windows at 03:07 and 15:07 UTC (06:07 and 18:07 East Africa Time). Actual execution may be delayed, so these times should not be interpreted as guaranteed data-update times.
+
 ## Development Workflow
 Development was managed using Git and GitHub with feature-specific branches and pull requests.
 
@@ -288,33 +366,33 @@ The repository uses main as its principal integration branch. An active GitHub r
 
 Development branches were organized around implementation tasks such as:
 
-Data acquisition and ETL validation
+- Data acquisition and ETL validation
 
-PostgreSQL database development
+- PostgreSQL database development
 
-Feature engineering and machine learning
+- Feature engineering and machine learning
 
-GIS integration
+- GIS integration
 
-Authentication, dashboards, and alerts
+- Authentication, dashboards, and alerts
 
-Deployment and system testing
+- Deployment and system testing
 
-Documentation
+- Documentation
 
-GitHub Issues and milestones were used to record planned work, track progress, and organize development activities. Pull requests provided an auditable record of changes made during implementation, debugging, testing, and deployment.
+GitHub Issues and milestones were used to record planned work, track progress and organize development activities. Pull requests provided an auditable record of changes made during implementation, debugging, testing and deployment.
 
 Examples of repository history and project management evidence are available through:
 
-Branches
+- Branches
 
-Pull Requests
+- Pull Requests
 
-Issues
+- Issues
 
-GitHub Actions
+- GitHub Actions
 
-Commit History
+- Commit History
 
 ## Testing
 
@@ -322,17 +400,17 @@ Testing covered functional behavior, unit-level validation, system integration, 
 
 Automated tests are primarily located within the following directories:
 
-tests/ — unit tests and controlled validation fixtures
+- tests/ — unit tests and controlled validation fixtures
 
-scripts/ — integration, operational, database, dashboard and system-testing utilities
+- scripts/ — integration, operational, database, dashboard and system-testing utilities
 
-Unit testing
+# Unit testing
 
 The core unit test suite can be executed using: python -m pytest -q tests/test_unit_core.py
 
 The completed evaluation recorded 54 passing unit tests after identified validation defects were corrected.
 
-Selected production smoke tests
+# Selected production smoke tests
 
 The repository includes read-only tests for selected deployed monitoring endpoints and report-generation behavior.
 
@@ -374,7 +452,7 @@ Study Area: Nairobi County, Kenya
 
 Research Areas: Data Engineering, Machine Learning, Geographic Information Systems, Environmental Monitoring, and Information Systems
 
-Licensing and Access
+## Licensing and Access
 
 The source repository is publicly accessible for inspection and academic evaluation.
 
